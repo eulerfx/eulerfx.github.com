@@ -1,0 +1,43 @@
+---
+layout: post
+title: "Services in Domain-Driven Design (DDD)"
+date: 2012-04-14 22:07
+comments: true
+categories: [ddd,architecture,c#]
+---
+
+__UPDATE:__ _[Vaughn Vernon](https://twitter.com/#!/vaughnvernon) provided some very valuable insight into the differences between application services and domain services as well as emphasizing the Hexagonal architectural style._
+
+The term service is overloaded and its meaning takes on different shades depending on the context. As a result, there is a cloud of confusion surrounding the notion of services as one tries to distinguish between application services, domain services, infrastructural services, SOA services, etc. In all these cases the term "service" is valid, however the roles are different and can span all layers of an application.
+
+A service is indeed a somewhat generic title for an application building block because it implies very little. First and foremost, a service implies a client the requests of which the service is designed to satisfy. Another characteristic of a service operation is that of input and output - arguments and provided as input to an operation and a result is returned. Beyond this implication are usually assumptions of statelessness and the idea of [pure fabrication](http://davidhayden.com/blog/dave/archive/2005/09/18/2476.aspx) according to [GRASP](http://en.wikipedia.org/wiki/GRASP_(object-oriented_design)).
+
+Eric Evans introduces the notion of a service as a building block within Domain-Driven Design in the blue book:
+
+{% blockquote Eric Evans, Domain-Driven Design %}
+When a significant process or transformation in the domain is not a natural responsibility of an ENTITY or VALUE OBJECT, add an operation to the model as standalone interface declared as a SERVICE. Define the interface in terms of the language of the model and make sure the operation name is part of the UBIQUITOUS LANGUAGE. Make the SERVICE stateless.
+{% endblockquote %}
+
+These types of services can be identified more specifically as domain services and are part of the domain layer. Domain services are often overlooked as key building blocks, overshadowed by focus on entities and value objects. On the other end of the spectrum is over-utilization of domain services leading to an [anemic domain model](http://martinfowler.com/bliki/AnemicDomainModel.html) in what essentially becomes a separation of data, stored in entities, and behaviors, provided by the service. This can become an anti-pattern because the [information expert](http://en.wikipedia.org/wiki/GRASP_(object-oriented_design)#Information_Expert) aspect of OOP is lost. 
+
+Domain services are different from infrastructural services because they embed and operate upon domain concepts and are part of the ubiquitous language. Infrastructural services are instead focused encapsulating the "plumbing" requirements of an application; usually [IO](http://en.wikipedia.org/wiki/Input/output) concerns such as file system access, database access, email, etc. For example, a common application requirement is the sending of an email notification informing interested parties about some event. The concept of the [event](http://www.udidahan.com/2009/06/14/domain-events-salvation/) exists in the domain layer and the domain layer determines when the event should be raised. An email infrastructure service can handle a domain event by generating and transmitting an appropriate email message. Another infrastructural service can handle the same event and send a notification via SMS or other channel. The domain layer doesn't care about the specifics or how an event notification is delivered, it only cares about raising the event. A repository implementation is also an example of an infrastructural service. The interface is declared in the domain layer and is an important aspect of the domain. However, the specifics of the communication with durable storage mechanisms are handled in the infrastructure layer.
+
+An application service has an important and distinguishing role - it provides a hosting environment for the execution of domain logic. As such, it is a convenient point to inject various [gateways](http://martinfowler.com/eaaCatalog/gateway.html) such as a [repository](http://martinfowler.com/eaaCatalog/repository.html) or wrappers for external services. A common problem in applying DDD is when an entity requires access to data in a repository or other gateway in order to carry out a business operation. One solution is to inject repository dependencies directly into the entity, however this is often frowned upon. One reason for this is because it requires the plain-old-(C#, Java, etc...) objects implementing entities to be part of an application dependency graph. Another reason is that is makes reasoning about the behavior of entities more difficult. A better solution is to have a service retrieve the information required by an entity, effectively setting up the execution environment, and provide it to the entity.
+
+In addition to being a host, the purpose of an application service is to expose the functionality of the domain to other application layers as an API. This attributes an encapsulating role to the service - the service is an instance of the [facade pattern](http://en.wikipedia.org/wiki/Facade_pattern). Exposing objects directly can be cumbersome and lead to [leaky abstractions](http://www.joelonsoftware.com/articles/LeakyAbstractions.html) if interactions are distributed in nature. In this way, a service also fulfills a translation role - that of translating between external commands and the underlying domain object model. The importance of this translation must not be neglected. For example, a human requested command can be something like "transfer $5 from account A to account B". There are a number of steps required for a computer to fulfill that command and we would never expect a human to issue a more specific command such as "load an account entity with id A from account repository, load an account entity with id B from account repository, call the debit method on the account A entity...". This is a job best suited for an application service.
+
+The following is an example application service from a purchase order domain. The example also contains a PurchaseOrder entity, an Invoice value object and a repository. (Please note that the code has been simplified for explanation purposes).
+
+{% gist 2411363 %}
+
+There are many refinements that need to be made to this code for it to be of production-ready caliber however it serves well to illustrate the purpose of an application service.
+
+The differences between a domain service and an application services are subtle but critical:
+
+- Domain services are very granular where as application services are a facade purposed with providing an API. 
+- Domain services contain domain logic that can't naturally be placed in an entity or value object whereas application services orchestrate the execution of domain logic and don't themselves implement any domain logic.
+- Domain service methods have other domain elements as operands and return values whereas application services operate upon trivial operands such as identity values and flat data structures.
+
+In a complete application, a domain model does not stand alone. Applications with GUIs contain a presentation layer which facilitates interaction between the domain and a user. The same application may wish to expose its functionality as a set of REST resources or WCF services or SOA services. In Alistair Cockburn's [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture), the presentation layer, the REST resource and the WCF service are adapters which adapt the core application to specific ports. Application services form the API which encapsulate the application core and in the case of Domain-Driven Design they ultimately orchestrate and delegate to the underlying entities, value objects and domain services. The application service isn't strictly necessary since each adapter implementation can orchestrate the required domain elements, however encapsulating the domain layer provides a fitting demarcation allowing each component of the entire application to be viewed in isolation. Conversely, the DDD-based domain layer isn't strictly necessary and the application service could delegate to a [transaction script](http://martinfowler.com/eaaCatalog/transactionScript.html). As seen from this perspective, DDD is an implementation detail.
+
+
