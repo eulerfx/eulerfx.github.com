@@ -1,20 +1,20 @@
 /*
 Syntax error: File to import not found or unreadable: susy.
               Load paths:
-                C:/users/leo/octopress/sass
+                C:/Users/Leo/octopress/sass
                 C:/Ruby193/lib/ruby/gems/1.9.1/gems/compass-0.12.2/frameworks/blueprint/stylesheets
                 C:/Ruby193/lib/ruby/gems/1.9.1/gems/compass-0.12.2/frameworks/compass/stylesheets
                 Compass::SpriteImporter
-        on line 2 of C:/users/leo/octopress/sass/lib/_grid.scss
-        from line 4 of C:/users/leo/octopress/sass/lib/_base.scss
-        from line 6 of C:/users/leo/octopress/sass/application.scss
+        on line 2 of C:/Users/Leo/octopress/sass/lib/_grid.scss
+        from line 4 of C:/Users/Leo/octopress/sass/lib/_base.scss
+        from line 6 of C:/Users/Leo/octopress/sass/application.scss
 
-1: C:/users/leo/octopress/sass/application.scss
+1: C:/Users/Leo/octopress/sass/application.scss
 
 Backtrace:
-C:/users/leo/octopress/sass/lib/_grid.scss:2
-C:/users/leo/octopress/sass/lib/_base.scss:4
-C:/users/leo/octopress/sass/application.scss:6
+C:/Users/Leo/octopress/sass/lib/_grid.scss:2
+C:/Users/Leo/octopress/sass/lib/_base.scss:4
+C:/Users/Leo/octopress/sass/application.scss:6
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.1.20/lib/sass/tree/import_node.rb:64:in `rescue in import'
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.1.20/lib/sass/tree/import_node.rb:42:in `import'
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.1.20/lib/sass/tree/import_node.rb:25:in `imported_file'
@@ -71,4 +71,4 @@ C:/Ruby193/bin/compass:23:in `<main>'
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Syntax error: File to import not found or unreadable: susy.\A               Load paths:\A                 C:/users/leo/octopress/sass\A                 C:/Ruby193/lib/ruby/gems/1.9.1/gems/compass-0.12.2/frameworks/blueprint/stylesheets\A                 C:/Ruby193/lib/ruby/gems/1.9.1/gems/compass-0.12.2/frameworks/compass/stylesheets\A                 Compass::SpriteImporter\A         on line 2 of C:/users/leo/octopress/sass/lib/_grid.scss\A         from line 4 of C:/users/leo/octopress/sass/lib/_base.scss\A         from line 6 of C:/users/leo/octopress/sass/application.scss\A \A 1: C:/users/leo/octopress/sass/application.scss"; }
+  content: "Syntax error: File to import not found or unreadable: susy.\A               Load paths:\A                 C:/Users/Leo/octopress/sass\A                 C:/Ruby193/lib/ruby/gems/1.9.1/gems/compass-0.12.2/frameworks/blueprint/stylesheets\A                 C:/Ruby193/lib/ruby/gems/1.9.1/gems/compass-0.12.2/frameworks/compass/stylesheets\A                 Compass::SpriteImporter\A         on line 2 of C:/Users/Leo/octopress/sass/lib/_grid.scss\A         from line 4 of C:/Users/Leo/octopress/sass/lib/_base.scss\A         from line 6 of C:/Users/Leo/octopress/sass/application.scss\A \A 1: C:/Users/Leo/octopress/sass/application.scss"; }
