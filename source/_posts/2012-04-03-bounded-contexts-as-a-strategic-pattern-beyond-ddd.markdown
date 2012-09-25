@@ -3,7 +3,7 @@ layout: post
 title: "Bounded Contexts as a strategic pattern beyond DDD"
 date: 2012-04-03 23:15
 comments: true
-categories: [DDD,architecture]
+categories: [ddd,architecture]
 ---
 
 The term bounded context (BC) was introduced by Eric Evans in the Domain-Driven Design ["blue book"](http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/ref=sr_1_1?ie=UTF8&qid=1332969996&sr=8-1) part IV "Strategic Design", 
