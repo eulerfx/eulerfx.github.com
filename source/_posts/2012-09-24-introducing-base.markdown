@@ -11,7 +11,6 @@ categories: [semantic-web]
 
 
 
-
 # Capabilities
 - Build workflows
 - Rules
