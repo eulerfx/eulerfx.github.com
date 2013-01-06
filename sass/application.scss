@@ -5,8 +5,10 @@
 
 @import "lib/base";
 
-$light-blue: rgb(42, 109, 100);
-$blue: rgb(26, 57, 52);
+//$light-blue: rgb(42, 109, 100);
+//$blue: rgb(26, 57, 52);
+$light-blue: #005342;
+$blue: #1F7A68;
 
 
 /*
@@ -368,7 +370,7 @@ article {
 			margin: 0;
 
 			p {
-				text-align: justify;
+				text-align: left;
 
 				&:last-child {
 					margin-top: 1em;
