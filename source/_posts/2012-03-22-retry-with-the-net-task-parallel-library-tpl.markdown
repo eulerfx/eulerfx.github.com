@@ -5,11 +5,12 @@ date: 2012-03-22 23:06
 comments: true
 categories: [c#, tpl]
 ---
-
 The [.NET Task Parallel Library](http://msdn.microsoft.com/en-us/library/dd460717.aspx) simplifies development of and reasoning about asynchronous code. 
 However, working with [Task](http://msdn.microsoft.com/en-us/library/system.threading.tasks.task.aspx) instances instead of blocking method results can still be difficult and un-intuitive. 
 One example where this is true is in implementing retry logic for functions that return Task instances. 
 Consider this helper function which retries a provided function a specified number of times:
+
+<!--more-->
 
 {% gist 2161734 %}
 

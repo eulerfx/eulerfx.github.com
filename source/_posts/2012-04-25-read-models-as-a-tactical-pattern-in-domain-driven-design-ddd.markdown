@@ -5,8 +5,9 @@ date: 2012-04-25 22:18
 comments: true
 categories: [ddd,architecture,c#]
 ---
-
 Domain-Driven Design espouses the [repository pattern](http://domaindrivendesign.org/node/123) as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to [aggregate](http://domaindrivendesign.org/node/88) roots, [entities](http://domaindrivendesign.org/node/109) and less frequently to [value objects](http://domaindrivendesign.org/node/135). Eric Evans attributes another potential responsibility to a repository in the blue book:
+
+<!--more-->
 
 {% blockquote Eric Evans, Domain-Driven Design %}
 Although most queries return an object or a collection of objects, it also fits within the concept to return some types of summary calculations, such as an object count, or a sum of a numerical attribute that was intended by the model to be tallied.

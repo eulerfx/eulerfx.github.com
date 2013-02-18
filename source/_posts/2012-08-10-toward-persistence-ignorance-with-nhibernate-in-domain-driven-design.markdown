@@ -7,6 +7,8 @@ categories: [ddd,nhibernate]
 ---
 Persistence ignorance is a quality of a design wherein entity classes are devoid of data access supporting characteristics. Adherence to this technique facilitates a separation between domain and infrastructure. By deflecting the technical noise, this separation streamlines the mapping between the model and its incarnation in code. In practice, persistence ignorance is an ideal seldom achieved in its entirety. Even if entities are stripped of all persistence related traits, the design tends to yield to influence from the persistence framework. Fortunately, like most things in programming, persistence ignorance falls upon a spectrum and can pay dividends even with partial application. After all, any type of code isn't an entirely noiseless medium.
 
+<!--more-->
+
 In domain-driven design, one way to attain persistence ignorance is with the use of a [repository](http://devlicio.us/blogs/casey/archive/2009/02/20/ddd-the-repository-pattern.aspx) and an [ORM](http://en.wikipedia.org/wiki/Object-relational_mapping). On the .NET Framework, the ORM [NHibernate](http://en.wikipedia.org/wiki/NHibernate) affords a relatively high degree of persistence ignorance with the use of out of band mapping declarations and reflection. What follows is a summary of various techniques for achieving persistence ignorance with NHibernate.
 
 #### Default protected constructor

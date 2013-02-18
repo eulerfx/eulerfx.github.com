@@ -5,8 +5,9 @@ date: 2012-05-19 14:27
 comments: true
 categories: [ddd,architecture]
 ---
-
 Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice because it must be implemented throughout all areas of an application, typically employing different methods for each area. In a general sense, validation is a mechanism for ensuring operations result in a valid states. The ambiguity in that statement must not be overlooked because it illustrates several important characteristics of validation. One characteristic is context - the context under which validation is invoked. Context is critical because validation in one context may not be applicable in another context. Another corollary is the open-endedness of what is regarded as valid. Validity may be a trivial statement such as "The string representing a customer's name must not be null" or it may be a complex sequence of [CycL](http://en.wikipedia.org/wiki/CycL) assertions. This post addresses validation as manifest in DDD-based enterprise applications. Validation, in this post, is distinct from a related discipline of [correctness](http://bit.ly/JjLUA2) in theoretical computer science as researched by the likes of [Edsger Dijkstra](http://en.wikipedia.org/wiki/Edsger_Dijkstra).
+
+<!--more-->
 
 ## Always Valid
 

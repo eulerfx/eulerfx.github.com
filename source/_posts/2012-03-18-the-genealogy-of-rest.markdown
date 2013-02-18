@@ -5,8 +5,9 @@ date: 2012-03-18 22:28
 comments: true
 categories: [architecture,REST]
 ---
-
 This is yet another take on describing [REST](http://en.wikipedia.org/wiki/Representational_state_transfer) targeted in particular toward developers. The developer community has a difficult time accepting the REST architectural style. There are misunderstandings regarding its scope, applicability, strictness, and ultimately its value. 
+
+<!--more-->
 
 One way to approach the problem of describing REST to developers is to expose the context under which the principles were devised. The term was introduced by Roy Fielding in his doctoral dissertation [Architectural Styles and the Design of Network-based Software Architectures](http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm).
 

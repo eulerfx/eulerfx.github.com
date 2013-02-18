@@ -5,8 +5,9 @@ date: 2012-07-24 23:07
 comments: true
 categories: [ddd]
 ---
-
 Domain-Driven Design places great emphasis on modeling the domain and representing the model in code and the ubiquitous language. A model is an abstraction of reality which preserves aspects interesting for solving a particular problem. Consider the stereotypical order model consisting of a sales order, line items and a customer. The problem is trivial - storing and managing order data and the aspects that are interesting to this problem are confined to a narrow perspective of the entirety of what an order and a customer is. The model of a sales order may contain an order number, a date, a shipping address and finally line item details such as price and quantity. Expressing every aspect of an order is of course prohibitive and defeats the utility of the model.
+
+<!--more-->
 
 A primary method for implementing associations is with object [references](http://blogs.msdn.com/b/ericlippert/archive/2011/03/07/references-and-pointers-part-one.aspx). For example, a customer class may reference an address class which allows calling code to traverse the relationship obtain a customer's address. Another method for expressing relationships is with a [repository](http://domaindrivendesign.org/node/123). Repositories can express relationships by providing access to associated entities by means of a database search. [Eric Evans](https://twitter.com/ericevans0/) states:
 
