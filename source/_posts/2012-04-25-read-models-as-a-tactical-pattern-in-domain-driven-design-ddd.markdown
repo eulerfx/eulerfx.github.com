@@ -3,7 +3,7 @@ layout: post
 title: "Read-models as a tactical pattern in Domain-Driven Design (DDD)"
 date: 2012-04-25 22:18
 comments: true
-categories: [ddd,architecture,c#]
+categories: [DDD,architecture,C#]
 ---
 Domain-Driven Design espouses the [repository pattern](http://domaindrivendesign.org/node/123) as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to [aggregate](http://domaindrivendesign.org/node/88) roots, [entities](http://domaindrivendesign.org/node/109) and less frequently to [value objects](http://domaindrivendesign.org/node/135). Eric Evans attributes another potential responsibility to a repository in the blue book:
 

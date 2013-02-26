@@ -3,7 +3,7 @@ layout: post
 title: "Services in Domain-Driven Design (DDD)"
 date: 2012-04-14 22:07
 comments: true
-categories: [ddd,architecture,c#]
+categories: [DDD,architecture,C#]
 ---
 __UPDATE:__ _[Vaughn Vernon](https://twitter.com/vaughnvernon) provided some very valuable insight into the differences between application services and domain services as well as emphasizing the Hexagonal architectural style._
 

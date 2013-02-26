@@ -3,7 +3,7 @@ layout: post
 title: "Json.NET Type Converters for the F# option, list and tuple types"
 date: 2013-01-05 16:16
 comments: true
-categories: [f#, json.net, c#]
+categories: [F#]
 ---
 
 [Json.NET](http://json.codeplex.com/) is a popular [JSON](http://www.json.org/) serialization library on the .NET Framework. F# contains several types that aren't supported by Json.NET out of the box because they don't have direct analogs in C#. To enable support for these types in Json.NET a type provider implementation must be provided for each type. The types addressed in this post are [option](http://msdn.microsoft.com/en-us/library/dd233245.aspx), [list](http://msdn.microsoft.com/en-us/library/ee370372.aspx) and [tuple](http://msdn.microsoft.com/en-us/library/dd233200.aspx).

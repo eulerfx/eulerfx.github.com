@@ -3,7 +3,7 @@ layout: post
 title: "Retry with the .NET Task Parallel Library (TPL)"
 date: 2012-03-22 23:06
 comments: true
-categories: [c#, tpl]
+categories: [C#, TPL]
 ---
 The [.NET Task Parallel Library](http://msdn.microsoft.com/en-us/library/dd460717.aspx) simplifies development of and reasoning about asynchronous code. 
 However, working with [Task](http://msdn.microsoft.com/en-us/library/system.threading.tasks.task.aspx) instances instead of blocking method results can still be difficult and un-intuitive. 

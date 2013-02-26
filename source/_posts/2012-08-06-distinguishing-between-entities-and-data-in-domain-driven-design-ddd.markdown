@@ -3,7 +3,7 @@ layout: post
 title: "Distinguishing between entities and data in Domain-Driven Design (DDD)"
 date: 2012-08-06 22:16
 comments: true
-categories: [ddd]
+categories: [DDD]
 published: true
 ---
 In Domain-Driven Design, entities have a strictly defined life-cycle and identity. Accordingly, creation of entity instances should be restricted by a constructor with required parameters and possibly a factory. [Ideally](http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/), entities should not be allowed to enter an undefined state such as the state typically resulting from a parameterless constructor. There should be a small number of well defined places where new entity instances are created. Moreover, [as described by Udi Dahan](http://www.udidahan.com/2009/06/29/dont-create-aggregate-roots/), creation of aggregate roots can often be delegated to an existing entity in the context. These constraints simplify reasoning about code in addition to keeping focus on the domain and forcing one to carefully evaluate life-cycle related operations.

@@ -3,7 +3,7 @@ layout: post
 title: "Toward persistence ignorance with NHibernate in Domain-Driven Design (DDD)"
 date: 2012-08-10 12:35
 comments: true
-categories: [ddd,nhibernate]
+categories: [DDD,NHibernate]
 ---
 Persistence ignorance is a quality of a design wherein entity classes are devoid of data access supporting characteristics. Adherence to this technique facilitates a separation between domain and infrastructure. By deflecting the technical noise, this separation streamlines the mapping between the model and its incarnation in code. In practice, persistence ignorance is an ideal seldom achieved in its entirety. Even if entities are stripped of all persistence related traits, the design tends to yield to influence from the persistence framework. Fortunately, like most things in programming, persistence ignorance falls upon a spectrum and can pay dividends even with partial application. After all, any type of code isn't an entirely noiseless medium.
 

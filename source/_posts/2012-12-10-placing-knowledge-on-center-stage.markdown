@@ -3,7 +3,7 @@ layout: post
 title: "Placing knowledge on center stage"
 date: 2012-12-10 21:22
 comments: true
-categories: [semantic-web, ontology, architecture, DDD, DCI, OOP, FP, AOP]
+categories: [semantic-web,ontology,architecture,DDD,DCI,OOP,FP,AOP]
 ---
 _In this post I survey the evolution of various programming paradigms and emphasize the importance of expressing and isolating domain knowledge. Paradigms such as OOP, AOP, DCI, DDD, and Hexagonal are regarded as having a central goal of facilitating the representation of knowledge all while supporting integration with technical components. Finally I introduce a knowledge-driven architecture by Jeff Zhuk._
 

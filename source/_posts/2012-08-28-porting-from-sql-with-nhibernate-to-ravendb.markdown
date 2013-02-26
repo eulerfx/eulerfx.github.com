@@ -3,7 +3,7 @@ layout: post
 title: "Porting from SQL with NHibernate to RavenDB"
 date: 2012-08-28 19:45
 comments: true
-categories: [nhibernate,ravendb,sql,nosql]
+categories: [NHibernate,RavenDB,SQL,NoSQL]
 ---
 _In this post I will overview a port of a persistence implementation of a Domain-Driven Design project from a solution based on SQL Server and [NHibernate](http://nhforge.org/Default.aspx) to a solution based on [RavenDB](http://ravendb.net/). I describe the problem domain, the current stack, project goals, the database selection process, as well as serialization, indexing and optimization patterns._
 
