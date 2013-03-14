@@ -7,6 +7,8 @@ categories: [DDD]
 ---
 _This post explores Domain-Driven Design from the tactical and strategic perspectives with the goal of clearing confusion around these orthogonal axes. Motivation sourced from [Outside In TDD versus DDD](http://blog.ploeh.dk/2013/03/04/outside-in-tdd-versus-ddd/) by [Mark Seemann](https://twitter.com/ploeh) where the author examines this misunderstanding surrounding DDD._
 
+<!--more-->
+
 It appears that many developers, myself included, initially attempt to harness Domain-Driven Design for the object-oriented programming patterns described by [Eric Evans](https://twitter.com/ericevans0) in [the Domain-Driven Design book](http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215). This is no surprise because these patterns, which include concepts such as entities and repositories, are well founded, refined and hardened by years in service. Together, these patterns embody the tactical side of Domain-Driven Design. The other side of DDD consists of strategic principles and methodologies for analyzing and modeling domains as well as systematic techniques for catalyzing the development process. 
 
 ## Tactics
