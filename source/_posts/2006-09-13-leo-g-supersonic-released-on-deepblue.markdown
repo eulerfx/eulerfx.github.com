@@ -1,0 +1,16 @@
+---
+layout: post
+title: "Leo G - Supersonic released on DeepBlue"
+date: 2006-09-13 23:56
+comments: true
+categories:
+---
+The track 'Supersonic' was released, under my Leo G moniker, on DeepBlue records. The official release date was August 7th, 2006; the track was originally signed in October of 2005, along with 2000 Years of Solitude, which is scheduled for release next. Supersonic was release as both a 12" vinyl and a CD. The B-side of the vinyl features the Martin Roth remix. The CD also has an ambient remix of 'Supersonic' that I did just prior to release. 2000 Years of Solitude will also be released under the Leo G moniker. I don't yet know who will be the remixer. Knowing Rich Mowatt from Solar Stone (DeepBlue founders) I will be doing an ambient remix of 2000 Years of Solitude as well.
+
+The original version of 'Supersonic' is definatly progressive trance. It is progressive in the sense that there is no sudden esclation or release. Instead, the atmosphere emerges slowly throughout the entire track, cascading to a climax towards the end and then fading away. The atmosphere hinges upon the use of overdriven pads and strings. I did a lot of experimentation of overdrive, using both structured and unstructured amplification algorithms. The chords and arrangements are partially unstructured and unpredictable, yet still designed to carry the main theme. 'Supersonic', like most of my tracks, was written to convey a particular state of mind. It is not so much an emotion, or a concrete idea, but instead it is solely a representation of a trance. It conveys freedom and beauty in purely musical symbols and in a sense exemplifying the notion of music existing as its own concept, without implied relation to ideas that can be easily expressed with words.
+
+The Martin Roth remix of "Supersonic" is a harder, more club/dance oriented version of the original, featuring a new central theme. This version is less progressive and more fit to the style of Armin van Buuren's "A State of Trance". Martin Roth overlays the atmosphere of the original over a very well programmed bassline and synths. This version will be more the more popular one.
+
+I also did an ambient/chillout version of "Supersonic" sticking closely to the concept of the original. This mix carries a lot of tension, which does not neccesarily make it the best chillout track. I use the same overdrive pads from the original and add a lot of background strings, pads and effects achieved in various ways. I change the piano sections slighting and leave the main string arrangement. I aslo implement a new string section, backed by cut-out piano chords, which was written to fit with the ambience of the reas of the track. Rich seems to really like this remix.
+
+The next track up for release on DeepBlue is "2000 Years of Solitude" which has a far more epic trance feel. Sweeping pads, dramatic chords, cascading pianos, gated choirs, etc. This track is less subtle than "Supersonic" yet still bears the natural and organic production style. I always try to stay away from producing trance that underlines that fact that it was made using digital equipment.

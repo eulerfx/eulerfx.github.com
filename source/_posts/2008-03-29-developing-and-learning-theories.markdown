@@ -1,0 +1,8 @@
+---
+layout: post
+title: "Developing and learning theories"
+date: 2008-03-29 18:39
+comments: true
+categories: [philosophy]
+---
+There seems to exist natural beginnings of thought in approaching problems to be solved. As an example take the problem of finding the volume of a solid. It is natural and certainly reasonable to think that the volume is related to the shape and size, therefore it is possible to measure. This vague notion of relationship eventually develops into a more formal notion of function and thus a strict formula. At this point a natural inclination, and a general pattern of human thought is abstraction. We now seek similarities between measuring the volume of different solids. Skipping ahead to the mathematics of real analysis we have measure theory, integration theory, etc. These theories we developed from this cycle of making particular observations and then creating generalizations. Thus after the efforts of hundreds of years of mathematical research we have the ability to measure the volume of a solid, and therefore a mathematical theory of measuring - measure theory. When a new generation of mathematicians is learning the work of the past they approach solved problems from the perspective of these theories. The important thing to note is that this is the reverse of the approach that resulted in the theories. A student's effort is then directed towards understanding the theory, or in essence an encoded thought of another mathematician, instead of understanding the problem the theory addresses in the first place. Not to say it is a wasted effort it is an interesting pattern in learning.
