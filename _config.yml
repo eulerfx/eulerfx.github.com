@@ -2,7 +2,7 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://eulerfx.github.com
+url: http://gorodinski.com
 title: Lev Gorodinski
 subtitle: Computing, Math, Philosophy
 author: Lev Gorodinski
@@ -90,7 +90,7 @@ googleplus_hidden: false
 
 # Disqus Comments
 disqus_short_name: eulerfx
-disqus_show_comment_count: false
+disqus_show_comment_count: true
 
 # Google Analytics
 google_analytics_tracking_id: UA-30683601-1
