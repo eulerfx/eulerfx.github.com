@@ -16,7 +16,7 @@ With a resounding lack of scientific evidence, I claim that a disproportionate f
 The tendency to conflate meanings of terms is inherent in natural language. [Martin Fowler](https://twitter.com/martinfowler) wrote about this and recently retreaded:
 
 {% blockquote Martin Fowler http://martinfowler.com/bliki/TypeInstanceHomonym.html TypeInstanceHomonym %}
-"'War and Peace' is a wonderful book.
+"War and Peace is a wonderful book.
 "Let me see...pity this book has such a tattered cover"
 
 In the first sentence 'book' refers to a literary work, one that's been with us for over a hundred years. In the second sentence 'book' now refers to a physical object that's probably been around for a lot less. 
@@ -32,7 +32,9 @@ Unsurprisingly, the dangers of abstraction aren't limited to domain modeling. [R
 
 ## Conflation Pitfalls
 
-Modeling mistakes cannot be prevented, but they can be managed. In particular, I've found that it is easier to resolve improper distinctions among concepts than it is to resolve improper conflation among concepts. A interesting parallel to this principle is [integer factorization](http://en.wikipedia.org/wiki/Integer_factorization), the difficulty of which forms the basis of [public key cryptography](http://en.wikipedia.org/wiki/Public-key_cryptography), among other things. Perhaps I am taking too great of a liberty in this abstraction, but I've yet to be convinced of this. The important takeaway is that failing to detect distinctions can be dangerous. A question for the readers - [are you better at detecting differences between things or similarities between things?](https://twitter.com/eulerfx/status/310126313711206400)
+Modeling mistakes cannot be prevented, but they can be managed. In particular, I've found that it is easier to resolve improper distinctions among concepts than it is to resolve improper conflation among concepts. A interesting parallel to this principle is [integer factorization](http://en.wikipedia.org/wiki/Integer_factorization), the difficulty of which forms the basis of [public key cryptography](http://en.wikipedia.org/wiki/Public-key_cryptography), among other things. The important takeaway is that failing to detect distinctions can be dangerous. 
+
+[Are you better at detecting differences between things or similarities between things?](https://twitter.com/eulerfx/status/310126313711206400)
 
 
 
