@@ -3,29 +3,85 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    
-    <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/default.css" id="theme">
-    <!-- For syntax highlighting -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
-	 <!-- If the query includes 'print-pdf', use the PDF print sheet -->
-    <script>
-        document.write('<link rel="stylesheet" href="css/print/' + ( window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">');
-    </script>
-
-
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>  
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/default.css" id="theme">
+  <!-- For syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+  <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+  <script>
+    document.write('<link rel="stylesheet" href="css/print/' + ( window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">');
+  </script>
 	<title>Domain-Driven Design and Event Sourcing with F# and EventStore</title>
 </head>
 <body>
+
 <div class="reveal">
 <div class="slides">	
-	<section>
-		<h2>Domain-Driven Design and Event Sourcing with F# and EventStore</h2>
-		<p>Lev Gorodinski</p>
-		<p>@eulerfx</p>
-		<p>gorodinski.com</p>
-	</section>
+
+	<section data-markdown>
+    <script type="text/template">
+      ## Domain-Driven Design with
+      ## F# and EventStore
+
+      Lev Gorodinski
+
+      gorodinski.com
+
+      @eulerfx
+    </script>
+	</section data-markdown>
+  
+  <section data-markdown>
+    <script type="text/template">
+    ## Outline
+    - Goals
+    - Why functional programming? Why F#?
+    - Why event sourcing? Why EventStore?
+    - DDD example
+    - Resources
+    </script>
+  </section>
+  
+  <section data-markdown>
+    <script type="text/template">
+    ## Why F#? 
+    - General purpose, statically typed, multi-paradigm, functional-first, type inference on the CLR
+    - CLR, .NET, Visual Studio, etc
+    - Combines OOP and FP
+    - Type inference:
+      - Succinct code
+      - Automatic generalization
+    - Pattern matching
+    - Language-oriented programming
+      - Computation expressions
+    - Functional programming...
+    </script>
+  </section>
+
+  <section data-markdown>
+    <script type="text/template">
+    ### Functional Programming
+    - First-class functions
+    - Functional composition
+      - Currying
+      - Partial application
+    - Immutable data structures
+      - Record types
+      - Union types
+    - Draw on research techniques no available for OOP
+    </script>
+  </section>
+
+
+  <section data-markdown>
+    <script type="text/template">
+    ### Why Event Sourcing?
+    - _"Capture all changes to an application state as a sequence of events."_ M. Fowler
+    </script>
+  </section>
+
+
 </div>
 </div>
 
@@ -33,7 +89,6 @@
 <script src="js/reveal.min.js"></script>
 
 <script>
-
   // Full list of configuration options available here:
   // https://github.com/hakimel/reveal.js#configuration
   Reveal.initialize({
@@ -56,7 +111,6 @@
       // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
     ]
   });
-
 </script>
 
 </body>
