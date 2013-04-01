@@ -90,7 +90,7 @@ googleplus_hidden: false
 
 # Disqus Comments
 disqus_short_name: eulerfx
-disqus_show_comment_count: true
+disqus_show_comment_count: false
 
 # Google Analytics
 google_analytics_tracking_id: UA-30683601-1

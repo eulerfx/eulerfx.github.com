@@ -14,7 +14,8 @@ $link-color-active: adjust-color($link-color-hover, $lightness: -15) !default;
   }
 }
 
-$mono: Menlo, Monaco, "Andale Mono", "lucida console", "Courier New", monospace !default;
+/*$mono: Menlo, Monaco, "Andale Mono", "lucida console", "Courier New", monospace !default;*/
+$mono: Consolas, 'Liberation Mono', Courier, monospace
 
 .highlight, html .gist .gist-file .gist-syntax .gist-highlight {
   table td.code { width: 100%; }
@@ -42,6 +43,10 @@ $mono: Menlo, Monaco, "Andale Mono", "lucida console", "Courier New", monospace 
 figure.code, .gist-file, pre {
   @include box-shadow(rgba(#000, .06) 0 0 10px);
   .highlight pre { @include box-shadow(none); }
+}
+
+table.lines {
+  width: 100%;
 }
 
 html .gist .gist-file {
