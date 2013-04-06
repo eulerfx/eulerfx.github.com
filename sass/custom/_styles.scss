@@ -58,9 +58,7 @@
 	}
 
 
-	/* ----- Content ----- */
-
-
+	/* ----- Content ----- */	
 	#content .blog-index article h1 {
 	  font-size: 1.8em;
 	    font-weight: normal;
@@ -87,6 +85,25 @@
 	      text-align:left;
 	        margin-bottom: 1em;
 	}
+
+	/* -- Gists --- */
+	.entry-content .gist .gist-file .gist-data pre {
+		font-family: Consolas, 'Liberation Mono', Courier, monospace;
+	}
+	.gist .gist-file .gist-data table.lines {
+		width: 100%;
+		margin-top: 5px;
+	}
+	.gist .gist-file .gist-data td.line-numbers {
+		width: 1%;		
+	}	
+	.entry-content .gist {
+		padding: 25px 10px 5px 10px;
+	}
+	.entry-content .gist .gist-file .gist-meta {
+		font-size: 0.8em;
+	}
+
 
 
 	/* ----- Sidebar ----- */
