@@ -13,6 +13,11 @@
     document.write('<link rel="stylesheet" href="css/print/' + ( window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">');
   </script>
 	<title>Domain-Driven Design and Event Sourcing with F# and EventStore</title>
+  <style type="text/css">
+  .reveal code {
+    max-height: 500px;
+  }
+  </style>
 </head>
 <body>
 
@@ -32,93 +37,405 @@
     </script>
 	</section data-markdown>
   
-  <section data-markdown>
-    <script type="text/template">
-    ## Outline
-    - Goals
-    - Why functional programming? Why F#?
-    - Why event sourcing? Why EventStore?
-    - DDD example
-    - Resources
-    </script>
+
+  <section>
+    <h2>Goals</h2>
+    <ul>
+      <li class="fragment roll-in">Go beyond OOP</li>
+      <li class="fragment roll-in">Learn F# / Functional Programming</li>
+      <li class="fragment roll-in">Learn EventStore / Event sourcing</li>
+      <li class="fragment roll-in">Supple design</li>
+    </ul>
   </section>
+  <!--end Goals-->
+
   
-
   <section>
-    <h2>Event Sourcing</h2>
-    <div style="width:500px;margin:0 auto;">
-    <blockquote class="twitter-tweet"><p>want to learn event sourcing? f(state, event) =&gt; state</p>&mdash; gregyoung (@gregyoung) <a href="https://twitter.com/gregyoung/status/313358540821647360">March 17, 2013</a></blockquote>
-<script async src="http://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    </div>
+    <section>
+      <h2>The Domain</h2>
+      <p>Inventory tracking system</p>
+    </section>
+    <section>
+      <p><strong>InventoryItem</strong> Aggregate</p>
+      <h3>Behaviors</h3>
+      <ul>
+        <li>Create</li>
+        <li>Rename</li>
+        <li>Activate</li>
+        <li>Deactivate</li>
+        <li>Check items in</li>
+        <li>Check items out</li>
+      </ul>
+    </section>    
   </section>
+  <!--end The Domain-->
+
 
   <section>
-    <h2>C#</h2>
-    <pre><code class="no-highlight">
-    public class InventoryItem : AggregateRoot 
-    {
-      bool _activated;
-      Guid _id;    
+    <section>
+      <h2>C#</h2>      
+      <div class="fragment roll-in">
+        <pre><code class="cs">
+        public class InventoryItem : AggregateRoot 
+        {
+          bool _activated;
 
-      void Apply(InventoryItemCreated e)
+          public void Deactivate()
+          {
+              if(!_activated) throw new InvalidOperationException("already deactivated");
+              ApplyChange(new InventoryItemDeactivated(_id));
+          }
+
+          void Apply(InventoryItemDeactivated e)
+          {
+            _activated = false;
+          }
+        }
+        </code></pre>      
+        <a href="https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs">source</a>
+      </div>
+    </section>
+    <section>
+      <pre><code class="cs">
+      public abstract class AggregateRoot
       {
-        _id = e.Id;
-        _activated = true;
-      }      
-    }
-    </code></pre>
+        public abstract Guid Id { get; }
+        public int Version { get; internal set; }
+
+        readonly List&lt;Event&gt; _changes = new List&lt;Event&gt;();        
+
+        protected void ApplyChange(Event e)
+        {
+            ApplyChange(e, true);
+        }
+
+        void ApplyChange(Event e, bool isNew)
+        {
+            (this as dynamic).Apply((dynamic)e);
+            if (isNew) _changes.Add(e);
+        }
+      }
+      </code></pre>
+    </section>
+    <section>
+      <h2>Issues</h2>
+      <ul>
+        <li class="fragment roll-in">Verbose</li>
+        <li class="fragment roll-in">Not POCO</li>
+        <li class="fragment roll-in">Double dispatch voodoo</li>
+        <li class="fragment roll-in">Misuse of inheritance</li>
+        <li class="fragment roll-in">Conflation of state and identity</li>
+      </ul>
+    </section>
+  </section>
+  <!--end C#-->
+
+
+
+  <section>
+
+    <section>
+      <h2>F#</h2>
+
+      <pre class="fragment roll-in"><code class="no-highlight">    
+      type State = { 
+        isActive : bool; 
+      }
+      </pre></code>
+
+      <h3 class="fragment roll-in">Record Type</h3>  
+      <ul class="fragment roll-in">
+        <li>Immutable by default</li>
+        <li class="fragment roll-in">No inheritance</li>
+        <li class="fragment roll-in">Structural equality, comparison</li>
+      </ul>
+
+    </section>
+
+    <section>
+      <h3>Events & Commands</h3>
+      <pre class="fragment roll-in"><code class="no-highlight">    
+      type Command = 
+          | Create of string
+          | Deactivate 
+
+      type Event = 
+          | Created of string
+          | Deactivated
+      </pre></code>
+      <h3 class="fragment roll-in">Union Type</h3>
+      <ul class="fragment roll-in">
+        <li>Mutually exclusive, named cases</li>
+        <li class="fragment roll-in">Similar: closed class hiearachy, C union, enum on steroids</li>
+        <li class="fragment roll-in">Pattern matching</li>
+      </ul>
+    </section>
+
+
+    <section>
+      <div class="fragment fade-out">
+      <pre><code class="no-highlight">
+      let apply state event = 
+        match event with
+        | Deactivated -> { state with State.isActive = false; }
+      </code></pre>
+      </div>
+
+      <pre class="fragment roll-in"><code class="no-highlight">
+      let apply state = function
+        | Deactivated -> { state with State.isActive = false; }
+      </code></pre>
+
+      <h3 class="fragment roll-in">Pattern Matching</h3>  
+      <ul class="fragment roll-in">
+        <li>Switch statement on steroids</li>
+        <li class="fragment roll-in">...lots of steroids</li>
+        <li class="fragment roll-in">Customizable</li>
+      </ul>
+
+    </section>
+
+    <section>
+      <div>
+      <pre><code class="haskell">
+      module Assert =
+          let inactive item = if item.isActive = true then failwith "The item is already deactivated."
+
+      let exec state = 
+        let apply event = 
+            let newItem = apply item event
+            event
+
+        function
+        | Deactivate -> item |> Assert.inactive; Deactivated |> apply
+      </code></pre>      
+      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">source</a>
+      </div>
+      <ul class="fragment roll-in">        
+        <li>Pipe operator</li>
+        <li class="fragment roll-in">Inner functions</li>
+        <li class="fragment roll-in">Modules</li>
+      </ul>
+
+    </section>
+
+    <section>
+      <h2>Improvements</h2>
+      <ul>
+        <li class="fragment roll-in">Brevity</li>
+        <li class="fragment roll-in">Explicitness</li>
+        <li class="fragment roll-in">Uniformity</li>
+        <li class="fragment roll-in">Single responsibility</li>
+        <li class="fragment roll-in">Static verification</li>
+      </ul>
+    </section>
+
+  </section>
+  <!--end F#-->
+
+
+  <section>
+    <section>
+      <h2>Benefits for DDD</h2>
+      <ul class="fragment roll-in">
+        <li>Focus on behavior</li>
+        <li class="fragment roll-in">Declarative</li>
+        <li class="fragment roll-in">Assertions</li>
+        <li class="fragment roll-in">Side-effect free</li>
+        <li class="fragment roll-in">Closure of operations</li>
+      </ul>
+    </section>
+  </section>
+  <!--end Benefits for DDD-->
+
+  <section>
+    <h2>Challenges</h2>
+    <ul>
+      <li class="fragment roll-in">New paradigm</li>
+      <li class="fragment roll-in">Different paradigms collide for attention</li>
+      <li class="fragment roll-in">Less tooling support</li>
+      <li class="fragment roll-in">C# interop can be less than pleasant</li>
+      <li class="fragment roll-in">Missing some advanced functional features</li>
+    </ul>
   </section>
 
 
   <section>
-    <h2>F#</h2>
-    <pre><code class="no-highlight">
-    type State = { 
-      isActive : bool; 
-    }
 
-    let apply state = function
-      | Created _ -> { state with State.isActive = true; }    
-    </code></pre>
+    <section>
+      <h2>Event Sourcing</h2>
+
+      <div class="fragment roll-in" style="width:500px;margin:0 auto;">
+      <blockquote class="twitter-tweet"><p>want to learn event sourcing? f(state, event) =&gt; state</p>&mdash; gregyoung (@gregyoung) <a href="https://twitter.com/gregyoung/status/313358540821647360">March 17, 2013</a></blockquote>
+      <script async src="http://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      </div>
+      <br />
+      <div class="fragment roll-in">
+        <h3>AHA!</h3>
+        <pre><code class="no-highlight">
+        let apply state = function
+          | Deactivated -> { state with State.isActive = false; }
+        </code></pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>Event Sourcing</h2>
+      <div>
+        <blockquote>
+          Capture all changes to an application state as a sequence of events.        
+        </blockquote>      
+        <em style="float:right;">Martin Fowler</em>
+        <div style="clear:both"></div>
+      </div>
+      <br />
+      <blockquote class="fragment roll-in">
+        Capture all <strike>changes to an application state</strike> <strong>behaviors</strong> as a sequence of events.        
+      </blockquote>
+    </section>
+
+    <section>
+      <h2>Reconstitution</h2>
+      <p>Replay all past events to bring aggregate into current state.</p>
+    </section>
+
+    <section>
+      <h3>Aggregate Abstraction</h3>
+      <pre><code class="no-highlight">
+      type Aggregate<'TState, 'TCommand, 'TEvent> = {          
+          zero : 'TState;
+          apply : 'TState -> 'TEvent -> 'TState;
+          exec : 'TState -> 'TCommand -> 'TEvent;
+      }
+      </code></pre>
+      <div class="fragment roll-in">
+      <h3>Replay</h3>
+      <pre><code class="no-highlight">
+      let events = load (typeof<'TEvent>,id)
+      let state = events |> Seq.fold aggregate.apply aggregate.zero        
+      </code></pre>
+      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h3>EventStore Integration</h3>
+      <div class="fragment roll-in">
+      <pre><code class="no-highlight">
+  let load (typ,id) =
+      let slice = conn.ReadStreamEventsForward(id,1,Int32.Max,false)
+      slice.Events 
+      |> Seq.map (fun e -> decode(typ,e.Event.EventType,e.Event.Data))
+      </code></pre>
+      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h3>Event Persistance</h3>
+      <div class="fragment roll-in">
+      <pre><code class="no-highlight">
+  let commit (id,expectedVersion) e =
+        let eventType,bytes = serialize e
+        let meta = [||] : byte array
+        let data = EventData(Guid.NewGuid(),eventType,true,bytes,meta)
+        if version = 0 then 
+          conn.CreateStream(id, Guid.NewGuid(), true, metaData)
+        conn.AppendToStream(id,expectedVersion,data)
+      </code></pre>
+      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h3>Projections</h3>
+      <ul>
+        <li class="fragment roll-in">Project stream onto new stream</li>
+        <li class="fragment roll-in">State</li>
+        <li class="fragment roll-in">Declared with JavaScript</li>
+        <li class="fragment roll-in">Simple read-models</li>
+        <li class="fragment roll-in">CEP</li>        
+      </ul>
+    </section>
+
+    <section>
+      <h3>Read Model Projection</h3>
+      <div class="fragment roll-in">
+        <pre><code class="javascript">
+fromCategory('InventoryItem').foreachStream().when({
+  $init: function() {
+    return { name: null, active: false };
+  },
+  "Created": function (s, e) {
+    s.name = e.body.value;
+    s.active = true;
+    var streamId = "ReadModel-" + 
+          e.streamId.replace("InventoryItem-", "");
+    var eventType = e.eventType + "_ReadModel";
+    emit(streamId, eventType, s);
+  },
+  "Deactivated": function (s, e) {
+    s.active = false;
+    var streamId = "ReadModel-" + 
+          e.streamId.replace("InventoryItem-", "");
+    var eventType = e.eventType + "_ReadModel";
+    emit(streamId, eventType, s);
+  }
+});
+        </code></pre>
+        <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/FlatReadModelProjection.js">source</a>
+      </div>
+    </section>
+
+
+    <section>
+      <h2>Challenges</h2>
+      <ul>
+        <li class="fragment roll-in">Less tooling support</li>
+        <li class="fragment roll-in">Non-trivial shift in data modelling</li>
+        <li class="fragment roll-in">Queries must be implemented separately</li>
+        <li class="fragment roll-in">Eventual consistency</li>
+        <li class="fragment roll-in">Lack of referential integrity</li>
+        <li class="fragment roll-in">Schema maintenance, refactoring</li>
+      </ul>
+    </section>
+
+
+  </section>
+  <!--end Event sourcing-->
+
+
+  <section>
+    <h2>Summary</h2>
   </section>
 
 
-  <section data-markdown>
-    <script type="text/template">
-    ## Why F#? 
-    - General purpose, statically typed, multi-paradigm, functional-first, type inference on the CLR
-    - CLR, .NET, Visual Studio, etc
-    - Combines OOP and FP
-    - Type inference:
-      - Succinct code
-      - Automatic generalization
-    - Pattern matching
-    - Language-oriented programming
-      - Computation expressions
-    - Functional programming...
-    </script>
-  </section>
-
-  <section data-markdown>
-    <script type="text/template">
-    ### Functional Programming
-    - First-class functions
-    - Functional composition
-      - Currying
-      - Partial application
-    - Immutable data structures
-      - Record types
-      - Union types
-    - Draw on research techniques no available for OOP
-    </script>
+  <section>
+    <h2>Acknowledgements</h2>
+    <ul>
+      <li>Paul Rayner</li>
+      <li>Vaughn Vernon</li>
+      <li>Community</li>
+    </ul>
   </section>
 
 
-  <section data-markdown>
-    <script type="text/template">
-    ### Why Event Sourcing?
-    - _"Capture all changes to an application state as a sequence of events."_ M. Fowler
-    </script>
+  <section>
+    <h2>References</h2>
+    <ul>
+      <li><a href="https://github.com/gregoryyoung/m-r">SimpleCQRS by Greg Young</a></li>
+      <li><a href="https://github.com/eulerfx/DDDInventoryItemFSharp">SimpleCQRS in F#</a></li>
+      <li><a href="http://fsharpforfunandprofit.com/">F# for fun and profit</a></li>
+    </ul>
+  </section>
+
+
+  <section>
+    <h2>Lev Gorodinski</h2>
+    <p><a href="http://gorodinski.com">gorodinski.com</a></p>
+    <p><a href="http://twitter.com/eulerfx">@eulerfx</a></p>
+    <p><a href="http://github.com/eulerfx">github.com/eulerfx</a></p>
+    <p><a href="mailto:eulerfx@gmail.com">eulerfx@gmail.com</a></p>
   </section>
 
 
@@ -137,7 +454,7 @@
     history: true,
     center: true,
 
-    theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+    //theme: 'beige', // available themes are in /css/theme
     transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
 
     // Optional libraries used to extend on reveal.js
