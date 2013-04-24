@@ -24,18 +24,14 @@
 <div class="reveal">
 <div class="slides">	
 
-	<section data-markdown>
-    <script type="text/template">
-      ## Domain-Driven Design with
-      ## F# and EventStore
-
-      Lev Gorodinski
-
-      gorodinski.com
-
-      @eulerfx
-    </script>
-	</section data-markdown>
+	<section>
+    <div style="background-image:url(images/lambda.png);background-repeat:no-repeat;height:500px;">
+      <h2>Domain-Driven Design with <br />F# and EventStore</h2>
+      <p>Lev Gorodinski</p>
+      <p>gorodinski.com</p>
+      <p>@eulerfx</p>
+    </div>
+	</section>
   
 
   <section>
@@ -227,6 +223,7 @@
         <li class="fragment roll-in">Uniformity</li>
         <li class="fragment roll-in">Single responsibility</li>
         <li class="fragment roll-in">Static verification</li>
+        <li class="fragment roll-in">Cohesion</li>
       </ul>
     </section>
 
@@ -248,6 +245,8 @@
   </section>
   <!--end Benefits for DDD-->
 
+
+
   <section>
     <h2>Challenges</h2>
     <ul>
@@ -258,7 +257,7 @@
       <li class="fragment roll-in">Missing some advanced functional features</li>
     </ul>
   </section>
-
+  <!--end Challenges-->
 
   <section>
 
@@ -298,6 +297,7 @@
       <h2>Reconstitution</h2>
       <p>Replay all past events to bring aggregate into current state.</p>
     </section>
+
 
     <section>
       <h3>Aggregate Abstraction</h3>
@@ -401,12 +401,46 @@ fromCategory('InventoryItem').foreachStream().when({
     </section>
 
 
+
   </section>
   <!--end Event sourcing-->
 
 
+
+  <section>
+    <h2>Why F# / Functional Programming?</h2>
+    <ul>
+      <li class="fragment roll-in">.NET, VisualStudio</li>
+      <li class="fragment roll-in">Multi-paradigm</li>
+      <li class="fragment roll-in">Powerful type inference</li>
+      <li class="fragment roll-in">Language oriented</li>
+      <li class="fragment roll-in">Better coupling characteristics</li>
+      <li class="fragment roll-in">Smaller, more numerous types</li>
+      <li class="fragment roll-in">Function as unit of coupling</li>
+      <li class="fragment roll-in">More explicit, declarative</li>
+      <li class="fragment roll-in">Pattern matching</li>
+      <li class="fragment roll-in">Avoid nulls</li>
+      <li class="fragment roll-in">Isolate, minimize state</li>
+      <li class="fragment roll-in">OOP patterns taken care of</li>
+      <li class="fragment roll-in">Draw on math research</li>
+    </ul>
+  </section>
+
+
+  <section>
+    <h2>Why EventStore / event sourcing?</h2>
+    <ul>
+      <li class="fragment roll-in">Immutable, preserve information</li>
+      <li class="fragment roll-in">Uniform</li>
+      <li class="fragment roll-in">Append only</li>
+      <li class="fragment roll-in">Natural model of reality</li>
+    </ul>
+  </section>
+
+
   <section>
     <h2>Summary</h2>
+    <img src="images/ddd-implementation-path.png" alt="Domain-Driven Design Implementation Path" />
   </section>
 
 
