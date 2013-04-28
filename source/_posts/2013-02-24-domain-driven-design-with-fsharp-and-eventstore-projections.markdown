@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Domain-Driven Design (DDD) with F# and EventStore: Projections"
+title: "Domain-Driven Design (DDD) with F# and EventStore - Projections"
 date: 2013-02-24 18:36
 comments: true
 categories: [F#,CQRS,DDD,EventStore,event sourcing]
