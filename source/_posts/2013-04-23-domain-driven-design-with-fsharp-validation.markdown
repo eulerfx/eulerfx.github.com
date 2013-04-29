@@ -5,7 +5,7 @@ date: 2013-04-23 09:38
 comments: true
 categories: [DDD,F#]
 ---
-_In this post I dig deeper into validation of a Domain-Driven Design with F# and the functional paradigm. The implementation builds upon the [design introduced earlier](http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/). The central theme is that of explicitness - the possibility of a failure is made explicit with type signatures. In turn, this calls for explicit handling of failure conditions paving the way for a design-by-contract style of programming and equational resoning. Under the hood, the implementation draws on basic principles of [category theory](https://en.wikipedia.org/wiki/Category_theory) which provide for uniformity and composability. As a result, from the perspective of DDD, the confluence of declarative design, supply design, invariants and assertions is tremendously enhanced. The functional implementation is to a great extent based on the work of [Mauricio Scheffer](https://github.com/mausch)._
+_In this post I dig deeper into validation of a Domain-Driven Design with F# and the functional paradigm. The implementation builds upon the [design introduced earlier](http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/). The central theme is that of explicitness - the possibility of a failure is made explicit with type signatures. In turn, this calls for explicit handling of failure conditions paving the way for a design-by-contract style of programming and equational reasoning. Under the hood, the implementation draws on basic principles of [category theory](https://en.wikipedia.org/wiki/Category_theory) which provide for uniformity and composability. As a result, from the perspective of DDD, the confluence of declarative design, supply design, invariants and assertions is tremendously enhanced. The functional implementation of validation is to a great extent based on the wonderful work of [Mauricio Scheffer](https://github.com/mausch)._
 
 <!--more-->
 
@@ -47,7 +47,7 @@ The first order of business is finding an amplified type to encode both successf
 
 In this example, like the successful result, the erroneous result is returned explicitly. While this implementation avoids many of the pitfalls of exceptions, the syntax could certainly use some work. To address the syntax, we shall put the compositional facilities of F# to work. 
 
-## Validation Framework
+## A Functional Validation Framework
 
 The validation framework presented here is based largely on the work of Mauricio Scheffer in [Validating with applicative functors in F#](http://bugsquash.blogspot.com/2011/08/validating-with-applicative-functors-in.html). This work has been refined and incorporated into [fsharpx](https://github.com/fsharp/fsharpx) drawing on powerful, category theory based composition mechanisms contained therein.
 
@@ -65,7 +65,7 @@ An applicative functor extends the functor type class with additional functions 
 
 {% gist 5477979 %}
 
-In the example, the apply function takes a function wrapped in a _Choice_ type and arbitrary value also wrapped in a choice type. It applies the function, if available, otherwise passing on the contained errors, possibly composing with errors from the arbitrary value. In effect, it handles each of the four cases that a set of two _Choice_ values can be in. In turn, we use these functions to compose the following functions.
+The _apply_ function takes a function wrapped in a _Choice_ type and arbitrary value also wrapped in a choice type. It applies the function, if available, otherwise passing on the contained errors, possibly composing with errors from the arbitrary value. In effect, it handles each of the four cases that a set of two _Choice_ values can be in. In turn, we use these functions to compose the following functions.
 
 {% gist 5478001 %}
 
@@ -73,7 +73,7 @@ The functions _lift2_, _&lt;?&gt;_, and _|?&gt;_ in this example form a sort of 
 
 {% gist 5478005 %}
 
-In this example, the _validName_ assertion, with the _&lt;*_ [operator](http://msdn.microsoft.com/en-us/library/dd233204.aspx), composes two validators from the [Validator](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Validatior.fs) module which ensure that the inventory item name is neither null or empty. In the _exec_ function, the assertion is composed with the returned event using the _&lt;?&gt;_ operator. This operator takes a _Choice_ value on the left and a non-amplified value on the right and composes them into a single _Choice_ value the first case of which is a value of the type of the second operand. The order of the operands can be reversed with the _|?&gt;_ operator which can be read as [if and only if](http://en.wikipedia.org/wiki/If_and_only_if).
+In this example from the [InventoryItem](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) module, the _validName_ assertion, with the _&lt;*_ [operator](http://msdn.microsoft.com/en-us/library/dd233204.aspx), composes two validators from the [Validator](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Validatior.fs) module which ensure that the inventory item name is neither null or empty. In the _exec_ function, the assertion is composed with the returned event using the _&lt;?&gt;_ operator. This operator takes a _Choice_ value on the left and a non-amplified value on the right and composes them into a single _Choice_ value the first case of which is a value of the type of the second operand. The order of the operands can be reversed with the _|?&gt;_ operator which can be read as [if and only if](http://en.wikipedia.org/wiki/If_and_only_if). Note the return type of the _exec_ function is _Choice&lt;Event, string list&gt;_.
 
 ## Refactoring Outer Layers
 
@@ -93,7 +93,7 @@ Beyond what was showcased in this post are deeper questions about explicit valid
 
 ## Summary
 
-In this post we discussed the pitfalls of traditional validation techniques involving exceptions. Next, we implemented a validation mechanism which avoids exceptions and which as a result is in better alignment with functional programming. To this end, we were able to draw on basic concepts in category theory which studies composition among mathematical structures. Throughout our approach, the themes of uniformity, explicitness and declarativeness prevail. The resulting code remains succinct, draws on static verification and provides better composition facilities. In particular, it provides for [equational resoning](http://www.haskell.org/haskellwiki/Equational_reasoning_examples) which will be a topic of future posts. Additionally, the explicit implementation is simpler both in terms of readability, intuition and the requirements upon the runtime. Finally, the rich compositional facilities of F# allowed a solution that does not short-circuit like exceptions do, allowing clients to obtain all detected errors immediately.
+In this post we discussed the pitfalls of traditional validation techniques involving exceptions. Next, we implemented a validation mechanism which avoids exceptions and which as a result is in better alignment with functional programming. To this end, we were able to draw on basic concepts in category theory which studies composition among mathematical structures. Throughout our approach, the themes of uniformity, explicitness and declarative design prevail. The resulting code remains succinct, draws on static verification and provides better composition facilities. In particular, it provides for [equational reasoning](http://www.haskell.org/haskellwiki/Equational_reasoning_examples) which will be a topic of future posts. Additionally, the explicit implementation is simpler both in terms of readability, intuition and the requirements upon the runtime. Finally, the rich compositional facilities of F# allowed a solution that does not short-circuit like exceptions do, allowing clients to obtain all detected errors immediately.
 
 ## Source Code
 
