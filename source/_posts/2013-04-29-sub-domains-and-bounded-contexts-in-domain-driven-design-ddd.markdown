@@ -5,7 +5,7 @@ date: 2013-04-29 21:15
 comments: true
 categories: [DDD]
 ---
-_In this post I discuss the subtle relationship between bounded contexts and sub-domains within strategic Domain-Driven Design. The concepts often seem elusively similar, yet in reality are more like parallels. The association between a domain of discourse and the corresponding model shall be investigated. My understanding of the subject matter was honed at [DDD Denver Lean Coffee Discussions](http://vimeo.com/63635620) organized by [Paul Rayner](http://www.virtual-genius.com/)._
+_In this post I discuss the subtle relationship between bounded contexts and sub-domains within strategic Domain-Driven Design. The concepts often seem elusively similar, yet in reality are more like parallels. To understand the parallels, the association between a domain of discourse and the corresponding model shall be investigated. My understanding of the subject matter was honed at [DDD Denver Lean Coffee Discussions](http://vimeo.com/63635620) organized by [Paul Rayner](http://www.virtual-genius.com/)._
 
 <!--more-->
 
@@ -13,8 +13,8 @@ _In this post I discuss the subtle relationship between bounded contexts and sub
 
 The key to understanding the difference between a bounded context and a sub-domain is understanding the difference between a domain and a domain model. The domain, in effect, is the problem to be addressed with a software effort. It is the problem space. A domain can be decomposed into sub-domains which typically reflect some organizational structure. A common example of a sub-domain is Product Catalog or Accounting - the latter possibly a generic sub-domain. A domain model on the other hand is an abstraction of a domain taking whats necessary to satisfy requirements. It has to be created with the cooperation of developers and domain experts. If the design and analysis process was a mathematical function, the model would be its [range](http://en.wikipedia.org/wiki/Range_\(mathematics\)). In fact, it would have to be a [non-injective and non-surjective](http://en.wikipedia.org/wiki/Bijection,_injection_and_surjection) function:
 
-{% blockquote George E. P. Box %}
-All models are wrong. Some models are useful.
+{% blockquote George E. P. Box, Empirical Model-Building and Response Surfaces (1987) %}
+Essentially, all models are wrong, but some are useful.
 {% endblockquote %}
 
 ## Bounded Contexts
@@ -27,7 +27,7 @@ Reality however isn't always so forgiving. Given that bounded contexts are a sof
 
 As noted by Paul Rayner at the Lean Coffee Discussion, it is instructive to contemplate the nature of sub-domain boundaries. How are those boundaries determined in the first place? [Conway's Law](http://en.wikipedia.org/wiki/Conway's_law) states:
 
-{% blockquote Melvin Conway %}
+{% blockquote Melvin Conway, How do Committees Invent? (1968) %}
 Organizations which design systems are constrained to produce designs which are copies of the communication structures of these organizations.
 {% endblockquote %}
 
@@ -35,7 +35,15 @@ According to Conway's Law, sub-domain boundaries are determined in part by commu
 
 ## Model Exploration Whirlpool
 
-Much like different models can be designed for a domain, a domain can itself be interpreted in different ways. Moreover, there is no canonical interpretation and the interpretation must be continuously evolved based largely on feedback from the domain model. Eric Evans refers to this continuous evolution as the [model exploration whirlpool](http://www.domainlanguage.com/ddd/whirlpool/Domain_Language_Model_Exploration_Whirlpool_v2010-06-19.pdf). 
+Much like different models can be designed for a domain, a domain can itself be interpreted in different ways. Moreover, there is no canonical interpretation and the interpretation must be continuously evolved based to a great extent on feedback from the domain model. Eric Evans refers to this process as the [model exploration whirlpool](http://www.domainlanguage.com/ddd/whirlpool/Domain_Language_Model_Exploration_Whirlpool_v2010-06-19.pdf). 
+
+## Summary
+
+A sub-domain delimits a domain and exists within the problem space. A bounded context delimits the _domain model_ and exists within the solution space. The ideal is full alignment between a sub-domain and a bounded context, however in practice a degree of flexibility must be accepted in this regard. Furthermore, just as the bounded context is guided by a sub-domain, a sub-domain is, in turn, guided by a bounded context as part of the model exploration whirlpool.
+
+<div style="margin:0 auto;width:500px;height:418px;">
+{% img center /images/posts/drawing-hands.jpg 500 418 'MC Escher Drawing Hands' %}
+</div>
 
 ## Resources
 
