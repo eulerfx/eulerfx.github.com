@@ -56,18 +56,18 @@
   <section>
     <section>
       <h2>The Domain</h2>
-      <p>Inventory tracking system</p>
+      <p>SaaSOvation / Collaboration</p>
     </section>
     <section>
-      <p><strong>InventoryItem</strong> Aggregate</p>
+      <p><strong>Forum</strong> Aggregate</p>
       <h3>Behaviors</h3>
       <ul>
-        <li>Create</li>
-        <li>Rename</li>
-        <li>Activate</li>
-        <li>Deactivate</li>
-        <li>Check items in</li>
-        <li>Check items out</li>
+        <li>Start</li>
+        <li>Assign Moderator</li>
+        <li>Change Description</li>
+        <li>Change Subject</li>
+        <li>Close</li>
+        <li>Re-Open</li>
       </ul>
     </section>    
   </section>
@@ -79,47 +79,52 @@
       <h2>C#</h2>      
       <div class="fragment roll-in">
         <pre><code class="cs">
-        public class InventoryItem : AggregateRoot 
-        {
-          bool _activated;
+public class Forum : EventSourcedRootEntity
+{
+	public void AssignModerator(Moderator moderator)
+	{
+		AssertionConcern.AssertArgumentNotNull(moderator, "The moderator must be provided.");
+	    AssertOpen();        
+	    Apply(new ForumModeratorChanged(this.tenantId, this.forumId, moderator, this.exclusiveOwner));
+	}
 
-          public void Deactivate()
-          {
-              if(!_activated) throw new InvalidOperationException("already deactivated");
-              ApplyChange(new InventoryItemDeactivated(_id));
-          }
+	void AssertOpen()
+	{
+	    if (this.closed)
+	        throw new InvalidOperationException("Forum is closed.");
+	}
 
-          void Apply(InventoryItemDeactivated e)
-          {
-            _activated = false;
-          }
-        }
+	void When(ForumModeratorChanged e)
+	{
+	    this.moderator = e.Moderator;
+	}
+}
         </code></pre>      
-        <a href="https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs">source</a>
+        <a href="https://github.com/VaughnVernon/IDDD_Samples_NET/blob/master/iddd_collaboration/Domain.Model/Forums/Forum.cs">source</a>
       </div>
     </section>
     <section>
       <pre><code class="cs">
-      public abstract class AggregateRoot
-      {
-        public abstract Guid Id { get; }
-        public int Version { get; internal set; }
+public abstract class EventSourcedRootEntity : EntityWithCompositeId
+{
+	readonly List&lt;IDomainEvent&gt; mutatingEvents;
+	readonly int unmutatedVersion;
 
-        readonly List&lt;Event&gt; _changes = new List&lt;Event&gt;();        
+	protected void Apply(IDomainEvent e)
+	{
+	    this.mutatingEvents.Add(e);
+	    When(e);
+	}
 
-        protected void ApplyChange(Event e)
-        {
-            ApplyChange(e, true);
-        }
-
-        void ApplyChange(Event e, bool isNew)
-        {
-            (this as dynamic).Apply((dynamic)e);
-            if (isNew) _changes.Add(e);
-        }
-      }
+	void When(IDomainEvent e)
+	{
+	    // dynamic dispatch
+	    (this as dynamic).When(e);
+	}    
+}
       </code></pre>
     </section>
+
     <section>
       <h2>Issues</h2>
       <ul>
@@ -130,6 +135,7 @@
         <li class="fragment roll-in">Conflation of state and identity</li>
       </ul>
     </section>
+    
   </section>
   <!--end C#-->
 
@@ -141,9 +147,10 @@
       <h2>F#</h2>
 
       <pre class="fragment roll-in"><code class="no-highlight">    
-      type State = { 
-        isActive : bool; 
-      }
+type State = { 
+    moderator      : Collaborator;
+    description    : NonEmptyString;
+    closed         : bool; }
       </pre></code>
 
       <h3 class="fragment roll-in">Record Type</h3>  
@@ -158,13 +165,13 @@
     <section>
       <h3>Events & Commands</h3>
       <pre class="fragment roll-in"><code class="no-highlight">    
-      type Command = 
-          | Create of string
-          | Deactivate 
-
-      type Event = 
-          | Created of string
-          | Deactivated
+type Command = 
+    | AssignModerator of Collaborator
+    | ChangeDescription of NonEmptyString
+    
+type Event =
+    | ModeratorChanged of Id * Collaborator * ExclusiveOwner
+    | DescriptionChanged of Id * NonEmptyString * ExclusiveOwner
       </pre></code>
       <h3 class="fragment roll-in">Union Type</h3>
       <ul class="fragment roll-in">
@@ -176,18 +183,15 @@
 
 
     <section>
-      <div class="fragment fade-out">
+      <div class="fragment">
       <pre><code class="no-highlight">
-      let apply state event = 
-        match event with
-        | Deactivated -> { state with State.isActive = false; }
+let apply state = function
+    | ModeratorChanged (_,moderator,_) -> 
+    	{ state with moderator = moderator }
+    | DescriptionChanged (_,desc,_)    -> 
+    	{ state with description = desc }
       </code></pre>
       </div>
-
-      <pre class="fragment roll-in"><code class="no-highlight">
-      let apply state = function
-        | Deactivated -> { state with State.isActive = false; }
-      </code></pre>
 
       <h3 class="fragment roll-in">Pattern Matching</h3>  
       <ul class="fragment roll-in">
@@ -200,26 +204,16 @@
 
     <section>
       <div>
-      <pre><code class="haskell">
-      module Assert =
-          let inactive item = if item.isActive = true then failwith "The item is already deactivated."
-
-      let exec state = 
-        let apply event = 
-            let newItem = apply item event
-            event
-
-        function
-        | Deactivate -> item |> Assert.inactive; Deactivated |> apply
+      <pre><code class="no-highlight">
+let exec state =         
+    let assertOpen = validator (fun _ -> state.closed <> true) 
+    	["Forum must be open."] state
+    function
+    | AssignModerator moderator -&gt; assertOpen &lt;?&gt; [ModeratorChanged(...)]
+    | ChangeDescription desc -&gt; assertOpen &lt;?&gt; [DescriptionChanged(...)]
       </code></pre>      
-      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">source</a>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/Forums.fs">source</a>
       </div>
-      <ul class="fragment roll-in">        
-        <li>Pipe operator</li>
-        <li class="fragment roll-in">Inner functions</li>
-        <li class="fragment roll-in">Modules</li>
-      </ul>
-
     </section>
 
     <section>
@@ -279,8 +273,9 @@
       <div class="fragment roll-in">
         <h3>AHA!</h3>
         <pre><code class="no-highlight">
-        let apply state = function
-          | Deactivated -> { state with State.isActive = false; }
+let apply state = function
+    | ModeratorChanged (_,moderator,_) -> { state with moderator = moderator }
+    | DescriptionChanged (_,desc,_)    -> { state with description = desc }
         </code></pre>
       </div>
     </section>
@@ -309,11 +304,10 @@
     <section>
       <h3>Aggregate Abstraction</h3>
       <pre><code class="no-highlight">
-      type Aggregate<'TState, 'TCommand, 'TEvent> = {          
-          zero : 'TState;
-          apply : 'TState -> 'TEvent -> 'TState;
-          exec : 'TState -> 'TCommand -> 'TEvent;
-      }
+	type Aggregate<'TState, 'TCommand, 'TEvent> = {          
+		zero : 'TState;
+		apply : 'TState -> 'TEvent -> 'TState;
+		exec : 'TState -> 'TCommand -> 'TEvent; }
       </code></pre>
       <div class="fragment roll-in">
       <h3>Replay</h3>
@@ -321,7 +315,7 @@
       let events = load (typeof<'TEvent>,id)
       let state = events |> Seq.fold aggregate.apply aggregate.zero        
       </code></pre>
-      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">source</a>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/Common.fs">source</a>
       </div>
     </section>
 
@@ -334,7 +328,7 @@
       slice.Events 
       |> Seq.map (fun e -> decode(typ,e.Event.EventType,e.Event.Data))
       </code></pre>
-      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">source</a>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/EventStore.fs">source</a>
       </div>
     </section>
 
@@ -350,7 +344,7 @@
           conn.CreateStream(id, Guid.NewGuid(), true, metaData)
         conn.AppendToStream(id,expectedVersion,data)
       </code></pre>
-      <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">source</a>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/EventStore.fs">source</a>
       </div>
     </section>
 
@@ -369,28 +363,26 @@
       <h3>Read Model Projection</h3>
       <div class="fragment roll-in">
         <pre><code class="javascript">
-fromCategory('InventoryItem').foreachStream().when({
+fromCategory('Forum').foreachStream().when({
   $init: function() {
-    return { name: null, active: false };
+    return { description: null, moderator: null };
   },
-  "Created": function (s, e) {
-    s.name = e.body.value;
-    s.active = true;
+  "ModeratorAssigned": function (s, e) {
+    s.moderator = e.body.moderator;
     var streamId = "ReadModel-" + 
-          e.streamId.replace("InventoryItem-", "");
+          e.streamId.replace("Forum-", "");
     var eventType = e.eventType + "_ReadModel";
     emit(streamId, eventType, s);
   },
-  "Deactivated": function (s, e) {
-    s.active = false;
+  "DescriptionChanged": function (s, e) {
+    s.description = e.body.description;
     var streamId = "ReadModel-" + 
-          e.streamId.replace("InventoryItem-", "");
+          e.streamId.replace("Forum-", "");
     var eventType = e.eventType + "_ReadModel";
     emit(streamId, eventType, s);
   }
 });
         </code></pre>
-        <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/FlatReadModelProjection.js">source</a>
       </div>
     </section>
 
@@ -450,8 +442,8 @@ fromCategory('InventoryItem').foreachStream().when({
   <section>
     <h2>Acknowledgements</h2>
     <ul>
-      <li>Paul Rayner</li>
       <li>Vaughn Vernon</li>
+      <li>Paul Rayner</li>      
       <li>Community</li>
     </ul>
   </section>
@@ -460,9 +452,9 @@ fromCategory('InventoryItem').foreachStream().when({
   <section>
     <h2>References</h2>
     <ul>
-      <li><a href="https://github.com/gregoryyoung/m-r">SimpleCQRS by Greg Young</a></li>
-      <li><a href="https://github.com/eulerfx/DDDInventoryItemFSharp">SimpleCQRS in F#</a></li>
-      <li><a href="http://fsharpforfunandprofit.com/">F# for fun and profit</a></li>
+      <li><a href="https://github.com/VaughnVernon/IDDD_Samples">Java IDDD Samples</a></li>
+      <li><a href="https://github.com/VaughnVernon/IDDD_Samples_NET">C# IDDD Samples</a></li>
+      <li><a href="https://github.com/eulerfx/IDDDFSharpSamples/">F# IDDD Samples</a></li>      
     </ul>
   </section>
 

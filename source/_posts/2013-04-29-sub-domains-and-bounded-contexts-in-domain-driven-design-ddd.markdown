@@ -39,7 +39,7 @@ Much like different models can be designed for a domain, a domain can itself be 
 
 ## Summary
 
-A sub-domain delimits a domain and exists within the problem space. A bounded context delimits the _domain model_ and exists within the solution space. The ideal is full alignment between a sub-domain and a bounded context, however in practice a degree of flexibility must be accepted in this regard. Furthermore, just as the bounded context is guided by a sub-domain, a sub-domain is, in turn, guided by a bounded context as part of the model exploration whirlpool.
+A sub-domain delimits a domain and exists within the problem space. A bounded context delimits the _domain model_ and exists within the solution space. The ideal is full alignment between a sub-domain and a bounded context, however in practice a degree of flexibility must be accepted in this regard. Furthermore, just as the bounded context is guided by a sub-domain, a sub-domain is, in turn ,guided by a bounded context as part of the model exploration whirlpool.
 
 <div style="margin:0 auto;width:500px;height:418px;">
 {% img center /images/posts/drawing-hands.jpg 500 418 'MC Escher Drawing Hands' %}
