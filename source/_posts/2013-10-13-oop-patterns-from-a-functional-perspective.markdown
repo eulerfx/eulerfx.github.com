@@ -7,6 +7,8 @@ categories: [OOP,FP]
 ---
 _In this post I interpret design patterns and principles commonplace in [object-oriented programming](http://en.wikipedia.org/wiki/Object-oriented_programming) languages from the perspective of [functional programming](http://en.wikipedia.org/wiki/Functional_programming). Most of these patterns are trivially reduced to elementary functional constructs. The intent is to illustrate advantages and insight resulting from a shift in paradigm. After all, both the object-oriented and the functional paradigm have a shared goal - the solution of some problem. The patterns discussed herein are a testament to this commonality. The difference between the paradigms lies in the underlying abstractions upon which they are established which in turn have significant ramifications for the problem solving tactics they engender. In particular, I argue that the object-oriented inheritance model and the paradigm's primary utilization as an adorned state encapsulation mechanism are limiting factors in composing higher-level abstractions. Conversely, functional programming, being based on an entirely different [model of computation](http://en.wikipedia.org/wiki/Model_of_computation), eschews state, thereby bypassing accompanying hurdles and mandates composion from the core, thereby encouraging resuable abstractions._ 
 
+<!--more-->
+
 ## Introduction
 
 The following claims are based on a few years of experience developing applications with the functional paradigm. In particular, contrasts of the paradigms have been distilled through porting code samples for [Implementing Domain-Driven Design](http://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577) from a [Java/C# implementation](https://github.com/VaughnVernon/IDDD_Samples_NET) to an [implementation in F#](https://github.com/eulerfx/IDDDFSharpSamples). 
@@ -66,16 +68,16 @@ Functional languages favor [parametric polymorphism](http://en.wikipedia.org/wik
 
 ### <a id="interface-segregation-principle"></a>Interface Segregation Principle
 
-The interface segregation principle states that _no client should be forced to depend on methods it does not use_. In essence it is a restatement of the single-responsibility principle for interfaces and reflects the same underlying problem - the difficulty of balancing responsibility assignment, composition and encapsulation in object-oriented design. On the one hand, it is desirable to encapsulate, on the other hand it is desirable to compose. Furthermore, the problem the employing the interface-segregation principle alone is that it doesn't directly protect against class bloat and is some ways hides the problem.
+The interface segregation principle states that _no client should be forced to depend on methods it does not use_. In essence it is a restatement of the single-responsibility principle for interfaces and reflects the same underlying problem - the difficulty of balancing responsibility assignment, composition and encapsulation in object-oriented design. On the one hand, it is desirable to encapsulate, on the other hand it is desirable to compose. Furthermore, the problem with employing the interface-segregation principle alone is that it doesn't directly protect against class bloat and in some ways hides the problem.
 
-Functional programming reduces the need for encapsulation by eschewing state and breeds composition at the core. There is no augmented concept of roles because function roles are explicit at the onset.
+Functional programming reduces the need for encapsulation by eschewing state and breeds composition at the core. There is no augmented concept of role-based interfaces because function roles are explicit at the onset. Functions are segregated by default.
 
 
 ### <a id="dependency-inversion-principle"></a>Dependency Inversion Principle
 
-The dependency inversion principle states that high-level modules should be decoupled from low-level modules through abstractions. In other words, the principle states that code should be structured around the problem domain, and the domain should declare dependencies on required infrastructure as interfaces. Dependencies thus point inward to the domain model. The reason this principle is an _inversion_ is because typical architectures promoted by the object-oriented approach (via layer architecture) exhibit dependency topologies where high-level modules consume low-level modules directly. Initially, this dependency graph seems natural, since in expressing domain models in code one inevitably depends upon the constructs of the language. Procedural programming allows dependencies to be encapsulated by procedures. Subtype polymorphism defers procedure implementation. Unfortunately, use of subtype polymorphism (interfaces) is often overlooked for expressing domain dependencies in object-oriented implementations. Given that infrastructure code is typically more voluminous, the focus of the code drifts away from the domain. Domain-Driven Design was devised in part to balance this drift.
+The dependency inversion principle states that high-level modules should be decoupled from low-level modules through abstractions. In other words, the principle states that code should be structured around the problem domain, and the domain should declare dependencies on required infrastructure as interfaces. Dependencies thus point inward to the domain model. The reason this principle is an _inversion_ is because typical architectures promoted by the object-oriented approach (via layer architecture) exhibit dependency graphs where high-level modules consume low-level modules directly. Initially, this dependency graph seems natural, since in expressing domain models in code one inevitably depends upon the constructs of the language. Procedural programming allows dependencies to be encapsulated by procedures. Subtype polymorphism defers procedure implementation. Unfortunately, use of subtype polymorphism (interfaces) is often overlooked for expressing domain dependencies in object-oriented implementations. Given that infrastructure code is typically more voluminous, the focus of the code drifts away from the domain. Domain-Driven Design was devised in part to balance this drift.
 
-As a matter of course, the declarative and side-effect free nature of functional programming provide for dependency inversion. In object-oriented programming, high-level modules depend on infrastructure modules primarily to invoke side-effects. In functional programming, side-effects are more naturally triggered _in response_ to domain behavior as opposed to being _directly invoked_ by domain behavior.
+As a matter of course, the declarative and side-effect free nature of functional programming provide for dependency inversion. In object-oriented programming, high-level modules depend on infrastructure modules primarily to invoke side-effects. In functional programming, side-effects are more naturally triggered _in response_ to domain behavior as opposed to being _directly invoked by_ domain behavior. Thus dependencies become not merely inverted, but pushed to outer layers all together.
 
 
 
@@ -83,28 +85,28 @@ As a matter of course, the declarative and side-effect free nature of functional
 
 ### <a id="aggregate"></a>Aggregate
 
-The concept of the aggregate remains in functional programming however it isn't expressed in terms of a class. Instead, it can be expressed as a quadruple, consisting of a set of states corresponding to the states of the aggregate, a set of commands, a set of events and a function mapping the set of commands onto the set of events given the state. Cohesion is provided by a module mechanism. The benefit of this formal definition is improved composition characteristics. A [functional F# implementation of a domain-driven design](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) illustrates this. There are no dependencies on persistence infrastructure and the same domain model can be used in an event-sourcing implementation, a key-value store as well as an ORM. Moreover, domain event side effects can be managed but outer layers.
+The concept of the aggregate remains in functional programming, however it isn't expressed in terms of a class. Instead, it can be expressed as a quintuple, consisting of a set of aggregate states, an initial state, a set of commands, a set of events and a function mapping the set of commands onto the set of events given a state. Cohesion is provided by a module mechanism. The benefit of this formal definition is improved composition and reuse characteristics. A [functional F# implementation of a domain-driven design](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) illustrates this approach. There are no dependencies on persistence infrastructure and the same domain model can be used in an event-sourcing implementation, a key-value store as well as an ORM. Moreover, domain event side effects can be delegated to outer layers.
 
 ### <a id="immutable-value-objects"></a>Immutable value objects
 
-Functional languages typically provide immutable record (product) types with structural equality which addresses this pattern trivially. Heavy reliance on state in object-oriented programming makes references or pointers a first class citizen rather than the structure of the data itself. In object-oriented programming, the syntactical cost of declaring value object classes as well as difficulties in operating upon them can lead to [primitive obsession](http://c2.com/cgi/wiki?PrimitiveObsession).
+Functional languages typically provide immutable record (product) and union (sum) types with structural equality which addresses this pattern trivially. Heavy reliance on state in object-oriented programming makes references or pointers a first class citizen rather than the structure of the data itself. Furthermore, the syntactical cost of declaring value object classes as well as difficulties in operating upon them can lead to [primitive obsession](http://c2.com/cgi/wiki?PrimitiveObsession).
 
 
 ### <a id="domain-events"></a>Domain Events
 
-In a functional language, a domain event is simply a value evaluated by a function in an aggregate. Instead of relying on a [complex domain events infrastructure](http://www.udidahan.com/2009/06/14/domain-events-salvation/) in an object-oriented language, one can simply pattern-match on a value and invoke desired side-effects in response. This is also illustrated by the [F# DDD example](https://github.com/eulerfx/DDDInventoryItemFSharp).
+In a functional language, a domain event is simply a value returned by a function in an aggregate. Instead of relying on a [complex domain events infrastructure](http://www.udidahan.com/2009/06/14/domain-events-salvation/) in an object-oriented language, one can simply pattern-match on a value and invoke desired side-effects in response. This is illustrated by the [F# DDD example](https://github.com/eulerfx/DDDInventoryItemFSharp).
 
 ### <a id="intention-revealing-interface"></a>Intention-revealing interface
 
-Since functional programming is mored declarative, function names and interfaces tend to be more focused on intent than the underlying mechanics. In addition, interfaces of side-effect-free functions are by nature more revealing because behavior is made explicit through the return type.
+Since functional programming is more declarative, function names and interfaces tend to be more focused on intent instead of the the underlying mechanics. In addition, interfaces of side-effect-free functions are by nature more revealing because behavior is made explicit through the return type. In addition to a purely linguistic benefit of naming with intent, intent is also encoded by the type system.
 
 ### <a id="side-effect-free-functions"></a>Side-effect-free functions
 
-Unlike imperative programming, functional programming makes side effects an explicitly designated exception - side-effect-free functions are the norm.
+Unlike imperative programming, functional programming makes side effects an explicitly designated exception - side-effect-free functions are the norm. This pattern is yet another example of how well crafted object-oritend design converges upon a functional style.
 
 ### <a id="assertions"></a>Assertions
 
-Like many patterns rooted in object-oriented design, assertions purport to wield implicit side-effects.
+Like many patterns rooted in imperative object-oriented design, assertions purport to wield implicit side-effects.
 
 {% blockquote Eric Evans, Domain-Driven Design %}
 When the side effects of operations are only defined implicitly by their implementation,
@@ -113,7 +115,7 @@ understand a program is to trace execution through branching paths. The value of
 encapsulation is lost. The necessity of tracing concrete execution defeats abstraction.
 {% endblockquote %}
 
-As with intention-revealing interfaces, assertions in functional languages are automatically encoded in the return type of a function.
+As with intention-revealing interfaces, assertions in functional languages are automatically encoded in the return type of a function in addition to the function name. In languages with powerful type systems such as F# and to a greater extent Scala, assertions often can be encoded by types directly making invalid states irrepresentable.
 
 ### <a id="conceptual-contours"></a>Conceptual Contours
 
@@ -131,7 +133,7 @@ concept can be lost completely. Half of a uranium atom is not uranium. And of co
 isn't just grain size that counts, but just where the grain runs.
 {% endblockquote %}
 
-In functional languages, conceptual contours emerge naturally, once again due to the declarative and side-effect free nature of the paradigm. Specifically, clients of the domain model can rely on cohesive functionality attained with composition and yet still have access to constituents without breaking encapsulation.
+In functional languages, conceptual contours emerge more readily, once again due to the declarative and side-effect free nature of the paradigm. Specifically, clients of the domain model can rely on cohesive functionality attained with composition and yet still have access to constituents without breaking encapsulation.
 
 ### <a id="closure-of-operations"></a>Closure of operations
 
@@ -146,7 +148,7 @@ under the set of instances of that type. A closed operation provides a high-leve
 interface without introducing any dependency on other concepts.
 {% endblockquote %}
 
-Essentially, closure simplifies reasoning about a problem by restricting the domain of discourse. The [example of a functional implementation of a domain](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) exhibits this characteristic at a fundamental levels. The operation of applying a domain event is closed under the set of domain states. In terms of persistence, this naturally translates to event-sourcing but also supports persistence in a key-value store or ORM without modification as discussed in the _Aggregate_ pattern.
+Essentially, closure simplifies reasoning about a problem by restricting the domain of discourse. The [example of a functional implementation of a domain](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) exhibits this characteristic at a fundamental levels. The operation of applying a domain event is closed under the set of domain states. In terms of persistence, this naturally translates to event-sourcing but also supports persistence in a key-value store or ORM with no required modification.
 
 ### <a id="declarative-design"></a>Declarative Design
 
