@@ -80,29 +80,73 @@ The dependency inversion principle states that high-level modules should be deco
 As a matter of course, the declarative and side-effect free nature of functional programming provide for dependency inversion. In object-oriented programming, high-level modules depend on infrastructure modules primarily to invoke side-effects. In functional programming, side-effects are more naturally triggered _in response_ to domain behavior as opposed to being _directly invoked by_ domain behavior. Thus dependencies become not merely inverted, but pushed to outer layers all together.
 
 
+## <a id="tell-dont-ask"></a>Tell, Don't Ask
+
+The [Tell, Don't Ask principle](http://pragprog.com/articles/tell-dont-ask) states that _you should endeavor to tell objects what you want them to do; do not ask them questions about their state, make a decision, and then tell them what to do._ One strategy for this endeavor is the [Command/Query Separation principle](http://en.wikipedia.org/wiki/Command%E2%80%93query_separation). The paradox however is that in attempting to strengthen object-oriented code these principles propose a segregation of data structure and behavior. Combining data structure to behavior obfuscates the distinction between _observations_ about an object and _behaviors_ supported the object. In functional programming, observations are data structures and behaviors are functions - the distinction is crystal clear. Furthermore, invariants can be declared with types instead of state making invalid states irrepresentable. For example, the iterator referenced in the statement of the pattern can be succinctly represented as:
+
+{% gist 7000167 %}
+
+When an iterator value is of type _End_ there is no syntacticly valid way to obtain the next element. Not only is the code much shorter, it is more robust.
+
+
 
 ## <a id="domain-driven-design"></a>Domain-Driven Design
 
 ### <a id="aggregate"></a>Aggregate
 
-The concept of the aggregate remains in functional programming, however it isn't expressed in terms of a class. Instead, it can be expressed as a quintuple, consisting of a set of aggregate states, an initial state, a set of commands, a set of events and a function mapping the set of commands onto the set of events given a state. Cohesion is provided by a module mechanism. The benefit of this formal definition is improved composition and reuse characteristics. A [functional F# implementation of a domain-driven design](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) illustrates this approach. There are no dependencies on persistence infrastructure and the same domain model can be used in an event-sourcing implementation, a key-value store as well as an ORM. Moreover, domain event side effects can be delegated to outer layers.
+The concept of the aggregate remains in functional programming, however it isn't expressed in terms of a class. Instead, it can be expressed as a quintuple, consisting of a set of aggregate states, an initial state, a set of commands, a set of events and a function mapping the set of commands onto the set of events given a state. Cohesion is provided by a module mechanism. The benefit of this formal definition is improved composition and reuse characteristics. A [functional F# implementation of a domain-driven design](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) illustrates this approach. There are no dependencies on persistence infrastructure and the same domain model can be used in an event-sourcing implementation, a key-value store as well as an ORM. Moreover, domain event side effects can be delegated to outer layers without reliance on side-effects. Contrast this implementation with [an implementation in C#](https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs) which only supports event sourcing.
+
 
 ### <a id="immutable-value-objects"></a>Immutable value objects
 
-Functional languages typically provide immutable record (product) and union (sum) types with structural equality which addresses this pattern trivially. Heavy reliance on state in object-oriented programming makes references or pointers a first class citizen rather than the structure of the data itself. Furthermore, the syntactical cost of declaring value object classes as well as difficulties in operating upon them can lead to [primitive obsession](http://c2.com/cgi/wiki?PrimitiveObsession).
+Functional languages typically provide immutable record (product) and union (sum) types with auto-implemented structural equality which addresses this pattern trivially. Heavy reliance on state in object-oriented programming makes references or pointers a first class citizen rather than the structure of the data itself. Furthermore, the syntactical cost of declaring value object classes as well as difficulties in operating upon them can lead to [primitive obsession](http://c2.com/cgi/wiki?PrimitiveObsession). While it is certainly possible to declare immutable classes in object-oriented languages, heavy use of this concept quite simply calls for better tools.
+
+Contrast
+
+{% gist 6999570 %}
+
+with
+
+{% gist 6999582 %}
 
 
 ### <a id="domain-events"></a>Domain Events
 
-In a functional language, a domain event is simply a value returned by a function in an aggregate. Instead of relying on a [complex domain events infrastructure](http://www.udidahan.com/2009/06/14/domain-events-salvation/) in an object-oriented language, one can simply pattern-match on a value and invoke desired side-effects in response. This is illustrated by the [F# DDD example](https://github.com/eulerfx/DDDInventoryItemFSharp).
+Domain events are a powerful mechanism for keeping domain models encapsulated. This is accomplished by allowing various handlers from outer layers to register for a domain event. The problem with domain events in object-oriented languages is that the [typical implementation](http://www.udidahan.com/2009/06/14/domain-events-salvation/) is complex and relies on side-effects. Event registrations are typically declared in the [composition root](http://blog.ploeh.dk/2011/07/28/CompositionRoot/) and thus it isn't immediately obvious from the perspective of the publisher which handlers will be invoked. In a functional language, a domain event is simply a value returned by a function in an aggregate. Interested parties can be explicitly registered as filters. This technique is illustrated by the [F# DDD example](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs). Returning domain events from aggregate methods in an object-oriented language is prohibitive due to lack of union types and pattern matching.
+
 
 ### <a id="intention-revealing-interface"></a>Intention-revealing interface
 
-Since functional programming is more declarative, function names and interfaces tend to be more focused on intent instead of the the underlying mechanics. In addition, interfaces of side-effect-free functions are by nature more revealing because behavior is made explicit through the return type. In addition to a purely linguistic benefit of naming with intent, intent is also encoded by the type system.
+In imperative object-oriented code, intent leaks through side-effects and through focus on the _how_ rather than the _what_. Always having to bind behavior to data structure can also be problematic.
+
+{% blockquote Eric Evans, Domain-Driven Design %}
+If a developer must consider the implementation of a component in order to use it, the
+value of encapsulation is lost. If someone other than the original developer must infer
+the purpose of an object or operation based on its implementation, that new developer
+may infer a purpose that the operation or class fulfills only by chance. If that was not
+the intent, the code may work for the moment, but the conceptual basis of the design
+will have been corrupted, and the two developers will be working at cross-purposes.
+{% endblockquote %}
+
+Since functional programming is more declarative, function names and interfaces tend to be more focused on intent rather than the the underlying mechanics. In addition, the interfaces of side-effect-free functions are by nature more revealing because behavior is made explicit through the return value. As a result, in addition to a purely linguistic benefit of naming with intent, intent is also encoded by the type system. This is not to say that expressing intent is effortless in functional languages. Only that it is better supported by the paradigm.
+
 
 ### <a id="side-effect-free-functions"></a>Side-effect-free functions
 
-Unlike imperative programming, functional programming makes side effects an explicitly designated exception - side-effect-free functions are the norm. This pattern is yet another example of how well crafted object-oritend design converges upon a functional style.
+The following excerpt is resounding evidence against the imperative object-oriented programming style. Side-effects are in direct opposition to encapsulation yet all too often they are the most handy tool.
+
+{% blockquote Eric Evans, Domain-Driven Design %}
+Interactions of multiple rules or compositions of calculations become extremely
+difficult to predict. The developer calling an operation must understand its
+implementation and the implementation of all its delegations in order to anticipate the
+result. The usefulness of any abstraction of interfaces is limited if the developers are
+forced to pierce the veil. Without safely predictable abstractions, the developers must
+limit the combinatory explosion, placing a low ceiling on the richness of behavior that is
+feasible to build.
+{% endblockquote %}
+
+Unlike imperative programming, functional programming makes side effects an explicitly designated exception - side-effect-free functions are the norm. This pattern is yet another example of how well crafted object-oriented design converges upon a functional style. 
+
 
 ### <a id="assertions"></a>Assertions
 
@@ -116,6 +160,7 @@ encapsulation is lost. The necessity of tracing concrete execution defeats abstr
 {% endblockquote %}
 
 As with intention-revealing interfaces, assertions in functional languages are automatically encoded in the return type of a function in addition to the function name. In languages with powerful type systems such as F# and to a greater extent Scala, assertions often can be encoded by types directly making invalid states irrepresentable.
+
 
 ### <a id="conceptual-contours"></a>Conceptual Contours
 
@@ -135,6 +180,7 @@ isn't just grain size that counts, but just where the grain runs.
 
 In functional languages, conceptual contours emerge more readily, once again due to the declarative and side-effect free nature of the paradigm. Specifically, clients of the domain model can rely on cohesive functionality attained with composition and yet still have access to constituents without breaking encapsulation.
 
+
 ### <a id="closure-of-operations"></a>Closure of operations
 
 Closure of operations illustrates yet another example of coercing composition and structure upon object-oriented designs.
@@ -149,6 +195,7 @@ interface without introducing any dependency on other concepts.
 {% endblockquote %}
 
 Essentially, closure simplifies reasoning about a problem by restricting the domain of discourse. The [example of a functional implementation of a domain](https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs) exhibits this characteristic at a fundamental levels. The operation of applying a domain event is closed under the set of domain states. In terms of persistence, this naturally translates to event-sourcing but also supports persistence in a key-value store or ORM with no required modification.
+
 
 ### <a id="declarative-design"></a>Declarative Design
 
