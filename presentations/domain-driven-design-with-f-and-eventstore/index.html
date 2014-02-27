@@ -46,6 +46,14 @@
     <section>
       <img src="images/ddd-implementation-path.png" alt="Domain-Driven Design Implementation Path" />
     </section>
+    <section>
+      <h2>Functional Themes</h2>
+      <ul>
+        <li>Immutability</li>
+        <li>Purity</li>
+        <li>Composability</li>
+      </ul>
+    </section>
   </section>
 
 
@@ -124,9 +132,9 @@
       <ul>
         <li class="fragment roll-in">Verbose</li>
         <li class="fragment roll-in">Not POCO</li>
-        <li class="fragment roll-in">Double dispatch voodoo</li>
-        <li class="fragment roll-in">Misuse of inheritance</li>
+        <li class="fragment roll-in">Double dispatch DLR voodoo</li>
         <li class="fragment roll-in">Conflation of state and identity</li>
+        <li class="fragment roll-in">Broken composition</li>
       </ul>
     </section>
   </section>
@@ -158,11 +166,11 @@
       <h3>Events & Commands</h3>
       <pre class="fragment roll-in"><code class="no-highlight">    
       type Command = 
-          | Create of string
+          | Create of name:string
           | Deactivate 
 
       type Event = 
-          | Created of string
+          | Created of name:string
           | Deactivated
       </pre></code>
       <h3 class="fragment roll-in">Union Type</h3>
@@ -243,7 +251,7 @@
       <ul class="fragment roll-in">
         <li>Focus on behavior</li>
         <li class="fragment roll-in">Declarative</li>
-        <li class="fragment roll-in">Assertions</li>
+        <li class="fragment roll-in">Assertive</li>
         <li class="fragment roll-in">Side-effect free</li>
         <li class="fragment roll-in">Closure of operations</li>
       </ul>
@@ -259,8 +267,8 @@
       <li class="fragment roll-in">New paradigm</li>
       <li class="fragment roll-in">Different paradigms collide for attention</li>
       <li class="fragment roll-in">Less tooling support</li>
-      <li class="fragment roll-in">C# interop can be less than pleasant</li>
-      <li class="fragment roll-in">Missing some advanced functional features</li>
+      <li class="fragment roll-in">C# interop can be tricky</li>
+      <li class="fragment roll-in">Missing features: type classes, higher kinds, etc.</li>
     </ul>
   </section>
   <!--end Challenges-->
@@ -360,7 +368,8 @@
         <li class="fragment roll-in">State</li>
         <li class="fragment roll-in">Declared with JavaScript</li>
         <li class="fragment roll-in">Simple read-models</li>
-        <li class="fragment roll-in">CEP</li>        
+        <li class="fragment roll-in">CEP</li>
+        <li class="fragment roll-in">Indexing</li>
       </ul>
     </section>
 
