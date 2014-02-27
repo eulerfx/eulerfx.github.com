@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ORM | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/orm/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ORM Lazy Loading Pitfalls]]></title>
+    <link href="http://gorodinski.com/blog/2012/06/16/orm-lazy-loading-pitfalls/"/>
+    <updated>2012-06-16T12:28:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/06/16/orm-lazy-loading-pitfalls</id>
+    <content type="html"><![CDATA[<p><a href="http://en.wikipedia.org/wiki/Object-relational_mapping">Object-relational mappers</a> furnish a mapping layer between <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented code</a> and <a href="http://en.wikipedia.org/wiki/Relational_database">relational databases</a>. ORMs such as NHibernate and Entity Framework support lazy loaded associations which allow the loading of specific subsets of an object graph from an underlying relational store. This is beneficial because an object model can construct an object graph which is unfeasible to contain in main memory in its entirety. Lazy loading can prevent unnecessary data from being loaded and as such it is often presented as a performance optimization technique. This technique however incurs several drawbacks and is limited in its scalability. One drawback is that classes are static declarations and object associations will be accessible regardless of whether they are lazy loaded or eager loaded. As a result, it becomes more difficult to understand code because it isn't immediately certain whether navigating an association will result in a database call behind the scenes. Moreover, care must be taken to ensure that an ORM session is available lest we run into the dreaded <a href="http://docs.jboss.org/hibernate/core/3.5/api/org/hibernate/LazyInitializationException.html">LazyInitializationException</a>. Given that lazy loading is typically implemented using the <a href="http://en.wikipedia.org/wiki/Proxy_pattern">proxy pattern</a>, data access implementation details inevitably and invisibly leak into the rest of the application. In sense these characteristics can be regarded as a violation of the <a href="http://en.wikipedia.org/wiki/Principle_of_least_astonishment">principle of least astonishment</a>.</p>
+
+<!--more-->
+
+
+<p>The problem that lazy loading attempts to address can be illustrated with an analogy to the <a href="http://en.wikipedia.org/wiki/World_Wide_Web">world wide web</a>. The success of the word wide web can be attributed in part to its hyperlinked nature - resources are connected with links allowing for navigation of the web graph loading resources as they are needed. It is unrealistic for the entire web to be loaded into memory, <a href="http://jots.mypopescu.com/post/219463131/google-can-keep-all-web-in-memory">unless you are Google, of course</a>. A relational database can be viewed as a web which ORMs attempt to navigate while at the same time mapping relational data to an object model. The reality is that there is a subtle mismatch between the object model and the relational model. More accurately, No-SQL, corresponding to the object model, and SQL, corresponding to the relational model are <a href="http://bit.ly/KQoKA6">mathematical duals</a> as described by <a href="http://research.microsoft.com/en-us/um/people/emeijer/">Erik Meijer</a> in <a href="http://queue.acm.org/detail.cfm?id=1961297">"A co-Relational Model of Data for Large Shared Data Banks"</a>. <em>(Meijer was also responsible for the <a href="http://msdn.microsoft.com/en-us/data/gg577609.aspx">Reactive Extensions Framework</a> and demonstrating the duality between <a href="http://msdn.microsoft.com/en-us/library/9eekhta0.aspx">IEnumerable<T></a> and <a href="http://msdn.microsoft.com/en-us/library/dd990377.aspx">IObservable<T></a>).</em></p>
+
+<p>In practice, the mismatch exists because SQL is best suited for ad hoc queries and ad hoc field selection whereas OOP is best suited for static models. From the relational perspective there is a tension to select data specifically for a given query which is in turn designed for a specific use case. From the OOP perspective there is a tension to conform the query to an object model which is designed for a variety of use cases. An important observation is that these mapping issues are most prominent on the query side of the equation. Consequently, a technique such as <a href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">read-models</a> can be utilized to mitigate lazy loading issues all together. Instead of devising intricate fetching strategies with lazy loading it is much simpler to create read-model classes purposed toward representing queries for specific use cases. In the <a href="http://martinfowler.com/bliki/CQRS.html">CQRS</a> and <a href="http://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a> world, persistent read-models or projections are a similar technique for implementing queries.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>Lazy loading can bring performance benefits in certain use cases.</li>
+<li>Lazy loading is not a data loading panacea and can lead to unexpected results.</li>
+<li>Lazy loading doesn't scale because it is always restricted by the static nature of the target object model.</li>
+<li>Read-models or projections can be used in place of lazy loading.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

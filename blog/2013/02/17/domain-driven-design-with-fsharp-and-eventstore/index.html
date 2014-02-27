@@ -1,0 +1,277 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Domain-Driven Design (DDD) with F# and EventStore - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="In this post I present a methodology for implementing Domain-Driven Design (DDD) using F# and EventStore. The described approach makes use of &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-17T19:04:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cqrs/'>CQRS</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/eventstore/'>EventStore</a>, <a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/event-sourcing/'>event sourcing</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Domain-Driven Design (DDD) With F# and EventStore</h1>
+	<div class="entry-content"><p><em>In this post I present a methodology for implementing Domain-Driven Design (DDD) using F# and <a href="http://geteventstore.com/">EventStore</a>. The described approach makes use of idiomatic functional constructs, especially where they bring value beyond the traditional object-oriented and procedural paradigms. In this manner, the functional and object-oriented paradigms are contrasted. The natural alignment between functional programming and event sourcing is exploited and implemented with EventStore. Note that this project is a spike and is a work in early stages of progress.</em></p>
+
+<!--more-->
+
+
+<p>Implementing a design in a programming language once the model is conceived in the mind is often trivial by comparison. As a result, over time, the apparent value of a programming language can become diminished. Regardless of the added features in the next version of C# or Java, they all seem like mere syntactic sugar. F# and the functional paradigm have shifted my perspective on this.</p>
+
+<p>The ambitions of both Domain-Driven Design and functional programming can be regarded as one and the same - that of streamlining the representation of domain knowledge in a formal system with the goal of enabling automation and integration. Functional programming emphasizes declarativeness with use of functions, expressions, immutability and algebraic data structures. These building blocks can be used for both the expression of domain knowledge and the furnishing of a framework for persistent execution of use cases.</p>
+
+<p>The example in this post is based on <a href="https://github.com/gregoryyoung/m-r">SimpleCQRS</a> by <a href="http://goodenoughsoftware.net/">Greg Young</a>. An existing F# implementation of this project is <a href="https://github.com/Thorium/SimpleCQRS-FSharp">SimpleCQRS-FSharp</a> by <a href="https://github.com/Thorium">Tuomas Hietanen</a>. A more idiomatic F# implementation is <a href="https://github.com/thinkbeforecoding/m-r">FsSimpleCQRS</a> by <a href="https://github.com/thinkbeforecoding">Jérémie Chassaing</a>. The example in this post aims to further free the implementation from establishmentarianist object-oriented practices. In fact, the use of classes is contained to integrations with the serialization library and the EventStore API. Classes were avoided in order to explore the benefits and drawbacks of the alternative. Caution was used to prevent focus on technology for the sake of technology alone. As such, the uses of functional techniques are entirely justified.</p>
+
+<h2>Analysis</h2>
+
+<p>The core of an OOP DDD implementation consists of classes which represent entities, value objects and domain services. These elements embody the informational core of the project. The remaining components integrate the informational core with infrastructure that connects the domain to databases for persistence, UIs for user interaction and other services.</p>
+
+<h3>Domain Module</h3>
+
+<p>The informational core in this example is contained in the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">InventoryItem</a> module:</p>
+
+<div><script src='https://gist.github.com/4975035.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975035&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>This single F# source file contains the representation of <em>InventoryItem</em> aggregate state as well as the commands and events associated with the aggregate. Together, these elements capture the entirety of the core domain logic associated with an inventory item. Compared to both the original C# implementation and the referenced F# implementations, this implementation attains a greater degree of encapsulation. By looking at this module alone one could glean an understanding of the functionality of the domain. Furthermore, the use of discriminated unions ensures that all commands and events are explicitly handled with static verification. Unions bring the additional benefit of a uniform interface which is exploited by the <em>Aggregate</em> module described in the next section.</p>
+
+<p>There is no need for an aggregate base class because persistence of state is delegated to infrastructural components defined in outer layers. The identity value is taken out of the domain module because the domain logic itself has no need for it. This allows the identity value type to be defined in outer layers. Once we let go of the aging object-oriented and procedural practices we observe that they are only one of the many options.</p>
+
+<h3>Aggregate Module</h3>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">Aggregate</a> module declares an abstraction of an aggregate and uses the abstraction to define a persistent command handler:</p>
+
+<div><script src='https://gist.github.com/4975076.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975076&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The aggregate abstraction is made possible by the use of a uniform interface for executing commands upon aggregate state. Application of persisted events is made with the <a href="http://en.wikipedia.org/wiki/Fold_(higher-order_function)">fold higher-order function</a> - another staple of functional programming. The <a href="https://github.com/eulerfx/DDDInventoryItemFSharpW/blob/master/DDDInventoryItemFSharp/IntegrationTests.fs">IntegrationTests</a> module employs the aggregate module to define a command handler by wiring the EventStore and the serialization module.</p>
+
+<h3>EventStore Module</h3>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">EventStore</a> module contains the integration with EventStore. This initial implementation is specific to <em>InventoryItem</em> however it can be easily generalized by generalizing the serializer.</p>
+
+<h2>Summary</h2>
+
+<p>The F# implementation in this post is more concise, more encapsulated, more declarative, more statically verified, and contains far less noise. I would argue that it is also more readable. Explicit factoring by functions elegantly replaces implicit factoring by class hierarchies. This establishes a dependency topology where the informational core is at the center with infrastructural and state related components orbiting in outer layers.</p>
+
+<p>In subsequent iterations, I will expand this example to contain query support via projections and read-models as well as a service layer. A more complex domain will further test this methodology. Specifically, I would like to explore the viability of these techniques with the introduction of behaviors bearing dependencies on domain services and behaviors involving complex invariants. Moreover, I would like to dig deeper into the use of F# types for representing domain state as described in <a href="http://fsharpforfunandprofit.com/series/designing-with-types.html">The Designing with types series</a>. The applicability of this approach within scenarios not employing event sourcing is also of interest. F# paves the way for a language-oriented programming paradigm. In particular, computation expressions support the redefinition of control flow constructs in arbitrary contexts. This technique has the potential to define a persistent context for workflows which execute domain logic. This will allow further isolation and encapsulation of the informational domain core.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/';
+        var disqus_url = 'http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

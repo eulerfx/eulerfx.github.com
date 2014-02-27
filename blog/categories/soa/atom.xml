@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: SOA | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/soa/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Request/Acknowledge/Poll with ASP.NET WebAPI and NServiceBus]]></title>
+    <link href="http://gorodinski.com/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/"/>
+    <updated>2012-07-13T17:26:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi</id>
+    <content type="html"><![CDATA[<p><a href="http://servicedesignpatterns.com/ClientServiceInteractions/RequestAcknowledge">Request/Acknowledge</a> is a service design pattern wherein clients receive an acknowledgement as an immediate response while the original request is processed in the background. The acknowledgement typically contains a token for identifying the background task which can in turn be used to query the processing status of the task. This pattern is employed to reduce <a href="http://bit.ly/ricVKj">temporal coupling</a> which is especially critical for requests requiring a long processing times. Instead of having the client wait for the final response a pull method for querying the status of the task or a push method for notifying the client is implemented. Similarly, the <a href="http://msdn.microsoft.com/en-us/library/wewwczdw.aspx">event-based asynchronous pattern</a> in <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">OOP</a> shares the goal of reducing wasted wait time. Request/Acknowledge/Poll is a variation of this pattern wherein a method is provided for the client to query for the status of the task being processed. The other variation is Request/Acknowledge/Callback wherein a client is notified of task status immediately via callback mechanism. The callback variation ensures that the client receives task status information as it is generated but can be a burden to implement because the client must support the callback mechanism. Furthermore, it places the additional burden of tracking and invoking callbacks upon the server. The poll variation is simpler to implement and keeps the client in control of retrieving status information as it is needed.</p>
+
+<!--more-->
+
+
+<p>The pattern consists of the following roles - the client, the service, the message queue, the request processor and the status repository. The client sends the initial request and polls the service for status information. The service receives the request, relays it to a message queue and returns an acknowledgement which typically contains a token to be used for identifying the task in subsequent status queries. The message queue serves to dismantle the temporal coupling between the sending of the request and receipt of the response. The request processor continuously dequeues messages from the queue and performs the actual processing of the request. The status repository is used to store information about the processing status of the task for retrieval by the client via the same service that accepted the initial request or by another service. Various frameworks can be utilized to implement the roles of the request/acknowledge/poll pattern and on the .NET platform a popular combination is <a href="http://www.asp.net/web-api">ASP.NET WebAPI</a> for the service, <a href="http://nservicebus.com/">NServiceBus</a> for messaging and the request processor and a dead simple implementation of the status repository backed by SQL Server or a plain old file system.</p>
+
+<p><strong> Example Domain </strong></p>
+
+<p>A specific example based on a production system is in order. Consider the domain of an online retailer which sources products from various suppliers, optimizes the content and pricing and posts listings on sales channels. Product information is retrieved from the suppliers website, web service or a flat file. After import, product data is sanitized, optimized and merged with existing data. The import process is seeded by a list of product <a href="http://en.wikipedia.org/wiki/Stock-keeping_unit">SKUs</a> provided by the supplier. As one can imagine, importing a product is a long running operation consisting of several steps and thus importing multiple products is also a long running operation. Furthermore, the import of multiple products bears a structure shared by processes where an identical operation is to be repeated for a set of items. The status of such processes typically contains the total number of items to be processed, the number of items processed so far as well as the number of errors.</p>
+
+<p><strong> The service with ASP.NET WebAPI </strong></p>
+
+<p>The service of the request/acknowledge pattern is trivial to implement because it serves a delegating role - a gateway between the client and the messaging infrastructure as well as the status repository. The ASP.NET WebAPI is an abstraction over <a href="http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a> which has specifications to fulfill the use case at hand - namely the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">202 Accepted</a> response status code as well as the <a href="http://en.wikipedia.org/wiki/HTTP_location">Location header</a> or <a href="http://www.w3.org/Protocols/9707-link-header.html">Link header</a>. Status code 202 indicates to clients that "the request has been accepted for processing, but the processing has not been completed.". The location or link header can be used to specify the location of the resource representing the status of the process.</p>
+
+<p><div><script src='https://gist.github.com/3157819.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3157819&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In the sample, the import controller implements a controller resource which accepts an import request, generates a unique identifier for the task and creates an internal message to be sent with NServiceBus. Additionally, the service can handle authorization and validation. The model representing the import request, <strong>ImportRequestModel</strong>, is nearly identical to the internal command message, <strong>ImportProducts</strong>, however it is best to implement them as separate classes because they have slightly different roles and are handled by different frameworks with different constraints. The task status resource referenced in the location header can also be implemented with the WebAPI.</p>
+
+<p><strong> The queue and request processor with NServiceBus </strong></p>
+
+<p>An asynchronous message queue decouples the sender of a message from the receiver while ensuring message delivery despite downtime of either one. NServiceBus is an abstraction over an underlying messaging technology, typically <a href="http://en.wikipedia.org/wiki/Microsoft_Message_Queuing">MSMQ</a>. While there is a managed client for MSMQ, NServiceBus provides several industrial strength facilities beyond MSMQ that will help make the system production ready - namely <a href="http://nservicebus.com/pubsub.aspx">pub/sub</a> and <a href="http://nservicebus.com/Sagas.aspx">sagas</a>. For the request/acknowledge pattern, NServiceBus serves as a framework for implementing the queue and request processor roles. The <strong>IBus</strong> interface encapsulates the queue and a class implementing <strong>IHandleMessages</strong> will be the request processor. A saga can be used to implement the processing "loop" for importing multiple products. This saga will handle the <strong>ImportProducts</strong> message and send individual <strong>ImportProduct</strong> messages to the appropriate endpoint. This endpoint, also implemented with NServiceBus, will handle individual <strong>ImportProduct</strong> messages and publish an event upon completion or failure. The aforementioned coordinating saga will subscribe to these events in order to manage status information for the import task as a whole. The following is a sample implementation.</p>
+
+<p><div><script src='https://gist.github.com/3161028.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3161028&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This saga implements the request processor with the method for handling the <strong>ImportProducts</strong> message. Furthermore, the saga entity <strong>ImportSagaData</strong> is used to track the processing status of the import task. Accordingly, this data is used to update the status of the task with the status repository. In this way, the saga coordinates the import task effectively implementing a distributed, fault tolerant processing loop. The saga data itself can be used instead of the status repository however the status repository is more convenient for a few reasons. First, the saga method <strong>MarkAsComplete</strong> deletes the saga data entity making the status unaccessible after the task complete. While it is possible to omit the call to the method, leaving it serves as documentation. Second, the saga data is persisted with the <strong>ISagaPersister</strong> which creates a dependency on the specific implementation. Third, the saga entity isn't accessible until the initial message completes processing and the entity is persisted. Depending on the size of the task, there may be a number of products that have already been imported at that point without the status being updated.</p>
+
+<p>Utilization of a durable messaging technology, such as MSMQ, makes the system resilient to crashes and downtime all while normalizing the load curve. The endpoint which handles individual <strong>ImportProduct</strong> messages can go down in the middle of an import and pick up where it left off once it is back up. Furthermore, with the use of the NServiceBus <a href="http://nservicebus.com/Distributor.aspx">distributor</a>, processing can be scaled out transparently. A caveat in implementing the coordinating saga with NServiceBus v2.6 and below is that the default NHibernate based saga persister <a href="http://tech.groups.yahoo.com/group/nservicebus/message/12975">isn't thread safe</a> which means that the endpoint can only have a single worker thread. Given that the work performed by this saga is relatively lightweight this isn't usually an issue.</p>
+
+<p><strong> The status repository </strong></p>
+
+<p>The status repository can be implemented in a variety of ways and is hardly worth a mention. As a tangential aside, like the ones so forever tantalizing for software engineers, <a href="http://redis.io/">Redis</a> presents an attractive solution for the status repository because of its data structural commands such as <a href="http://redis.io/commands/INCR">INCR</a>. The status repository interface used in the example follows.</p>
+
+<p><div><script src='https://gist.github.com/3161060.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3161060&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p><strong> Summary </strong></p>
+
+<p>As demonstrated, it is straightforward to implement the request/acknowledge pattern with the ASP.NET WebAPI and NServiceBus. This pattern allows clients to invoke long running operations without having to be bound to the processing time. The service role is implemented with ASP.NET WebAPI. The queue and request processor roles are implemented with an NServiceBus saga, which also coordinates the processing loop. Beyond the elimination of temporal coupling the described system is resilient and horizontally scalable. Despite their conveniences, we aren't bound to any particular framework or platform - there exist a plethora of messaging technologies and web service frameworks that can fulfill the required roles. For reference, queuing can be supported by <a href="http://masstransit-project.com/">MassTransit</a> over <a href="http://www.rabbitmq.com/">RabbitMQ</a> or <a href="http://activemq.apache.org/">ActiveMQ</a>. <a href="http://en.wikipedia.org/wiki/Java_API_for_XML_Web_Services">JAX</a> on the Java platform can be used in place of ASP.NET WebAPI. Most importantly, one must understand the role each technology plays and envision the system as being composed with these roles. Care must be taken to ensure that the system isn't deeply locked into any particular vendor.</p>
+
+<p><strong> Resources </strong></p>
+
+<ul>
+<li><a href="http://www.amazon.com/Service-Design-Patterns-Fundamental-Solutions/dp/032154420X">Service Design Patterns: Fundamental Design Solutions for SOAP/WSDL and RESTful Web Services</a></li>
+<li><a href="http://www.amazon.com/RESTful-Web-Services-Cookbook-Scalability/dp/0596801688/">RESTful Web Services Cookbook: Solutions for Improving Scalability and Simplicity</a></li>
+<li><a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf">SAGAS</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bounded Contexts as a strategic pattern beyond DDD]]></title>
+    <link href="http://gorodinski.com/blog/2012/04/03/bounded-contexts-as-a-strategic-pattern-beyond-ddd/"/>
+    <updated>2012-04-03T23:15:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/04/03/bounded-contexts-as-a-strategic-pattern-beyond-ddd</id>
+    <content type="html"><![CDATA[<p>The term bounded context (BC) was introduced by Eric Evans in the Domain-Driven Design <a href="http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/ref=sr_1_1?ie=UTF8&amp;qid=1332969996&amp;sr=8-1">"blue book"</a> Part IV <em>Strategic Design</em>,
+Chapter 14 <em>Maintaining Model Integrity</em>.</p>
+
+<!--more-->
+
+
+<h2>Defining Bounded Contexts</h2>
+
+<p>A definition from the book:</p>
+
+<p><blockquote><p>A BOUNDED CONTEXT delimits the applicability of a particular model so that team members have a clear and shared understanding of<br/>what has to be consistent and how it relates to other CONTEXTS. Within that CONTEXT, work to keep the model logically unified,<br/>but do not worry about applicability outside those bounds. In other CONTEXTS, other models apply, with differences in terminology,<br/>in concepts and rules, and in dialects of the UBIQUITOUS LANGUAGE.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>A domain model is thus valid only within a context and may not and more importantly should not be applicable to another context. All too often I and many other developers fall into the trap of combining disparate contexts. What follows are attempts to coerce a single model to fit requirements of disparate contexts. This comes at no surprise given an inherent tendency to follow the <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a> principle. This principle has value and the value is immediately evident in the most basic factoring of code, such as extracting a set of instructions into a sub-routine. DRY however is very much a double edged sword and can lead one astray when applied incorrectly. As easy as it is to gather value from this principle is to apply it incorrectly. Incorrect application often occurs when subtle nuances in the model are ignored, when responsibilities are conflated. Indeed, it is the proper division of responsibilities that leads to breakthroughs in the model. Furthermore, in practice, it is often easier and more rewarding to unify different parts of the model than it is to divide one part into two. For an in-depth discussion on the pitfalls of reuse, take a look at <a href="http://www.udidahan.com/2009/06/07/the-fallacy-of-reuse/">The Fallacy of Reuse</a> by Udi Dahan.</p>
+
+<p>Bounded contexts provide encapsulation much like methods and objects do, but at a higher architectural level and should therefore be a principal top-level architectural concern. <a href="http://en.wikipedia.org/wiki/Structured_programming">Structured programming</a> provided basic abstraction mechanisms to assist in organizing code and reasoning about code. <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">Object orientation</a> continued this paradigm by allowing the packaging of code and data into objects. Similarly, the <a href="http://en.wikipedia.org/wiki/Unix_philosophy">UNIX philosophy</a> emphasized small and well defined modules within a interconnected ecosystem. <a href="http://en.wikipedia.org/wiki/Service-oriented_architecture">SOA</a> purported to address the need for even higher levels of organization with services. The unifying theme is that of encapsulation and bounded contexts are no different.</p>
+
+<p>A distinguishing characteristic of bounded contexts, however, is their alignment with the domain instead of a technical axis. And this is quite becoming since all code is designed to solve problems in some domain. Thus bounded contexts emerge as a high level abstraction mechanism. Bounded contexts are not artifacts of programming languages or frameworks, they are artifacts of the very essence of how humans think. Indeed part of the SOA vision was alignment between business and IT. However, this was somehow lost amidst an overzealous fixation on the technology, the XSD schemas, the governance guidelines. Bounded contexts and Domain-Driven design shift the focus back on the domain.</p>
+
+<p>The importance of isolating appropriate bounded contexts in a domain cannot be overstated. Domain boundaries will determine characteristics of the model, but also delimit consistency boundaries and govern solution/project structure in the IDE. Few developers will argue against smaller and more focused solutions, projects, and classes.</p>
+
+<h2>Designing Bounded Contexts</h2>
+
+<p>To shamelessly re-quote <a href="http://mitpress.mit.edu/sicp/full-text/book/book.html">SICP</a>:</p>
+
+<p><blockquote><p>The acts of the mind, wherein it exerts its power over simple ideas, are chiefly these three: 1. Combining several simple ideas into one compound one, and thus all complex ideas are made. 2. The second is bringing two ideas, whether simple or complex, together, and setting them by one another so as to take a view of them at once, without uniting them into one, by which it gets all its ideas of relations. 3. The third is separating them from all other ideas that accompany them in their real existence: this is called abstraction, and thus all its general ideas are made.</p><footer><strong>John Locke</strong> <cite>An Essay Concerning Human Understanding (1690)</cite></footer></blockquote></p>
+
+<p>Proper delineation of boundaries is not an exact science and follows an organic progression through iterations and continuous integration just as the rest of the development process. Developers can apply <a href="http://en.wikipedia.org/wiki/GRASP_(object-oriented_design)">GRASP</a> guidelines to the design of bounded contexts, especially concepts of low coupling, high cohesion and the information expert pattern. The <a href="http://en.wikipedia.org/wiki/Dependency_inversion_principle">dependency-inversion principle</a> states <em>Abstractions should not depend upon details. Details should depend upon abstractions.</em>. This is yet another variation on the central theme of aligning code artifacts around the domain.</p>
+
+<p>Unfortunately, these guidelines are excessively declarative and provide little insight into the how. Much like the mathematical statement that the square root of 2 is a number wich when squared equals 2 provides little insight into <a href="http://en.wikipedia.org/wiki/Newton's_method">Newton's method</a>. Therefore, the structure of a bounded context must be distilled from interactions with subject matter experts, from refinement of the ubiquitous language and a process of continuous adaptation. From a software engineering perspective, developers and architects should also take care to make the cost of creating new bounded contexts as low as possible to prevent friction. Friction can cause teams to avoid bounded contexts in the first place.</p>
+
+<h2>Summary</h2>
+
+<p>The bounded context is a strategic pattern that was originally devised for Domain-Driven Design but is applicable regardless of methodology and technology. It maps to the natural human instinct to partition structures into composites and should be the cornerstone of the modeling and design phase. Bounded contexts make business and IT alignment explicit and relieved of technical concerns. In this way, they reinvigorate the original SOA vision. However, patterns for designing bounded contexts are still in their infancy.</p>
+
+<h2>Resources</h2>
+
+<ul>
+<li><a href="http://www.infoq.com/articles/ddd-contextmapping">This InfoQ article</a> provides a great example of bounded contexts and context mapping.</li>
+<li><a href="https://twitter.com/vaughnvernon">Vaughn Vernon's</a> upcoming book strives to place initial focus on bounded contexts and the rest of the strategic DDD patterns which will make a great addition to the existing knowledge base.</li>
+<li><a href="https://twitter.com/abdullin">Rinat Abdullin's</a> <a href="http://abdullin.com/journal/2012/3/31/anatomy-of-distributed-system-a-la-lokad.html"><em>Anatomy of Distributed System a la Lokad</em></a> article expounds on bounded contexts as a modelling tool.</li>
+<li><a href="http://martinfowler.com/">Martin Fowler's</a> vintage <a href="http://www.amazon.com/Analysis-Patterns-Reusable-Object-Models/dp/0201895420"><em>Analysis Patterns</em></a> is a wonderful source of inspiration for analyzing domains.</li>
+<li>In <a href="http://www.infoq.com/interviews/greg-young-ddd">this InfoQ interview</a> <a href="https://twitter.com/gregyoung">Greg Young</a> emphasizes the importance of bounded contexts.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: C# | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/c-/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Read-models as a tactical pattern in Domain-Driven Design (DDD)]]></title>
+    <link href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/"/>
+    <updated>2012-04-25T22:18:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd</id>
+    <content type="html"><![CDATA[<p>Domain-Driven Design espouses the <a href="http://domaindrivendesign.org/node/123">repository pattern</a> as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to <a href="http://domaindrivendesign.org/node/88">aggregate</a> roots, <a href="http://domaindrivendesign.org/node/109">entities</a> and less frequently to <a href="http://domaindrivendesign.org/node/135">value objects</a>. Eric Evans attributes another potential responsibility to a repository in the blue book:</p>
+
+<!--more-->
+
+
+<p><blockquote><p>Although most queries return an object or a collection of objects, it also fits within the concept to return some types of summary calculations, such as an object count, or a sum of a numerical attribute that was intended by the model to be tallied.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>This particular responsibility is not well explored or developed and as a result is often overlooked in practice. The basic premise of this approach is to leverage the underlying database, a relational database in particular, for what it's good at - namely aggregation, filtering, and projection. The requirement for this type of summarizing information depends on the project, but is commonplace in applications involving any type of GUI.</p>
+
+<p>Consider the standard order model with an order entity containing a collection of line items. The order total is a sum of the constituent line item totals and the tax and shipping charges. In C# the corresponding classes might look something like this:</p>
+
+<p><div><script src='https://gist.github.com/2486326.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2486326&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p><em>Note that much of the behavior and constraint checking have been omitted for brevity.</em></p>
+
+<p>This model appropriately represents the domain at hand. The only real behavior on this model is the calculation of the total. A typical application requirement calls for a view that displays a list of recent orders showing the order number, date and total. To support this, a repository contract might look like this:</p>
+
+<p><div><script src='https://gist.github.com/2486375.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2486375&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>From a client perspective the repository contract satisfies the requirements. However if implemented using an <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a> such as NHibernate certain caveats arise even in this simplistic scenario. The relationship between an order and an order line item is one-to-many and in a relational model there would be a table for the orders and a table for the order line items related by a foreign key. When retrieving an order entity, the repository must also retrieve the order line items in order for the entity to be complete. This can be achieved using several fetching strategies, including joining the order line items table or issuing a second select statement to the database. For retrieving a single instance of an order entity this approach is acceptable however for collections of orders, as in the case of the GetMostRecent method on the order repository, this results in the <a href="http://ayende.com/blog/1328/combating-the-select-n-1-problem-in-nhibernate">select N+1 problem</a>. While NHibernate and other ORMs offer solutions to this problem, these solutions are relatively complex and can become a performance burden for both the database and the ORM. An alternative solution, one that is accordance with <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a>, is to create an aggregating database query and map the results to simple, read-only objects:</p>
+
+<p><div><script src='https://gist.github.com/2495688.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2495688&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>One could also use the projection facilities provided by NHibernate. Regardless, the target class should match the shape of the query:</p>
+
+<p><div><script src='https://gist.github.com/2495699.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2495699&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Note that this class contains no behavior and is read only. Instances of this class are meant for read-only purposes such as for display in a GUI. Accordingly, these types of classes are called read-models. Alternative names for these types of objects are reporting objects, views, projections and probably something else I'm not thinking of at the moment.</p>
+
+<p>This trivial pattern boasts several advantages. The first of course is performance since relational databases are very adept at these types of queries. Next is simplicity - there is no simpler way of pulling data from a database - no ORM, no mapping magic, no problem! Furthermore, the developer isn't faced with coercing the order entity class to match the shape of the query at hand. <strong>This is perhaps the central advantage from the DDD perspective - keeping the aggregates and entities pure and <a href="http://en.wikipedia.org/wiki/Occam's_razor">Occam-esque</a>.</strong> <a href="http://dddcommunity.org/library/vernon_2011">Recent DDD guidance</a> suggests that aggregates should reference other aggregates using only the <a href="http://martinfowler.com/eaaCatalog/identityField.html">identity</a> instead of direct association. This also simplifies the model and transitively the mappings. What if, however, a particular view requires the display of data contained in the associated aggregate? The aggregate itself can no longer be used but this is where the read-model pattern comes to the rescue. Conversely to the read-model, the write-model aggregate only need to be retrievable using its identity in which case an ORM is a suitable solution due to several convenient accommodations such as change tracking, generated SQL, concurrency control, etc.</p>
+
+<p>The read-model pattern can be compared to the notion of <a href="http://martinfowler.com/articles/consumerDrivenContracts.html">consumer-driven contracts</a>. Additionally, the read-model pattern can be viewed as a special case of <a href="http://martinfowler.com/bliki/CQRS.html">CQRS</a> in that the model used for querying is different from the model used for processing commands. This is not full-fledged CQRS because read-models are pulled from the same data source as the write model. There is no requirement for a synchronization mechanism and the affiliated consistency and cache control concerns. However, the option remains to implement the synchronization mechanism at a later time when performance tests clamor for it. In CQRS, these read-models are usually called persistent read-models and are generated by event projections. The CQRS foreshadow also positions read-models as an intermediary refactoring step toward a CQRS implementation. For in depth treatment on CQRS look no further than <a href="http://abdullin.com/">Rinat Abdullin</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Services in Domain-Driven Design (DDD)]]></title>
+    <link href="http://gorodinski.com/blog/2012/04/14/services-in-domain-driven-design-ddd/"/>
+    <updated>2012-04-14T22:07:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/04/14/services-in-domain-driven-design-ddd</id>
+    <content type="html"><![CDATA[<p><strong>UPDATE:</strong> <em><a href="https://twitter.com/vaughnvernon">Vaughn Vernon</a> provided some very valuable insight into the differences between application services and domain services as well as emphasizing the Hexagonal architectural style.</em></p>
+
+<p>The term service is overloaded and its meaning takes on different shades depending on the context. As a result, there is a cloud of confusion surrounding the notion of services as one tries to distinguish between application services, domain services, infrastructural services, SOA services, etc. In all these cases the term "service" is valid, however the roles are different and can span all layers of an application.</p>
+
+<!--more-->
+
+
+<p>A service is indeed a somewhat generic title for an application building block because it implies very little. First and foremost, a service implies a client the requests of which the service is designed to satisfy. Another characteristic of a service operation is that of input and output - arguments and provided as input to an operation and a result is returned. Beyond this implication are usually assumptions of statelessness and the idea of <a href="http://davidhayden.com/blog/dave/archive/2005/09/18/2476.aspx">pure fabrication</a> according to <a href="http://en.wikipedia.org/wiki/GRASP_(object-oriented_design)">GRASP</a>.</p>
+
+<p>Eric Evans introduces the notion of a service as a building block within Domain-Driven Design in the blue book:</p>
+
+<p><blockquote><p>When a significant process or transformation in the domain is not a natural responsibility of an ENTITY or VALUE OBJECT, add an operation to the model as standalone interface declared as a SERVICE. Define the interface in terms of the language of the model and make sure the operation name is part of the UBIQUITOUS LANGUAGE. Make the SERVICE stateless.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>These types of services can be identified more specifically as domain services and are part of the domain layer. Domain services are often overlooked as key building blocks, overshadowed by focus on entities and value objects. On the other end of the spectrum is over-utilization of domain services leading to an <a href="http://martinfowler.com/bliki/AnemicDomainModel.html">anemic domain model</a> in what essentially becomes a separation of data, stored in entities, and behaviors, provided by the service. This can become an anti-pattern because the <a href="http://en.wikipedia.org/wiki/GRASP_(object-oriented_design)#Information_Expert">information expert</a> aspect of OOP is lost.</p>
+
+<p>Domain services are different from infrastructural services because they embed and operate upon domain concepts and are part of the ubiquitous language. Infrastructural services are instead focused encapsulating the "plumbing" requirements of an application; usually <a href="http://en.wikipedia.org/wiki/Input/output">IO</a> concerns such as file system access, database access, email, etc. For example, a common application requirement is the sending of an email notification informing interested parties about some event. The concept of the <a href="http://www.udidahan.com/2009/06/14/domain-events-salvation/">event</a> exists in the domain layer and the domain layer determines when the event should be raised. An email infrastructure service can handle a domain event by generating and transmitting an appropriate email message. Another infrastructural service can handle the same event and send a notification via SMS or other channel. The domain layer doesn't care about the specifics or how an event notification is delivered, it only cares about raising the event. A repository implementation is also an example of an infrastructural service. The interface is declared in the domain layer and is an important aspect of the domain. However, the specifics of the communication with durable storage mechanisms are handled in the infrastructure layer.</p>
+
+<p>An application service has an important and distinguishing role - it provides a hosting environment for the execution of domain logic. As such, it is a convenient point to inject various <a href="http://martinfowler.com/eaaCatalog/gateway.html">gateways</a> such as a <a href="http://martinfowler.com/eaaCatalog/repository.html">repository</a> or wrappers for external services. A common problem in applying DDD is when an entity requires access to data in a repository or other gateway in order to carry out a business operation. One solution is to inject repository dependencies directly into the entity, however this is often frowned upon. One reason for this is because it requires the plain-old-(C#, Java, etc...) objects implementing entities to be part of an application dependency graph. Another reason is that is makes reasoning about the behavior of entities more difficult since the <a href="http://en.wikipedia.org/wiki/Single_responsibility_principle">Single-Responsibility Principle</a> is violated. A better solution is to have an application service retrieve the information required by an entity, effectively setting up the execution environment, and provide it to the entity.</p>
+
+<p>In addition to being a host, the purpose of an application service is to expose the functionality of the domain to other application layers as an API. This attributes an encapsulating role to the service - the service is an instance of the <a href="http://en.wikipedia.org/wiki/Facade_pattern">facade pattern</a>. Exposing objects directly can be cumbersome and lead to <a href="http://www.joelonsoftware.com/articles/LeakyAbstractions.html">leaky abstractions</a> especially if interactions are distributed in nature. In this way, an application service also fulfills a translation role - that of translating between external commands and the underlying domain object model. The importance of this translation must not be neglected. For example, a human requested command can be something like "transfer $5 from account A to account B". There are a number of steps required for a computer to fulfill that command and we would never expect a human to issue a more specific command such as "load an account entity with id A from account repository, load an account entity with id B from account repository, call the debit method on the account A entity...". This is a job best suited for an application service.</p>
+
+<p>The following is an example application service from a purchase order domain. The example also contains a <em>PurchaseOrder</em> aggregate, an <em>Invoice</em> value object and a repository. (Please note that the code has been simplified for explanation purposes).</p>
+
+<p><div><script src='https://gist.github.com/2411363.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2411363&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>There are many refinements that need to be made to this code for it to be of production-ready caliber however it serves well to illustrate the purpose of an application service. The interface <em>IInvoiceNumberGenerator</em> is indeed a domain service because it encapsulates domain logic, namely the generation of invoice numbers. This process is something that can be discussed with domain experts and users of the system. After all, the purpose of the generator is to make use of invoice numbers of palatable. By contrast, the <em>PurchaseOrderService</em> application service performs technical tasks which domain experts aren't interested in.</p>
+
+<p>The differences between a domain service and an application services are subtle but critical:</p>
+
+<ul>
+<li>Domain services are very granular where as application services are a facade purposed with providing an API.</li>
+<li>Domain services contain domain logic that can't naturally be placed in an entity or value object whereas application services orchestrate the execution of domain logic and don't themselves implement any domain logic.</li>
+<li>Domain service methods can have other domain elements as operands and return values whereas application services operate upon trivial operands such as identity values and primitive data structures.</li>
+<li>Application services declare dependencies on infrastructural services required to execute domain logic.</li>
+<li>Command handlers are a flavor of application services which focus on handling a single command typically in a CQRS architecture.</li>
+</ul>
+
+
+<p>In a complete application, a domain model does not stand alone. Applications with GUIs contain a presentation layer which facilitates interaction between the domain and a user. The same application may wish to expose its functionality as a set of REST resources or WCF services or SOA services. In Alistair Cockburn's <a href="http://alistair.cockburn.us/Hexagonal+architecture">Hexagonal Architecture</a>, the presentation layer, the REST resource and the WCF service are adapters which adapt the core application to specific ports. Application services form the API which encapsulate the application core and in the case of Domain-Driven Design they ultimately orchestrate and delegate to the underlying entities, value objects and domain services. The application service isn't strictly necessary since each adapter implementation can orchestrate the required domain elements, however encapsulating the domain layer provides a fitting demarcation allowing each component of the entire application to be viewed in isolation. Conversely, the DDD-based domain layer isn't strictly necessary and the application service could delegate to a <a href="http://martinfowler.com/eaaCatalog/transactionScript.html">transaction script</a>. As seen from this perspective, DDD is an implementation detail.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Retry with the .NET Task Parallel Library (TPL)]]></title>
+    <link href="http://gorodinski.com/blog/2012/03/22/retry-with-the-net-task-parallel-library-tpl/"/>
+    <updated>2012-03-22T23:06:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/03/22/retry-with-the-net-task-parallel-library-tpl</id>
+    <content type="html"><![CDATA[<p>The <a href="http://msdn.microsoft.com/en-us/library/dd460717.aspx">.NET Task Parallel Library</a> simplifies development of and reasoning about asynchronous code.
+However, working with <a href="http://msdn.microsoft.com/en-us/library/system.threading.tasks.task.aspx">Task</a> instances instead of blocking method results can still be difficult and un-intuitive.
+One example where this is true is in implementing retry logic for functions that return Task instances.
+Consider this helper function which retries a provided function a specified number of times:</p>
+
+<!--more-->
+
+
+<p><div><script src='https://gist.github.com/2161734.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2161734&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This was a response to <a href="http://stackoverflow.com/questions/6090026/how-to-implement-retry-logic-with-task-parallel-librarytpl">this Stackoverflow.com question</a> and works as expected for blocking methods.
+However, suppose you have a function which returns a Task<TResult> and you would like to decorate it with retry logic as well.
+The above implementation won't work because it will only handle exceptions that are thrown by calling the task returning function,
+not exceptions thrown inside the task. What is needed is something that will retry based on task faults.
+The basic idea is to add a continuation to the returned task that will determine whether a task is faulted,
+examine the exception and retry or fail accordingly. The following is a sample implementation:</p>
+
+<p><div><script src='https://gist.github.com/2161819.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2161819&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The core functionality is in the RetryContinuation method. It takes a task instance, the original task returning function,
+a number of remaining attempts and a predicate function which determines whether a given exception should result in a retry.
+This function calls itself recursively until the task is either successful or the maximum number of attempts have been reached.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: F# | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/f-/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Domain-Driven Design (DDD) with F# - Validation]]></title>
+    <link href="http://gorodinski.com/blog/2013/04/23/domain-driven-design-with-fsharp-validation/"/>
+    <updated>2013-04-23T09:38:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2013/04/23/domain-driven-design-with-fsharp-validation</id>
+    <content type="html"><![CDATA[<p><em>In this post I dig deeper into validation of a Domain-Driven Design with F# and the functional paradigm. The implementation builds upon the <a href="http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/">design introduced earlier</a>. The central theme is that of explicitness - the possibility of a failure is made explicit with type signatures. In turn, this calls for explicit handling of failure conditions paving the way for a design-by-contract style of programming and equational reasoning. Under the hood, the implementation draws on basic principles of <a href="https://en.wikipedia.org/wiki/Category_theory">category theory</a> which provide for uniformity and composability. As a result, from the perspective of DDD, the confluence of declarative design, supple design, invariants and assertions is tremendously enhanced. The functional implementation of validation is to a great extent based on the wonderful work of <a href="https://github.com/mausch">Mauricio Scheffer</a>.</em></p>
+
+<!--more-->
+
+
+<h2>Pitfalls of Exceptions</h2>
+
+<p>Validation can be a <a href="http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/">tough topic</a>. In modern object-oriented languages such as C# and Java, a notable reason for the difficulty is the impedance mismatch between <a href="http://en.wikipedia.org/wiki/Exception_handling">exceptions</a>, which are used to handle various types of error conditions, and methods which return normally. The aftermath is a nonuniform interface coupled with reduced <a href="http://en.wiktionary.org/wiki/autognosis">autogenesis</a>. In addition to a <a href="http://www.microsoft.com/msj/0197/Exception/Exception.aspx">labyrinthine implementation</a>, usually requiring explicit support from the hosting runtime, exceptions seem to almost invariably lead to bad programming practices. Contrary to their ambition, exceptions compel programmers to defer and ultimately avoid explicit handling of errors. This is because exceptions are highly optimized for the non-degenerate case and despite guidelines and best practices, their fundamental flaws cannot be escaped.</p>
+
+<p>The following is a typical example used to showcase exception deficiencies.</p>
+
+<p><div><script src='https://gist.github.com/5457565.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5457565&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The method interface is not uniform because the result can either be a integer value, which can be captured by assigning the result to a variable, or an exception which can only be captured by a catch block. Furthermore, static verification extends only to the non-exceptional case. In other words, the compiler will issue a warning if one tries to assign the result of this method to a string, but it won't issue a warning if the result is assigned to an integer variable. This is problematic because the integer type is a proper <a href="https://en.wikipedia.org/wiki/Subset">subset</a> of the method's effective <a href="http://en.wikipedia.org/wiki/Range_(mathematics)">range</a> - which is a union of the set of integers and an error case.</p>
+
+<p>Unfortunately, the flaws of exceptions extend beyond interface irregularities to friction in designing exception hierarchies as evidenced by the likes of <a href="http://msdn.microsoft.com/en-us/library/system.applicationexception.aspx">ApplicationException</a> in .NET. Moreover, it isn't immediately clear whether a given exception should ever be caught. In .NET, it is just as easy to catch an <a href="http://msdn.microsoft.com/en-us/library/system.argumentexception.aspx">ArgumentException</a> as it is an <a href="http://msdn.microsoft.com/en-us/library/system.outofmemoryexception.aspx">OutOfMemoryException</a> though it never makes sense to catch the latter since there is not way to handle it. If all of this wasn't enough, catching exceptions also incurs a performance penalty.</p>
+
+<p>For more about the pitfalls of exceptions take a look at <a href="http://blogs.atlassian.com/2011/05/exceptions_are_bad/">Exceptions are Bad</a>.</p>
+
+<h2>An Explicit Alternative</h2>
+
+<p>The functional programming paradigm addresses the afore-mentioned scenario with explicit typing. Since the range of the <em>Divide</em> function is extended by the possibility of error, the range type is explicitly amplified. One such amplified type in F# is the <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">option type</a> use of which results in the following.</p>
+
+<p><div><script src='https://gist.github.com/5477487.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5477487&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this example, an erroneous result is explicitly encoded as an empty option. Therefore, the return type of the divide function is <em>Option&lt;int&gt;</em> - an amplified integer. Note that in this case, the interface of the <em>Divide</em> method is uniform because it is captured entirely in the return type. <a href="http://msdn.microsoft.com/en-us/library/dd547125.aspx">Pattern matching</a> with the match clause allows the compiler to ensure that both result sub-types are handled explicitly. It follows that, unlike in the C# example, it unnatural to write functional F# code which defers handling of exceptional cases. One drawback of this technique however, is that it can become cumbersome to compose functions which return amplified types. We shall address this composition challenge in the following sections.</p>
+
+<p>For a formal look at the origins of functional approaches to addressing exceptions and beyond take a look at <a href="http://research.microsoft.com/en-us/um/people/simonpj/Papers/marktoberdorf/">Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell</a>.</p>
+
+<h2>Functional Validation in Domain-Driven Design</h2>
+
+<p>Let us return to the <a href="http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/">original inventory domain</a>. In the original implementation, validation was performed in the function which executed an inventory item command:</p>
+
+<p><div><script src='https://gist.github.com/5477724.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5477724&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this example, a failed assertion will raise an exception which will bubble to an outer layer. While it certainly attains the desired result of preventing execution of the behavior, we will refine this implementation with explicit types.</p>
+
+<p>The first order of business is finding an amplified type to encode both successful and erroneous results. While the <em>Option</em> type, used in the integer division example above, captures both cases properly it doesn't provide any insight into why the result was erroneous. Fortunately, F# provides the <a href="http://msdn.microsoft.com/en-us/library/ee353439.aspx">Choice type</a>. Much like <em>Option</em>, <em>Choice</em> is a <a href="http://msdn.microsoft.com/en-us/library/dd233226.aspx">union type</a>, the difference being that it also allows association of an arbitrary value with the second case. We shall use a two-case <em>Choice</em> type to encode success with the first case and an error expressed as a list of string messages with the second case. Thus, the result type of the <em>exec</em> function will be <em>Choice&lt;'TEvent, string list&gt;</em> instead of just <em>'TEvent</em>. A basic implementation follows.</p>
+
+<p><div><script src='https://gist.github.com/5477784.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5477784&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this example, like the successful result, the erroneous result is returned explicitly. While this implementation avoids many of the pitfalls of exceptions, the syntax could certainly use some work. To address the syntax, we shall put the compositional facilities of F# to work.</p>
+
+<h2>A Functional Validation Framework</h2>
+
+<p>The validation framework presented here is based largely on the work of Mauricio Scheffer in <a href="http://bugsquash.blogspot.com/2011/08/validating-with-applicative-functors-in.html">Validating with applicative functors in F#</a>. This work has been refined and incorporated into <a href="https://github.com/fsharp/fsharpx">fsharpx</a> drawing on powerful, category theory based composition mechanisms contained therein.</p>
+
+<p>Initially, we define a primitive validator builder function.</p>
+
+<p><div><script src='https://gist.github.com/5477847.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5477847&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This is a function which when given a predicate and an error value creates a single parameter function which passes on the parameter if the predicate returns true otherwise returning the error value. This function shall be used to compose more complex validators.</p>
+
+<p>One of the things we would like to do with these validating functions is write code which applies multiple validations on a parameter. If one of the validators fails, we would like to capture the error and continue collecting errors from subsequent validators finally returning a composite error result. If all validators succeed we pass on the parameter. Ultimately, the validation code should compose with code which executes behavior in the non-erroneous case.</p>
+
+<p><a href="http://en.wikibooks.org/wiki/Haskell/Applicative_Functors">Applicative functors</a> will be used to attain the desired degree of composability. A <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">functor</a> is a commonly used structure in Haskell and functional programming in general. It is sort of like a <a href="http://en.wikipedia.org/wiki/Monad_(functional_programming)">monad</a> but weaker. For the C# programmer, a functor can be thought of as a set of extension method associated with an amplified type. For example, the <a href="http://msdn.microsoft.com/en-us/library/9eekhta0.aspx">IEnumerable&lt;T&gt;</a> type, which amplifies <em>T</em>, together with the <a href="http://msdn.microsoft.com/en-us/library/system.linq.enumerable.select.aspx">Select</a> extension method can be regarded as an instance of the functor <a href="http://en.wikipedia.org/wiki/Type_class">type class</a>. Intuitively, a functor provides a way to execute a function which operates upon the constituent type instead of the amplified type.</p>
+
+<p>An applicative functor extends the functor type class with additional functions called <em>pure</em> and <em>apply</em>.  <em>Pure</em> takes a non-amplified value and creates an instance of the amplified type corresponding to the functor. In the C# <em>IEnumerable</em> case this would entail a function which when given a value returns an <em>IEnumerable</em> containing that value - <em>yield return value;</em>. Apply for the <em>Choice</em> amplified type is defined as follows.</p>
+
+<p><div><script src='https://gist.github.com/5477979.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5477979&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The <em>apply</em> function takes a function wrapped in a <em>Choice</em> type and arbitrary value also wrapped in a choice type. It applies the function, if available, otherwise passing on the contained errors, possibly composing with errors from the arbitrary value. In effect, it handles each of the four cases that a set of two <em>Choice</em> values can be in. In turn, we use these functions to compose the following functions.</p>
+
+<p><div><script src='https://gist.github.com/5478001.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5478001&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The functions <em>lift2</em>, <em>&lt;?&gt;</em>, and <em>|?&gt;</em> in this example form a sort of interface between instances of the <em>Choice</em> type and non-amplified values.  The other two functions compose <em>Choice</em> values together passing on the type of either the left or the right value. We can use these functions to refine the syntax in the inventory item example as follows.</p>
+
+<p><div><script src='https://gist.github.com/5478005.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5478005&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this example from the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">InventoryItem</a> module, the <em>validName</em> assertion, with the <em>&lt;*</em> <a href="http://msdn.microsoft.com/en-us/library/dd233204.aspx">operator</a>, composes two validators from the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Validatior.fs">Validator</a> module which ensure that the inventory item name is neither null or empty. In the <em>exec</em> function, the assertion is composed with the returned event using the <em>&lt;?&gt;</em> operator. This operator takes a <em>Choice</em> value on the left and a non-amplified value on the right and composes them into a single <em>Choice</em> value the first case of which is a value of the type of the second operand. The order of the operands can be reversed with the <em>|?&gt;</em> operator which can be read as <a href="http://en.wikipedia.org/wiki/If_and_only_if">if and only if</a>. Note the return type of the <em>exec</em> function is <em>Choice&lt;Event, string list&gt;</em>.</p>
+
+<h2>Refactoring Outer Layers</h2>
+
+<p>In the original example, the Aggregate module defined an aggregate as follows.</p>
+
+<p><div><script src='https://gist.github.com/4975076.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975076&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In order to incorporate the validation work herein, we change the signature of <em>exec</em> to address erroneous results. The handler must also be changed to handle errors explicitly. The following snippet from the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">Aggregate</a> module provides an example.</p>
+
+<p><div><script src='https://gist.github.com/5478036.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5478036&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this example, only a successful executed command results in a commit to the event store. Otherwise, errors are propagated to the caller. The caller can in turn raise an exception or do anything else it may fancy.</p>
+
+<h2>Further Work</h2>
+
+<p>Beyond what was showcased in this post are deeper questions about explicit validation. How can we extract validation rules to outer layers such that they can be translated to client side JavaScript? Will a more descriptive error type be required? Can we use <a href="http://msdn.microsoft.com/en-us/library/dd233182.aspx">F# computation expressions</a> to declare more complex validation workflows?</p>
+
+<h2>Summary</h2>
+
+<p>In this post we discussed the pitfalls of traditional validation techniques involving exceptions. Next, we implemented a validation mechanism which avoids exceptions and which as a result is in better alignment with functional programming. To this end, we were able to draw on basic concepts in category theory which studies composition among mathematical structures. Throughout our approach, the themes of uniformity, explicitness and declarative design prevail. The resulting code remains succinct, draws on static verification and provides better composition facilities. In particular, it provides for <a href="http://www.haskell.org/haskellwiki/Equational_reasoning_examples">equational reasoning</a> which will be a topic of future posts. Additionally, the explicit implementation is simpler both in terms of readability, intuition and the requirements upon the runtime. Finally, the rich compositional facilities of F# allowed a solution that does not short-circuit like exceptions do, allowing clients to obtain all detected errors immediately.</p>
+
+<h2>Source Code</h2>
+
+<p>The source for this post is on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Domain-Driven Design (DDD) with F# and EventStore - Projections]]></title>
+    <link href="http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/"/>
+    <updated>2013-02-24T18:36:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections</id>
+    <content type="html"><![CDATA[<p><em>In this post I cover the introduction of simple projections into the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">InventoryItem domain project</a> implemented with F# and <a href="http://geteventstore.com/">EventStore</a>.</em></p>
+
+<p><a href="http://cqrsguide.com/doc:projection">Projections</a> implement the query side of CQRS. Specifically in EventStore, projections are a mechanism for transforming event streams into other event streams. This has a wide range of applications including <a href="http://en.wikipedia.org/wiki/Complex_event_processing">CEP</a>. For this project, projections were used to generate read models, also known as views or query models.</p>
+
+<!--more-->
+
+
+<h2>Overview Projection</h2>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/OverviewReadModelProjection.js">OverviewReadModelProjection.js</a> projection counts the total number of items in inventory. It does so by selecting events which change the count, namely <em>ItemsCheckedIn</em> and <em>ItemsRemoved</em>. Each occurrence of those events adjusts a state variable and emits a snapshot of the variable as an event. This event can then be retrieved as a read model to serve a query.</p>
+
+<p><div><script src='https://gist.github.com/5028145.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028145&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>As described in the <a href="http://geteventstore.com/blog/category/projections/">projections series</a> on the EventStore blog, the call to <em>emit</em> emits an event to an event stream with identity "InventoryItemOverviewReadModel". The <em>fromCategory()</em> function selects events in a specified category. Events are categorized by a built-in projection <a href="https://github.com/EventStore/EventStore/blob/master/src/EventStore/EventStore.Projections.Core/Standard/CategorizeEventsByStreamPath.cs">$by_category</a> which determines the category from the stream ID. The object passed into the <em>when()</em> function contains functions for handling the desired events as well as a state initialization function. The first parameter of the event handling functions is a state variable maintained by EventStore. The state variable can be scoped at the projection level or per event stream, depending on how events are selected. In this case, the state variable is scoped at the projection level. The second variable is the event itself. It has the following structure:</p>
+
+<p><div><script src='https://gist.github.com/5028185.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028185&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The values contains the stream ID, event body, metadata, event type and other details. Note that this structure is dictated by the serialization format. As such, care must be take to ensure the structure is palatable both in streams, projections and code.</p>
+
+<h2>Inventory Item State Projection</h2>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/FlatReadModelProjection.js">FlatReadModelProjection.js</a> projection captures the state of individual inventory items including their name, count and active flag.</p>
+
+<p><div><script src='https://gist.github.com/5028201.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028201&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this case, events are partitioned by stream with the <em>foreachStream()</em> function. As a result, the state variable will be a associated with each stream. The emitted events will be retrievable using the ID of the source aggregate stream and have category "InventoryItemFlatReadModel", for example "InventoryItemFlatReadModel-880852396f0f48c6b73d017333cb99ba".</p>
+
+<h2>Reading</h2>
+
+<p>The projections are retrieved as read models using the <a href="https://github.com/EventStore/EventStore/blob/master/src/EventStore/EventStore.ClientAPI/EventStoreConnection.cs#L548">ReadStreamEventsBackward</a> function to read the last event:</p>
+
+<p><div><script src='https://gist.github.com/5028226.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028226&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The read models are declared in F# as follows in the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/ReadModels.fs">ReadModels module</a>:</p>
+
+<p><div><script src='https://gist.github.com/5028231.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028231&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Note that the structure of the read models has to match the structure of the events emitted by the projection.</p>
+
+<h2>Conclusion</h2>
+
+<p>Projections in EventStore are a powerful mechanism with a wide array of applications. In this post, they were shown to support some basic read models. However, some scenarios can call for a document database or full-text search. In such cases events can be dispatched outside of the event store.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Domain-Driven Design (DDD) with F# and EventStore]]></title>
+    <link href="http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/"/>
+    <updated>2013-02-17T19:04:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore</id>
+    <content type="html"><![CDATA[<p><em>In this post I present a methodology for implementing Domain-Driven Design (DDD) using F# and <a href="http://geteventstore.com/">EventStore</a>. The described approach makes use of idiomatic functional constructs, especially where they bring value beyond the traditional object-oriented and procedural paradigms. In this manner, the functional and object-oriented paradigms are contrasted. The natural alignment between functional programming and event sourcing is exploited and implemented with EventStore. Note that this project is a spike and is a work in early stages of progress.</em></p>
+
+<!--more-->
+
+
+<p>Implementing a design in a programming language once the model is conceived in the mind is often trivial by comparison. As a result, over time, the apparent value of a programming language can become diminished. Regardless of the added features in the next version of C# or Java, they all seem like mere syntactic sugar. F# and the functional paradigm have shifted my perspective on this.</p>
+
+<p>The ambitions of both Domain-Driven Design and functional programming can be regarded as one and the same - that of streamlining the representation of domain knowledge in a formal system with the goal of enabling automation and integration. Functional programming emphasizes declarativeness with use of functions, expressions, immutability and algebraic data structures. These building blocks can be used for both the expression of domain knowledge and the furnishing of a framework for persistent execution of use cases.</p>
+
+<p>The example in this post is based on <a href="https://github.com/gregoryyoung/m-r">SimpleCQRS</a> by <a href="http://goodenoughsoftware.net/">Greg Young</a>. An existing F# implementation of this project is <a href="https://github.com/Thorium/SimpleCQRS-FSharp">SimpleCQRS-FSharp</a> by <a href="https://github.com/Thorium">Tuomas Hietanen</a>. A more idiomatic F# implementation is <a href="https://github.com/thinkbeforecoding/m-r">FsSimpleCQRS</a> by <a href="https://github.com/thinkbeforecoding">Jérémie Chassaing</a>. The example in this post aims to further free the implementation from establishmentarianist object-oriented practices. In fact, the use of classes is contained to integrations with the serialization library and the EventStore API. Classes were avoided in order to explore the benefits and drawbacks of the alternative. Caution was used to prevent focus on technology for the sake of technology alone. As such, the uses of functional techniques are entirely justified.</p>
+
+<h2>Analysis</h2>
+
+<p>The core of an OOP DDD implementation consists of classes which represent entities, value objects and domain services. These elements embody the informational core of the project. The remaining components integrate the informational core with infrastructure that connects the domain to databases for persistence, UIs for user interaction and other services.</p>
+
+<h3>Domain Module</h3>
+
+<p>The informational core in this example is contained in the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">InventoryItem</a> module:</p>
+
+<p><div><script src='https://gist.github.com/4975035.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975035&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This single F# source file contains the representation of <em>InventoryItem</em> aggregate state as well as the commands and events associated with the aggregate. Together, these elements capture the entirety of the core domain logic associated with an inventory item. Compared to both the original C# implementation and the referenced F# implementations, this implementation attains a greater degree of encapsulation. By looking at this module alone one could glean an understanding of the functionality of the domain. Furthermore, the use of discriminated unions ensures that all commands and events are explicitly handled with static verification. Unions bring the additional benefit of a uniform interface which is exploited by the <em>Aggregate</em> module described in the next section.</p>
+
+<p>There is no need for an aggregate base class because persistence of state is delegated to infrastructural components defined in outer layers. The identity value is taken out of the domain module because the domain logic itself has no need for it. This allows the identity value type to be defined in outer layers. Once we let go of the aging object-oriented and procedural practices we observe that they are only one of the many options.</p>
+
+<h3>Aggregate Module</h3>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">Aggregate</a> module declares an abstraction of an aggregate and uses the abstraction to define a persistent command handler:</p>
+
+<p><div><script src='https://gist.github.com/4975076.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975076&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The aggregate abstraction is made possible by the use of a uniform interface for executing commands upon aggregate state. Application of persisted events is made with the <a href="http://en.wikipedia.org/wiki/Fold_(higher-order_function)">fold higher-order function</a> - another staple of functional programming. The <a href="https://github.com/eulerfx/DDDInventoryItemFSharpW/blob/master/DDDInventoryItemFSharp/IntegrationTests.fs">IntegrationTests</a> module employs the aggregate module to define a command handler by wiring the EventStore and the serialization module.</p>
+
+<h3>EventStore Module</h3>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">EventStore</a> module contains the integration with EventStore. This initial implementation is specific to <em>InventoryItem</em> however it can be easily generalized by generalizing the serializer.</p>
+
+<h2>Summary</h2>
+
+<p>The F# implementation in this post is more concise, more encapsulated, more declarative, more statically verified, and contains far less noise. I would argue that it is also more readable. Explicit factoring by functions elegantly replaces implicit factoring by class hierarchies. This establishes a dependency topology where the informational core is at the center with infrastructural and state related components orbiting in outer layers.</p>
+
+<p>In subsequent iterations, I will expand this example to contain query support via projections and read-models as well as a service layer. A more complex domain will further test this methodology. Specifically, I would like to explore the viability of these techniques with the introduction of behaviors bearing dependencies on domain services and behaviors involving complex invariants. Moreover, I would like to dig deeper into the use of F# types for representing domain state as described in <a href="http://fsharpforfunandprofit.com/series/designing-with-types.html">The Designing with types series</a>. The applicability of this approach within scenarios not employing event sourcing is also of interest. F# paves the way for a language-oriented programming paradigm. In particular, computation expressions support the redefinition of control flow constructs in arbitrary contexts. This technique has the potential to define a persistent context for workflows which execute domain logic. This will allow further isolation and encapsulation of the informational domain core.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Subtleties of F# currying, partial application and eta-conversion]]></title>
+    <link href="http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/"/>
+    <updated>2013-01-25T20:55:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion</id>
+    <content type="html"><![CDATA[<p>F# is a functional programming language and as such provides various facilities for declaring, composing and transforming functions. Among these is <a href="http://en.wikipedia.org/wiki/Currying">currying</a> which allows multi-variable functions to be regarded as chains of single-parameter functions each returning a function with one less variable that the last. Partial application allows fixing variables of a curried function returning a new function of smaller arity. Viewing functions in this way affords several advantages, including representation in the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a>. An example in F# and a comparable C# implementation follow.</p>
+
+<!--more-->
+
+
+<p><div><script src='https://gist.github.com/4640182.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640182&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>and C#</p>
+
+<p><div><script src='https://gist.github.com/4640272.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640272&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The F# example contains a function <em>add</em> which is curried by default. The <em>add1</em> function is created via partial application on the <em>add</em> function. The <em>add1'</em> function has the same signature as <em>add1</em> and is declared without partial application but instead as direct invocation of <em>add</em>. In the C# example, the <em>Adder.Add1</em> function calls <em>Adder.Add</em> much like the <em>add1'</em> function in the F# example. The <em>CurriedAdder.Add1</em> is created in a manner more similar to F# by first curring <em>CurriedAdder.Add</em> with <em>CurriedAdder.Curry</em> and then fixing the first parameter.</p>
+
+<p>The difference between <em>add1</em> and <em>add1'</em> is subtle. They have the same signatures and produce equivalent results. However, the declaration of <em>add1</em> states that it <strong>is</strong> <em>add</em> with the first parameter fixed. The declaration of <em>add1'</em> however states that it <strong>calls</strong> <em>add</em> with <em>1</em> as the first argument and its own argument as the second. In the scenario of these simple arithmetic functions, the difference is insignificant. If instead of using an integer literal a <a href="http://en.wikipedia.org/wiki/Pure_function">impure function</a> call is made, behavior may change. For example:</p>
+
+<p><div><script src='https://gist.github.com/4662084.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662084&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Calling functions <em>addRand1</em> and <em>addRand2</em> will generate a new random number each time whereas in <em>addRand</em> the random value is effectively cached. The introduction of the variable <em>x</em> causes the invocation of the random function to be delayed and repeated. There are cases where this behavior is desirable, such as when encapsulating access to a cached data structure. For example:</p>
+
+<p><div><script src='https://gist.github.com/4662337.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662337&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Again, the signatures of <em>isPrime</em> and <em>isPrime2</em> are equivalent, except for presence of parenthesis in the first and explicit variable <em>x</em> in the second. The behavior is different however and in a scenario with larger sets it would be significant.</p>
+
+<p>The transformation from <em>isPrime</em> to <em>isPrime2</em> is called an <a href="http://www.haskell.org/haskellwiki/Eta_conversion">eta-abstraction</a> in the lambda calculus. The inverse transformation is called an eta-reduction and the functions are said to be equivalent under eta-conversion. However, while functions are equivalent under eta-conversion, their behavior may be different in a subtle way. Beyond the examples given here, eta-abstractions can also be used to resolve <a href="http://blogs.msdn.com/b/mulambda/archive/2010/05/01/value-restriction-in-f.aspx">value restriction errors</a> and to improve clarity of a <a href="http://en.wikipedia.org/wiki/Tacit_programming">point-free expression</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inverting object-orientation with F# discriminated unions and pattern matching]]></title>
+    <link href="http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/"/>
+    <updated>2013-01-21T21:41:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching</id>
+    <content type="html"><![CDATA[<p><em>In this post I compare and contrast the use discriminated unions and pattern matching in F# to the object-oriented paradigm, particularly in C#. Additionally, aspects of the object-oriented approach are linked with GoF design patterns, multiple dispatch and the open-closed principle. Ultimately, discriminated unions are shown to address deficiencies in the imperative, object-oriented approach.</em></p>
+
+<!--more-->
+
+
+<p>One of the distinguishing types in F# as compared to most imperative object-oriented languages is the <a href="http://msdn.microsoft.com/en-us/library/dd233226.aspx">discriminated union</a>. A discriminated union is an <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data type</a> (<a href="http://en.wikipedia.org/wiki/F-algebra">F-algebra</a> for the mathematically inclined) which consists of a finite number of named cases which themselves can be of any type. A discriminated union value can be of one and only one case. In other words, a discriminated union is a <em>union</em> because the set of cases forms a <a href="http://en.wikipedia.org/wiki/Union_(set_theory)">union</a>. It is <em>discriminated</em> because each case is distinguished from the others by its name. Many F# types including <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">Option</a> and <a href="http://msdn.microsoft.com/en-us/library/dd233224.aspx">List</a> are defined as discriminated unions.</p>
+
+<p>In C# a discriminated union can be represented as a class hierarchy where the base class corresponds to the union as a whole and sub-classes correspond to the cases. The ability to represent a discriminated union in this way may lead to a dismissive attitude in object-oriented developers. After all, mere brevity of representation, although important, is hardly a reason in and of itself. However, discriminated unions coupled with <a href="http://msdn.microsoft.com/en-us/library/dd547125.aspx">pattern matching</a> take the discussion to a whole new level.</p>
+
+<p>A central principle of object-oriented programming is the encapsulation of data with related behavior inside boundaries defined by a class. This complexity management mechanism manifest at all levels of a software system, from the smallest objects to entire applications. Objects are also intuitive because of their feigning affiliation with reality. There are however certain deficiencies to the object-oriented approach. The deficiency addressed in this post is based on the observation that classes optimize for extensibility through <a href="http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)">inheritance</a> thereby hiding inner structure. As a result, whenever behavior needs to depend on sub-classes of a class hierarchy it must either be placed directly into the sub-class or a derived class, or some hierarchy traversal mechanism must be employed.</p>
+
+<h2>The Visitor Pattern</h2>
+
+<p>Class hieararchy traversal can be implemented using several techniques. One such technique is the <a href="http://en.wikipedia.org/wiki/Visitor_pattern">visitor pattern</a> the goal of which is to augment existing class structures with new behavior without modifying said structures. Consider for instance the <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expressionvisitor.aspx">ExpressionVisitor</a> from the <a href="http://msdn.microsoft.com/en-us/library/bb506649.aspx">System.Linq.Expressions</a> namespace. This class is used to traverse the structure of code represented as an <a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree">AST</a>. Before this class was made public in the .NET Framework a similar implementation was used to implement LINQ support in NHibernate. This visitor pattern facilitates the <a href="http://en.wikipedia.org/wiki/Open/closed_principle">Open/closed principle</a> by allowing objects, <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx">Expression</a> instances in this case, to remain <em>closed</em> because they are not modified or inherited and <em>open</em> in that new behaviors are added - translation to the Hibernate Query Language in this case.</p>
+
+<p>The <em>ExpressionVisitor</em> operates by invoking an internal <em>Accept</em> method on an <em>Expression</em> instance. The <em>Expression</em> instance in turn effectively invokes a visit method on the visitor which corresponds to its specific type. The actual details are slightly more complicated, however the gist of the implementation follows:</p>
+
+<p><div><script src='https://gist.github.com/4601979.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4601979&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>To a large extent, the need for the visitor pattern is due to a lack of language support for <a href="http://en.wikipedia.org/wiki/Multiple_dispatch">multiple dispatch</a>. To understand multiple dispatch it is instructive to first consider <a href="http://en.wikipedia.org/wiki/Single_dispatch">single dispatch</a>. Single dispatch facilitates polymorphism in object-oriented languages by allowing method invocation to be based on the type of the instance which implements the method. Single dispatch is supported by most object-oriented languages including C# and Java. In multiple dispatch, the method invoked depends not only on the type of the instance, but also on the types of the arguments. The visitor pattern emulates multiple dispatch by employing single dispatch on the <em>Accept</em> method and then resolving the appropriate <em>Visit</em> method either with overloading or calling the method explicitly since the type of the visited object is handy.</p>
+
+<p>The visitor pattern isn't the only way to implement multiple dispatch. In C# for example, one could invoke the <a href="http://msdn.microsoft.com/en-us/library/dd233052.aspx">DLR</a>:</p>
+
+<p><div><script src='https://gist.github.com/4602404.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4602404&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This approach, while delegating the dispatch responsibilities to the runtime still suffers from a lack of static verification.</p>
+
+<h2>Enter Discriminated Unions</h2>
+
+<p>The problem with the visitor pattern is that it is tedious to implement and there is no support from the type system to ensure that all sub-types are accounted for making it error prone. In F#, discriminated unions and pattern matching address both of these problems in an elegant way. The <em>Expression</em> and <em>ExpressionVisitor</em> types could be implemented in the following way:</p>
+
+<p><div><script src='https://gist.github.com/4602257.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4602257&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The <em>Expression</em> is a recursively defined union type which corresponds to the class hierarchy of <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx">Expressions</a>. The sample also makes use of the <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">F# tuple type</a>. The <em>print</em> function accepts an expression value and unwraps it using pattern matching. This may initially seem like a glorified switch statement, however it is far more powerful. Most notably, the compiler ensures that all cases are handled. In this way, pattern matching turns any function accepting an expression into a statically checked "visitor".</p>
+
+<p>Discriminated unions and pattern matching aren't limited to shaming the visitor pattern. They can also be used to implement the <a href="http://en.wikipedia.org/wiki/State_pattern">state pattern</a>, also in a statically verifiable fashion. A great example of this can be found in <a href="http://fsharpforfunandprofit.com/posts/designing-with-types-representing-states/">Designing with types: Making state explicit</a>. The resulting design not only prevents invalid state behaviors at runtime, it prevents them at compile time.</p>
+
+<h2>Conclusion</h2>
+
+<p>We've witnessed the elegance with which discriminated unions address OOP deficiencies and lack of multiple dispatch. Discriminated unions and pattern matching allow data structures to be <em>inverted</em> such that they are not only open for extension but extension is guided by support from the type system. Additionally, brevity of expression establishes the discriminated union as an effective modeling tool - after all, a language should be a place to organize one's thoughts. By contrast, the optimization for extensibility by inheritance in the object-oriented paradigm hides inner object structure making it more difficult to augment class hierarchies. Given the OOP adage of favoring composition over inheritance, this leaves much to be desired in existing object-oriented languages.</p>
+]]></content>
+  </entry>
+  
+</feed>

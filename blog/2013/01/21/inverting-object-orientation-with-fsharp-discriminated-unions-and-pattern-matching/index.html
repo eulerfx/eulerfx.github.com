@@ -1,0 +1,273 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Inverting object-orientation with F# discriminated unions and pattern matching - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="In this post I compare and contrast the use discriminated unions and pattern matching in F# to the object-oriented paradigm, particularly in C#. &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-21T21:41:00-05:00" pubdate data-updated="true">Jan 21<span>st</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/fp/'>FP</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Inverting Object-orientation With F# Discriminated Unions and Pattern Matching</h1>
+	<div class="entry-content"><p><em>In this post I compare and contrast the use discriminated unions and pattern matching in F# to the object-oriented paradigm, particularly in C#. Additionally, aspects of the object-oriented approach are linked with GoF design patterns, multiple dispatch and the open-closed principle. Ultimately, discriminated unions are shown to address deficiencies in the imperative, object-oriented approach.</em></p>
+
+<!--more-->
+
+
+<p>One of the distinguishing types in F# as compared to most imperative object-oriented languages is the <a href="http://msdn.microsoft.com/en-us/library/dd233226.aspx">discriminated union</a>. A discriminated union is an <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data type</a> (<a href="http://en.wikipedia.org/wiki/F-algebra">F-algebra</a> for the mathematically inclined) which consists of a finite number of named cases which themselves can be of any type. A discriminated union value can be of one and only one case. In other words, a discriminated union is a <em>union</em> because the set of cases forms a <a href="http://en.wikipedia.org/wiki/Union_(set_theory)">union</a>. It is <em>discriminated</em> because each case is distinguished from the others by its name. Many F# types including <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">Option</a> and <a href="http://msdn.microsoft.com/en-us/library/dd233224.aspx">List</a> are defined as discriminated unions.</p>
+
+<p>In C# a discriminated union can be represented as a class hierarchy where the base class corresponds to the union as a whole and sub-classes correspond to the cases. The ability to represent a discriminated union in this way may lead to a dismissive attitude in object-oriented developers. After all, mere brevity of representation, although important, is hardly a reason in and of itself. However, discriminated unions coupled with <a href="http://msdn.microsoft.com/en-us/library/dd547125.aspx">pattern matching</a> take the discussion to a whole new level.</p>
+
+<p>A central principle of object-oriented programming is the encapsulation of data with related behavior inside boundaries defined by a class. This complexity management mechanism manifest at all levels of a software system, from the smallest objects to entire applications. Objects are also intuitive because of their feigning affiliation with reality. There are however certain deficiencies to the object-oriented approach. The deficiency addressed in this post is based on the observation that classes optimize for extensibility through <a href="http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)">inheritance</a> thereby hiding inner structure. As a result, whenever behavior needs to depend on sub-classes of a class hierarchy it must either be placed directly into the sub-class or a derived class, or some hierarchy traversal mechanism must be employed.</p>
+
+<h2>The Visitor Pattern</h2>
+
+<p>Class hieararchy traversal can be implemented using several techniques. One such technique is the <a href="http://en.wikipedia.org/wiki/Visitor_pattern">visitor pattern</a> the goal of which is to augment existing class structures with new behavior without modifying said structures. Consider for instance the <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expressionvisitor.aspx">ExpressionVisitor</a> from the <a href="http://msdn.microsoft.com/en-us/library/bb506649.aspx">System.Linq.Expressions</a> namespace. This class is used to traverse the structure of code represented as an <a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree">AST</a>. Before this class was made public in the .NET Framework a similar implementation was used to implement LINQ support in NHibernate. This visitor pattern facilitates the <a href="http://en.wikipedia.org/wiki/Open/closed_principle">Open/closed principle</a> by allowing objects, <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx">Expression</a> instances in this case, to remain <em>closed</em> because they are not modified or inherited and <em>open</em> in that new behaviors are added - translation to the Hibernate Query Language in this case.</p>
+
+<p>The <em>ExpressionVisitor</em> operates by invoking an internal <em>Accept</em> method on an <em>Expression</em> instance. The <em>Expression</em> instance in turn effectively invokes a visit method on the visitor which corresponds to its specific type. The actual details are slightly more complicated, however the gist of the implementation follows:</p>
+
+<div><script src='https://gist.github.com/4601979.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4601979&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>To a large extent, the need for the visitor pattern is due to a lack of language support for <a href="http://en.wikipedia.org/wiki/Multiple_dispatch">multiple dispatch</a>. To understand multiple dispatch it is instructive to first consider <a href="http://en.wikipedia.org/wiki/Single_dispatch">single dispatch</a>. Single dispatch facilitates polymorphism in object-oriented languages by allowing method invocation to be based on the type of the instance which implements the method. Single dispatch is supported by most object-oriented languages including C# and Java. In multiple dispatch, the method invoked depends not only on the type of the instance, but also on the types of the arguments. The visitor pattern emulates multiple dispatch by employing single dispatch on the <em>Accept</em> method and then resolving the appropriate <em>Visit</em> method either with overloading or calling the method explicitly since the type of the visited object is handy.</p>
+
+<p>The visitor pattern isn&#8217;t the only way to implement multiple dispatch. In C# for example, one could invoke the <a href="http://msdn.microsoft.com/en-us/library/dd233052.aspx">DLR</a>:</p>
+
+<div><script src='https://gist.github.com/4602404.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4602404&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>This approach, while delegating the dispatch responsibilities to the runtime still suffers from a lack of static verification.</p>
+
+<h2>Enter Discriminated Unions</h2>
+
+<p>The problem with the visitor pattern is that it is tedious to implement and there is no support from the type system to ensure that all sub-types are accounted for making it error prone. In F#, discriminated unions and pattern matching address both of these problems in an elegant way. The <em>Expression</em> and <em>ExpressionVisitor</em> types could be implemented in the following way:</p>
+
+<div><script src='https://gist.github.com/4602257.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4602257&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The <em>Expression</em> is a recursively defined union type which corresponds to the class hierarchy of <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx">Expressions</a>. The sample also makes use of the <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">F# tuple type</a>. The <em>print</em> function accepts an expression value and unwraps it using pattern matching. This may initially seem like a glorified switch statement, however it is far more powerful. Most notably, the compiler ensures that all cases are handled. In this way, pattern matching turns any function accepting an expression into a statically checked &#8220;visitor&#8221;.</p>
+
+<p>Discriminated unions and pattern matching aren&#8217;t limited to shaming the visitor pattern. They can also be used to implement the <a href="http://en.wikipedia.org/wiki/State_pattern">state pattern</a>, also in a statically verifiable fashion. A great example of this can be found in <a href="http://fsharpforfunandprofit.com/posts/designing-with-types-representing-states/">Designing with types: Making state explicit</a>. The resulting design not only prevents invalid state behaviors at runtime, it prevents them at compile time.</p>
+
+<h2>Conclusion</h2>
+
+<p>We&#8217;ve witnessed the elegance with which discriminated unions address OOP deficiencies and lack of multiple dispatch. Discriminated unions and pattern matching allow data structures to be <em>inverted</em> such that they are not only open for extension but extension is guided by support from the type system. Additionally, brevity of expression establishes the discriminated union as an effective modeling tool - after all, a language should be a place to organize one&#8217;s thoughts. By contrast, the optimization for extensibility by inheritance in the object-oriented paradigm hides inner object structure making it more difficult to augment class hierarchies. Given the OOP adage of favoring composition over inheritance, this leaves much to be desired in existing object-oriented languages.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/';
+        var disqus_url = 'http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

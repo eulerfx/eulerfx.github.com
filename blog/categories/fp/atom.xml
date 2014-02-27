@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: FP | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/fp/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Object-oriented design patterns from a functional perspective]]></title>
+    <link href="http://gorodinski.com/blog/2013/09/18/oop-patterns-from-a-functional-perspective/"/>
+    <updated>2013-09-18T21:50:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2013/09/18/oop-patterns-from-a-functional-perspective</id>
+    <content type="html"><![CDATA[<p><em>In this post I interpret design patterns and principles commonplace in <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming</a> languages from the perspective of <a href="http://en.wikipedia.org/wiki/Functional_programming">functional programming</a>. Most of these patterns are trivially reduced to elementary functional constructs. The intent is to illustrate advantages and insight resulting from a shift in paradigm. After all, both the object-oriented and the functional paradigm have a shared goal - the solution of some problem. The patterns discussed herein are a testament to this commonality. The difference between the paradigms lies in the underlying abstractions upon which they are established which in turn have significant ramifications for the problem solving tactics they engender. In particular, I argue that the object-oriented inheritance model and the paradigm's primary utilization as an adorned state encapsulation mechanism are limiting factors in composing higher-level abstractions. Conversely, functional programming, being based on an entirely different <a href="http://en.wikipedia.org/wiki/Model_of_computation">model of computation</a>, eschews state, thereby bypassing accompanying hurdles and mandates composion from the core, thereby encouraging resuable abstractions.</em></p>
+
+<!--more-->
+
+
+<h2>Introduction</h2>
+
+<p>The following claims are based on a few years of experience developing applications with the functional paradigm. In particular, contrasts of the paradigms have been distilled through porting code samples for <a href="http://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577">Implementing Domain-Driven Design</a> from a <a href="https://github.com/VaughnVernon/IDDD_Samples_NET">Java/C# implementation</a> to an <a href="https://github.com/eulerfx/IDDDFSharpSamples">implementation in F#</a>.</p>
+
+<h2>Disclaimers</h2>
+
+<p>The analysis of the object-oriented paradigm herein is based particularly on its manifestation in languages like Java, C# and related languages. (<a href="http://www.cs.utexas.edu/~wcook/papers/OOPvsADT/CookOOPvsADT90.pdf">Variations of object-oriented programming without state have characteristics orthogonal to abstract data types (ADTs) employed in functional programming</a>). Functional programming examples are provided in F#.</p>
+
+<p>This topic has been addressed priorly. Peter Norvig <a href="http://www.norvig.com/design-patterns/">discussed</a> how most of the <em>GoF</em> patterns are <em>invisible or simpler</em> in LISP, calling the patterns <em>"programming language bug reports"</em>. Paul Graham <a href="http://www.paulgraham.com/icad.html">echoes</a> the notion. Similarly, Joe Armstrong describes <a href="http://harmful.cat-v.org/software/OO_programming/why_oo_sucks">why OO sucks</a>. Although both LISP and Erlang (designed by Armstrong) are dynamically type-checked, the arguments hold just as well for statically typed languages. In fact, the issue of typing is orthogonal.</p>
+
+<p>Arguably, the power of abstraction in functional programming can be a double edged sword. For example, a <a href="http://apocalisp.wordpress.com/2010/06/14/on-monoids/">monoid</a> is in essence a very simple abstraction - an interface consisting of two members. However, without some context, it can be troublesome to sense its value and utility. Abuse of such abstractions can lead to cryptic code, however this isn't representative of the functional approach.</p>
+
+<p>Finally, the intent herein is not to undermine the object-oriented paradigm. In many ways, well crafted object-oriented code converges upon a functional style. This is no surprise because as stated earlier, the eventual goals of both paradigms are one and the same. It should also be stated that given the present state of the art, functional programming isn't practical for all domains.</p>
+
+<h2>Overview</h2>
+
+<p>In this post I survey the <a href="http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)">SOLID</a> patterns followed by tactical patterns of <a href="http://en.wikipedia.org/wiki/Domain-driven_design">Domain-Driven Design</a>. These patterns are intimately related. The single-responsibility principle fosters the interface-segregation principle; the open/closed principle fosters the Liskov substitution principle. The dependency inversion principle fosters Domain-Driven Design.</p>
+
+<p>The central grievances with object-oriented programming as presented herein are summarized as follows.</p>
+
+<ul>
+<li>Binding data structure to behavior is a mechanisms of state encapsulation which hides the underlying problem instead of solving it.</li>
+<li>A great deal of effort goes into making inheritance possible. Ironically, object-orientated patterns themselves favor composition over inheritance. Ultimately, in being a jack of two responsibilities - subtyping and reuse - inheritance is a master of neither and does a inferior job with both.</li>
+</ul>
+
+
+<p>The distinguishing characteristics of functional programming that address these grievances are summarized as follows.</p>
+
+<ul>
+<li>Explicit management of state is avoided through immutability.</li>
+<li>Explicit return values are favored over implicit side effects.</li>
+<li>Powerful composition facilities promote reuse without compromising encapsulation.</li>
+<li>The culmination of these characteristics is a more declarative paradigm.</li>
+</ul>
+
+
+<h2><a id="solid"></a>SOLID</h2>
+
+<h3><a id="single-responsibility-principle"></a>Single-responsibility Principle</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Single_responsibility_principle">single-responsibility principle</a> states that <em>every class should have a single responsibility</em> where a responsibility is roughly defined as a reason to change. The principle compensates for the anti-pattern where bloated classes play multiple roles. Classes can bloat for a few reasons. A core principle of object-oriented programming is the binding of data structure to behavior. The problem is that optimizing for data structure encapsulation not only weakens composition characteristics, but also hides the underlying problem of explicit state. As a result, object-oriented code typically contains many data structures with relatively few functions per data structure. Adding methods to a class exerts pressure on the single-responsibility principle and reducing the number of methods can either make the data structure difficult to compose or all together fruitless. Furthermore, the simple syntactical cost of declaring a class often compels programmers to marginalize. In less verbose languages, particularly dynamic ones like Ruby and Python, this problem is less prevalent. In my opinion, the importance of this purely mechanical issue must not be understated. A great deal of effort is put into optimizing development with IDEs and other tools, yet optimization can often be achieved at a far more fundamental level.</p>
+
+<p>In functional programming, the fundamental unit of abstraction is the function. Given that a function has a single input and a single output, functions naturally have a single responsibility. One could certainly define arbitrarily generic function, though this would be counterintuitive. Moreover, functions are syntacticly thrifty.</p>
+
+<h3><a id="open-closed-principle"></a>Open/closed Principle</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Open/closed_principle">open/closed principle</a> states that <em>software entities should be open for extension, but closed for modification</em>. The ambiguity of this statement can be resolved through two variations of the principle. The variation due to Bertrand Meyer simply states that existing classes should only be modified in order to correct bugs. This restriction delivers the closed aspect of the principle. The open aspect is delivered through <em>implementation inheritance</em>, or in other words, inheritance with the goal of reuse rather than <a href="http://en.wikipedia.org/wiki/Subtype_polymorphism">subtyping</a>. The variation due to Robert C. Martin espouses openness through polymorphism which by definition also provides for closure since extensibility is supported through substitution rather than modification. Unfortunately, substitution often leads to accidental complexity, which must be addressed by yet another principle - the Liskov substitution principle discussed in the following section.</p>
+
+<p>The primary utility of the open/closed principle is confinement of cascading changes while providing for extensibility. This is achieved by designing for extensibility and prohibiting changes to existing entities. Extensibility is attained by fancy tricks with abstract classes and virtual functions. Closure is attained by encapsulation, or rather by the hiding of moving parts. The existence of this principle merely exposes the object-oriented paradigm as a transitional introduction of polymorphism to imperative, state-oriented paradigms.</p>
+
+<p>In a functional language, functions can be substituted at will and as such, there is no need to "design" for extensibility. Functionality requiring parametrization is naturally declared as such. Instead of inventing a concept of a virtual method and inheritance, one can rely on an existing, elementary concept - the <a href="http://en.wikipedia.org/wiki/Higher-order_function">higher-order function</a>.</p>
+
+<h3><a id="liskov-substitution-principle"></a>Liskov Substitution Principle</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a> is essentially a restricted instance of subtyping which aims to guarantee semantic portability across class hierarchies. Portability is achieved by ensuring that whatever is true of a base type is also true of all subtypes. Subclasses must not strengthen preconditions - they must accept all input and initial state that the base class accepts and subclasses must not weaken postconditions - behavioral expectations declared by the base class must be met by the subclass. These characteristics cannot be enforced by the type system alone. The <em>is a</em> relation of inheritance is thus deceptive - hence the need for a compensating principle. As such, the need for this principle demonstrates a pitfall in subtype (inclusion-based) polymorphism. Implicit factoring by class hierarchy imposes needless inclusion restrictions and requires complex principles o place a bound on accidental complexity.</p>
+
+<p>Functional languages favor <a href="http://en.wikipedia.org/wiki/Parametric_polymorphism">parametric polymorphism</a> with <a href="http://en.wikipedia.org/wiki/Bounded_quantification">bounded quantification</a> thereby avoiding some of the pitfalls of inheritance. Informally, functional languages emphasize substitutability and deemphasize implementation reuse since reuse is better achieved through composition. Most ambitions of the Liskov substitution principle <a href="http://apocalisp.wordpress.com/2010/10/06/liskov-substitution-principle-is-contravariance/">are effectively trivial</a> in a functional language.</p>
+
+<h3><a id="interface-segregation-principle"></a>Interface Segregation Principle</h3>
+
+<p>The interface segregation principle states that <em>no client should be forced to depend on methods it does not use</em>. In essence it is a restatement of the single-responsibility principle for interfaces and reflects the same underlying problem - the difficulty of balancing responsibility assignment, composition and encapsulation in object-oriented design. On the one hand, it is desirable to encapsulate, on the other hand it is desirable to compose. Furthermore, the problem with employing the interface-segregation principle alone is that it doesn't directly protect against class bloat and in some ways hides the problem.</p>
+
+<p>Functional programming reduces the need for encapsulation by eschewing state and breeds composition at the core. There is no augmented concept of role-based interfaces because function roles are explicit at the onset. Functions are segregated by default.</p>
+
+<h3><a id="dependency-inversion-principle"></a>Dependency Inversion Principle</h3>
+
+<p>The dependency inversion principle states that high-level modules should be decoupled from low-level modules through abstractions. In other words, the principle states that code should be structured around the problem domain, and the domain should declare dependencies on required infrastructure as interfaces. Dependencies thus point inward to the domain model. The reason this principle is an <em>inversion</em> is because typical architectures promoted by the object-oriented approach (via layer architecture) exhibit dependency graphs where high-level modules consume low-level modules directly. Initially, this dependency graph seems natural, since in expressing domain models in code one inevitably depends upon the constructs of the language. Procedural programming allows dependencies to be encapsulated by procedures. Subtype polymorphism defers procedure implementation. Unfortunately, use of subtype polymorphism (interfaces) is often overlooked for expressing domain dependencies in object-oriented implementations. Given that infrastructure code is typically more voluminous, the focus of the code drifts away from the domain. Domain-Driven Design was devised in part to balance this drift.</p>
+
+<p>As a matter of course, the declarative and side-effect free nature of functional programming provide for dependency inversion. In object-oriented programming, high-level modules depend on infrastructure modules primarily to invoke side-effects. In functional programming, side-effects are more naturally triggered <em>in response</em> to domain behavior as opposed to being <em>directly invoked by</em> domain behavior. Thus dependencies become not merely inverted, but pushed to outer layers all together.</p>
+
+<h2><a id="tell-dont-ask"></a>Tell, Don't Ask</h2>
+
+<p>The <a href="http://pragprog.com/articles/tell-dont-ask">Tell, Don't Ask principle</a> states that <em>you should endeavor to tell objects what you want them to do; do not ask them questions about their state, make a decision, and then tell them what to do.</em> One strategy for this endeavor is the <a href="http://en.wikipedia.org/wiki/Command%E2%80%93query_separation">Command/Query Separation principle</a>. The paradox however is that in attempting to strengthen object-oriented code these principles propose a segregation of data structure and behavior. Combining data structure to behavior obfuscates the distinction between <em>observations</em> about an object and <em>behaviors</em> supported the object. In functional programming, observations are data structures and behaviors are functions - the distinction is crystal clear. Furthermore, invariants can be declared with types instead of state making invalid states irrepresentable. For example, the iterator referenced in the statement of the pattern can be succinctly represented as:</p>
+
+<p><div><script src='https://gist.github.com/7000167.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/7000167&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>When an iterator value is of type <em>End</em> there is no syntacticly valid way to obtain the next element. Not only is the code much shorter, it is more robust.</p>
+
+<h2><a id="domain-driven-design"></a>Domain-Driven Design</h2>
+
+<h3><a id="aggregate"></a>Aggregate</h3>
+
+<p>The concept of the aggregate remains in functional programming, however it isn't expressed in terms of a class. Instead, it can be expressed as a quintuple, consisting of a set of aggregate states, an initial state, a set of commands, a set of events and a function mapping the set of commands onto the set of events given a state. Cohesion is provided by a module mechanism. The benefit of this formal definition is improved composition and reuse characteristics. A <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">functional F# implementation of a domain-driven design</a> illustrates this approach. There are no dependencies on persistence infrastructure and the same domain model can be used in an event-sourcing implementation, a key-value store as well as an ORM. Moreover, domain event side effects can be delegated to outer layers without reliance on side-effects. Contrast this implementation with <a href="https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs">an implementation in C#</a> which only supports event sourcing.</p>
+
+<h3><a id="immutable-value-objects"></a>Immutable value objects</h3>
+
+<p>Functional languages typically provide immutable record (product) and union (sum) types with auto-implemented structural equality which addresses this pattern trivially. Heavy reliance on state in object-oriented programming makes references or pointers a first class citizen rather than the structure of the data itself. Furthermore, the syntactical cost of declaring value object classes as well as difficulties in operating upon them can lead to <a href="http://c2.com/cgi/wiki?PrimitiveObsession">primitive obsession</a>. While it is certainly possible to declare immutable classes in object-oriented languages, heavy use of this concept quite simply calls for better tools.</p>
+
+<p>Contrast</p>
+
+<p><div><script src='https://gist.github.com/6999570.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/6999570&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>with</p>
+
+<p><div><script src='https://gist.github.com/6999582.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/6999582&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<h3><a id="domain-events"></a>Domain Events</h3>
+
+<p>Domain events are a powerful mechanism for keeping domain models encapsulated. This is accomplished by allowing various handlers from outer layers to register for a domain event. The problem with domain events in object-oriented languages is that the <a href="http://www.udidahan.com/2009/06/14/domain-events-salvation/">typical implementation</a> is complex and relies on side-effects. Event registrations are typically declared in the <a href="http://blog.ploeh.dk/2011/07/28/CompositionRoot/">composition root</a> and thus it isn't immediately obvious from the perspective of the publisher which handlers will be invoked. In a functional language, a domain event is simply a value returned by a function in an aggregate. Interested parties can be explicitly registered as filters. This technique is illustrated by the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">F# DDD example</a>. Returning domain events from aggregate methods in an object-oriented language is prohibitive due to lack of union types and pattern matching.</p>
+
+<h3><a id="intention-revealing-interface"></a>Intention-revealing interface</h3>
+
+<p>In imperative object-oriented code, intent leaks through side-effects and through focus on the <em>how</em> rather than the <em>what</em>. Always having to bind behavior to data structure can also be problematic.</p>
+
+<p><blockquote><p>If a developer must consider the implementation of a component in order to use it, the<br/>value of encapsulation is lost. If someone other than the original developer must infer<br/>the purpose of an object or operation based on its implementation, that new developer<br/>may infer a purpose that the operation or class fulfills only by chance. If that was not<br/>the intent, the code may work for the moment, but the conceptual basis of the design<br/>will have been corrupted, and the two developers will be working at cross-purposes.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>Since functional programming is more declarative, function names and interfaces tend to be more focused on intent rather than the the underlying mechanics. In addition, the interfaces of side-effect-free functions are by nature more revealing because behavior is made explicit through the return value. As a result, in addition to a purely linguistic benefit of naming with intent, intent is also encoded by the type system. This is not to say that expressing intent is effortless in functional languages. Only that it is better supported by the paradigm.</p>
+
+<h3><a id="side-effect-free-functions"></a>Side-effect-free functions</h3>
+
+<p>The following excerpt is resounding evidence against the imperative object-oriented programming style. Side-effects are in direct opposition to encapsulation yet all too often they are the most handy tool.</p>
+
+<p><blockquote><p>Interactions of multiple rules or compositions of calculations become extremely<br/>difficult to predict. The developer calling an operation must understand its<br/>implementation and the implementation of all its delegations in order to anticipate the<br/>result. The usefulness of any abstraction of interfaces is limited if the developers are<br/>forced to pierce the veil. Without safely predictable abstractions, the developers must<br/>limit the combinatory explosion, placing a low ceiling on the richness of behavior that is<br/>feasible to build.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>Unlike imperative programming, functional programming makes side effects an explicitly designated exception - side-effect-free functions are the norm. This pattern is yet another example of how well crafted object-oriented design converges upon a functional style.</p>
+
+<h3><a id="assertions"></a>Assertions</h3>
+
+<p>Like many patterns rooted in imperative object-oriented design, assertions purport to wield implicit side-effects.</p>
+
+<p><blockquote><p>When the side effects of operations are only defined implicitly by their implementation,<br/>designs with a lot of delegation become a tangle of cause and effect. The only way to<br/>understand a program is to trace execution through branching paths. The value of<br/>encapsulation is lost. The necessity of tracing concrete execution defeats abstraction.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>As with intention-revealing interfaces, assertions in functional languages are automatically encoded in the return type of a function in addition to the function name. In languages with powerful type systems such as F# and to a greater extent Scala, assertions often can be encoded by types directly making invalid states irrepresentable.</p>
+
+<h3><a id="conceptual-contours"></a>Conceptual Contours</h3>
+
+<p>Conceptual contours emerge when domain knowledge permeates the code to a sufficient degree. In object-oriented languages this can be achieved by carefully following principles of Domain-Driven Design.</p>
+
+<p><blockquote><p>When elements of a model or design are embedded in a monolithic construct, their<br/>functionality gets duplicated. The external interface doesn't say everything a client<br/>might care about. Their meaning is hard to understand, because different concepts are<br/>mixed together.</p></p><p><p>On the other hand, breaking down classes and methods can pointlessly complicate the<br/>client, forcing client objects to understand how tiny pieces fit together. Worse, a<br/>concept can be lost completely. Half of a uranium atom is not uranium. And of course, it<br/>isn't just grain size that counts, but just where the grain runs.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>In functional languages, conceptual contours emerge more readily, once again due to the declarative and side-effect free nature of the paradigm. Specifically, clients of the domain model can rely on cohesive functionality attained with composition and yet still have access to constituents without breaking encapsulation.</p>
+
+<h3><a id="closure-of-operations"></a>Closure of operations</h3>
+
+<p>Closure of operations illustrates yet another example of coercing composition and structure upon object-oriented designs.</p>
+
+<p><blockquote><p>Where it fits, define an operation whose return type is the same as the type of its<br/>argument(s). If the implementer has state that is used in the computation, then the<br/>implementer is effectively an argument of the operation, so the argument(s) and return<br/>value should be of the same type as the implementer. Such an operation is closed<br/>under the set of instances of that type. A closed operation provides a high-level<br/>interface without introducing any dependency on other concepts.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>Essentially, closure simplifies reasoning about a problem by restricting the domain of discourse. The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">example of a functional implementation of a domain</a> exhibits this characteristic at a fundamental levels. The operation of applying a domain event is closed under the set of domain states. In terms of persistence, this naturally translates to event-sourcing but also supports persistence in a key-value store or ORM with no required modification.</p>
+
+<h3><a id="declarative-design"></a>Declarative Design</h3>
+
+<p>The overall intent of the aforementioned patterns is to cultivate a declarative design. As witnessed, functional programming is inherently more declarative and therefore more accommodating in this regard. Through declarative design, we can better distill distinguishing characteristics of the domain and reduce or eliminate coupling to orthogonal concerns of infrastructure. Consequently, re-usability, testability, correctness, maintainability and productivity qualities are tremendously enhanced.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Subtleties of F# currying, partial application and eta-conversion]]></title>
+    <link href="http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/"/>
+    <updated>2013-01-25T20:55:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion</id>
+    <content type="html"><![CDATA[<p>F# is a functional programming language and as such provides various facilities for declaring, composing and transforming functions. Among these is <a href="http://en.wikipedia.org/wiki/Currying">currying</a> which allows multi-variable functions to be regarded as chains of single-parameter functions each returning a function with one less variable that the last. Partial application allows fixing variables of a curried function returning a new function of smaller arity. Viewing functions in this way affords several advantages, including representation in the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a>. An example in F# and a comparable C# implementation follow.</p>
+
+<!--more-->
+
+
+<p><div><script src='https://gist.github.com/4640182.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640182&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>and C#</p>
+
+<p><div><script src='https://gist.github.com/4640272.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640272&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The F# example contains a function <em>add</em> which is curried by default. The <em>add1</em> function is created via partial application on the <em>add</em> function. The <em>add1'</em> function has the same signature as <em>add1</em> and is declared without partial application but instead as direct invocation of <em>add</em>. In the C# example, the <em>Adder.Add1</em> function calls <em>Adder.Add</em> much like the <em>add1'</em> function in the F# example. The <em>CurriedAdder.Add1</em> is created in a manner more similar to F# by first curring <em>CurriedAdder.Add</em> with <em>CurriedAdder.Curry</em> and then fixing the first parameter.</p>
+
+<p>The difference between <em>add1</em> and <em>add1'</em> is subtle. They have the same signatures and produce equivalent results. However, the declaration of <em>add1</em> states that it <strong>is</strong> <em>add</em> with the first parameter fixed. The declaration of <em>add1'</em> however states that it <strong>calls</strong> <em>add</em> with <em>1</em> as the first argument and its own argument as the second. In the scenario of these simple arithmetic functions, the difference is insignificant. If instead of using an integer literal a <a href="http://en.wikipedia.org/wiki/Pure_function">impure function</a> call is made, behavior may change. For example:</p>
+
+<p><div><script src='https://gist.github.com/4662084.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662084&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Calling functions <em>addRand1</em> and <em>addRand2</em> will generate a new random number each time whereas in <em>addRand</em> the random value is effectively cached. The introduction of the variable <em>x</em> causes the invocation of the random function to be delayed and repeated. There are cases where this behavior is desirable, such as when encapsulating access to a cached data structure. For example:</p>
+
+<p><div><script src='https://gist.github.com/4662337.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662337&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Again, the signatures of <em>isPrime</em> and <em>isPrime2</em> are equivalent, except for presence of parenthesis in the first and explicit variable <em>x</em> in the second. The behavior is different however and in a scenario with larger sets it would be significant.</p>
+
+<p>The transformation from <em>isPrime</em> to <em>isPrime2</em> is called an <a href="http://www.haskell.org/haskellwiki/Eta_conversion">eta-abstraction</a> in the lambda calculus. The inverse transformation is called an eta-reduction and the functions are said to be equivalent under eta-conversion. However, while functions are equivalent under eta-conversion, their behavior may be different in a subtle way. Beyond the examples given here, eta-abstractions can also be used to resolve <a href="http://blogs.msdn.com/b/mulambda/archive/2010/05/01/value-restriction-in-f.aspx">value restriction errors</a> and to improve clarity of a <a href="http://en.wikipedia.org/wiki/Tacit_programming">point-free expression</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Inverting object-orientation with F# discriminated unions and pattern matching]]></title>
+    <link href="http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/"/>
+    <updated>2013-01-21T21:41:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching</id>
+    <content type="html"><![CDATA[<p><em>In this post I compare and contrast the use discriminated unions and pattern matching in F# to the object-oriented paradigm, particularly in C#. Additionally, aspects of the object-oriented approach are linked with GoF design patterns, multiple dispatch and the open-closed principle. Ultimately, discriminated unions are shown to address deficiencies in the imperative, object-oriented approach.</em></p>
+
+<!--more-->
+
+
+<p>One of the distinguishing types in F# as compared to most imperative object-oriented languages is the <a href="http://msdn.microsoft.com/en-us/library/dd233226.aspx">discriminated union</a>. A discriminated union is an <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data type</a> (<a href="http://en.wikipedia.org/wiki/F-algebra">F-algebra</a> for the mathematically inclined) which consists of a finite number of named cases which themselves can be of any type. A discriminated union value can be of one and only one case. In other words, a discriminated union is a <em>union</em> because the set of cases forms a <a href="http://en.wikipedia.org/wiki/Union_(set_theory)">union</a>. It is <em>discriminated</em> because each case is distinguished from the others by its name. Many F# types including <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">Option</a> and <a href="http://msdn.microsoft.com/en-us/library/dd233224.aspx">List</a> are defined as discriminated unions.</p>
+
+<p>In C# a discriminated union can be represented as a class hierarchy where the base class corresponds to the union as a whole and sub-classes correspond to the cases. The ability to represent a discriminated union in this way may lead to a dismissive attitude in object-oriented developers. After all, mere brevity of representation, although important, is hardly a reason in and of itself. However, discriminated unions coupled with <a href="http://msdn.microsoft.com/en-us/library/dd547125.aspx">pattern matching</a> take the discussion to a whole new level.</p>
+
+<p>A central principle of object-oriented programming is the encapsulation of data with related behavior inside boundaries defined by a class. This complexity management mechanism manifest at all levels of a software system, from the smallest objects to entire applications. Objects are also intuitive because of their feigning affiliation with reality. There are however certain deficiencies to the object-oriented approach. The deficiency addressed in this post is based on the observation that classes optimize for extensibility through <a href="http://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)">inheritance</a> thereby hiding inner structure. As a result, whenever behavior needs to depend on sub-classes of a class hierarchy it must either be placed directly into the sub-class or a derived class, or some hierarchy traversal mechanism must be employed.</p>
+
+<h2>The Visitor Pattern</h2>
+
+<p>Class hieararchy traversal can be implemented using several techniques. One such technique is the <a href="http://en.wikipedia.org/wiki/Visitor_pattern">visitor pattern</a> the goal of which is to augment existing class structures with new behavior without modifying said structures. Consider for instance the <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expressionvisitor.aspx">ExpressionVisitor</a> from the <a href="http://msdn.microsoft.com/en-us/library/bb506649.aspx">System.Linq.Expressions</a> namespace. This class is used to traverse the structure of code represented as an <a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree">AST</a>. Before this class was made public in the .NET Framework a similar implementation was used to implement LINQ support in NHibernate. This visitor pattern facilitates the <a href="http://en.wikipedia.org/wiki/Open/closed_principle">Open/closed principle</a> by allowing objects, <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx">Expression</a> instances in this case, to remain <em>closed</em> because they are not modified or inherited and <em>open</em> in that new behaviors are added - translation to the Hibernate Query Language in this case.</p>
+
+<p>The <em>ExpressionVisitor</em> operates by invoking an internal <em>Accept</em> method on an <em>Expression</em> instance. The <em>Expression</em> instance in turn effectively invokes a visit method on the visitor which corresponds to its specific type. The actual details are slightly more complicated, however the gist of the implementation follows:</p>
+
+<p><div><script src='https://gist.github.com/4601979.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4601979&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>To a large extent, the need for the visitor pattern is due to a lack of language support for <a href="http://en.wikipedia.org/wiki/Multiple_dispatch">multiple dispatch</a>. To understand multiple dispatch it is instructive to first consider <a href="http://en.wikipedia.org/wiki/Single_dispatch">single dispatch</a>. Single dispatch facilitates polymorphism in object-oriented languages by allowing method invocation to be based on the type of the instance which implements the method. Single dispatch is supported by most object-oriented languages including C# and Java. In multiple dispatch, the method invoked depends not only on the type of the instance, but also on the types of the arguments. The visitor pattern emulates multiple dispatch by employing single dispatch on the <em>Accept</em> method and then resolving the appropriate <em>Visit</em> method either with overloading or calling the method explicitly since the type of the visited object is handy.</p>
+
+<p>The visitor pattern isn't the only way to implement multiple dispatch. In C# for example, one could invoke the <a href="http://msdn.microsoft.com/en-us/library/dd233052.aspx">DLR</a>:</p>
+
+<p><div><script src='https://gist.github.com/4602404.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4602404&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This approach, while delegating the dispatch responsibilities to the runtime still suffers from a lack of static verification.</p>
+
+<h2>Enter Discriminated Unions</h2>
+
+<p>The problem with the visitor pattern is that it is tedious to implement and there is no support from the type system to ensure that all sub-types are accounted for making it error prone. In F#, discriminated unions and pattern matching address both of these problems in an elegant way. The <em>Expression</em> and <em>ExpressionVisitor</em> types could be implemented in the following way:</p>
+
+<p><div><script src='https://gist.github.com/4602257.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4602257&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The <em>Expression</em> is a recursively defined union type which corresponds to the class hierarchy of <a href="http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx">Expressions</a>. The sample also makes use of the <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">F# tuple type</a>. The <em>print</em> function accepts an expression value and unwraps it using pattern matching. This may initially seem like a glorified switch statement, however it is far more powerful. Most notably, the compiler ensures that all cases are handled. In this way, pattern matching turns any function accepting an expression into a statically checked "visitor".</p>
+
+<p>Discriminated unions and pattern matching aren't limited to shaming the visitor pattern. They can also be used to implement the <a href="http://en.wikipedia.org/wiki/State_pattern">state pattern</a>, also in a statically verifiable fashion. A great example of this can be found in <a href="http://fsharpforfunandprofit.com/posts/designing-with-types-representing-states/">Designing with types: Making state explicit</a>. The resulting design not only prevents invalid state behaviors at runtime, it prevents them at compile time.</p>
+
+<h2>Conclusion</h2>
+
+<p>We've witnessed the elegance with which discriminated unions address OOP deficiencies and lack of multiple dispatch. Discriminated unions and pattern matching allow data structures to be <em>inverted</em> such that they are not only open for extension but extension is guided by support from the type system. Additionally, brevity of expression establishes the discriminated union as an effective modeling tool - after all, a language should be a place to organize one's thoughts. By contrast, the optimization for extensibility by inheritance in the object-oriented paradigm hides inner object structure making it more difficult to augment class hierarchies. Given the OOP adage of favoring composition over inheritance, this leaves much to be desired in existing object-oriented languages.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Placing knowledge on center stage]]></title>
+    <link href="http://gorodinski.com/blog/2012/12/10/placing-knowledge-on-center-stage/"/>
+    <updated>2012-12-10T21:22:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2012/12/10/placing-knowledge-on-center-stage</id>
+    <content type="html"><![CDATA[<p><em>In this post I survey the evolution of various programming paradigms and emphasize the importance of expressing and isolating domain knowledge. Paradigms such as OOP, AOP, DCI, DDD, and Hexagonal are regarded as having a central goal of facilitating the representation of knowledge all while supporting integration with technical components. Finally I introduce a knowledge-driven architecture by Jeff Zhuk.</em></p>
+
+<!--more-->
+
+
+<p>The vast majority of computing today can be decomposed into operations of a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing Machine</a>. Contrarily, the vast majority of humans think in terms of concepts far beyond symbols on a tape. Perhaps, as alluded to by <a href="http://en.wikipedia.org/wiki/Douglas_Hofstadter">Douglas Hofstadter</a> in <a href="http://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach">Godel, Escher, Bach</a>, consciousness is merely an illusion established by a balance between self-knowledge and self-ignorance. Self-knowledge is the extent to which we are aware of our thoughts and are able to trace the actions of our mind. Self-ignorance consists of the sub-conscious as well as all of the functions of the <a href="http://en.wikipedia.org/wiki/Central_nervous_system">central nervous system</a>. Given a thought, we can likely factor it into constituent propositions and statements, which themselves may be further factored. On the other hand, we can't feel the firing of the underlying neurons or operations of the <a href="http://en.wikipedia.org/wiki/Cerebral_cortex">cerebral cortex</a>.</p>
+
+<p>Natural characteristics of the brain and mind are in turn reflected in the architectures of computing devices. The <a href="http://en.wikipedia.org/wiki/Central_processing_unit">CPU</a> performs very basic arithmetical and logical operations the fundamental principals of which have remained unchanged since its inception. The software which the CPU ultimately runs however is far more complex than those basic operations. Programming languages and the practice of software engineering have been devised to tame this dichotomy. Yet today, many years after the first CPU and the first program, there remains an ongoing battle between the lower-level forces of hardware and the higher-level forces of domain knowledge.</p>
+
+<h2>Imperative &amp; Declarative</h2>
+
+<p>The battle between man and machine is fittingly illustrated by the contrast between <a href="http://en.wikipedia.org/wiki/Imperative_programming">imperative languages</a> and <a href="http://en.wikipedia.org/wiki/Declarative_programming">declarative languages</a>. Imperative languages can be thought of as bottom-up <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstractions</a> over the underlying hardware. Declarative languages on the other hand are top-down - they represent information and leave it up to the language <a href="http://en.wikipedia.org/wiki/Compiler">compiler</a> to translate and convey this information to the underlying hardware. Functional languages in particular are declarative because they are implementations of the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a> on a Turing machine. In terms of practical utility, imperative languages have been winning the battle as evidenced by the <a href="http://langpop.com/">predominance of C</a> decades after its creation. The bare-bones simplicity of C and its proximity to the underlying machine are <a href="http://programmers.stackexchange.com/questions/141329/what-makes-c-so-popular-in-the-age-of-oop">part of the reason</a> for its continual relevance. What this indicates, however, is that programming language technology has yet to attain the level of abstraction and expressive power to make something like C less relevant.</p>
+
+<h2>Object-oriented</h2>
+
+<p>Regardless of the continual prevalence of lower level languages, ambitious attempts at elevating abstraction can provide valuable insight. Take for instance <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming</a>. <a href="http://en.wikipedia.org/wiki/Douglas_Engelbart">Douglas Engelbart</a> envisioned the computer as an extension of the human mind and OOP can be regarded as the incarnation of his vision. Today, OOP is a predominant programming paradigm. The problem is that the promise of object's capacity to capture the end user's mental can be deceptive. In the context of GUIs objects serve well in representing the domain. However, for other domains, especially ones based on reality such as <a href="http://en.wikipedia.org/wiki/Line_of_business">LOB</a> applications, OOP's weaknesses in expressing collaboration can become a notable design and modeling hindrance. OOP can also be somewhat misleading because a class can rarely represent its counterpart in reality to the full extent. For example, a bank account class in an ATM application may model state to represent the available balance and expose behavior for adjusting the balance while protecting invariants. This however represents a small fraction of the functionality required to perform a withdrawal, which also entails aspects such as transactions, server connections, etc. The ATM withdrawal example is drawn from an <a href="http://www.artima.com/articles/dci_vision.html">article on DCI architecture</a> which provides a framework for expressing collaborations between objects based on roles.</p>
+
+<h2>DCI, Hexagonal and Domain-Driven</h2>
+
+<p>The method of action of the DCI architecture facilitates explicit representation of domain knowledge by providing a tailored language of expression as an OOP based framework. DCI was devised in order to compensate for the lack of behavioral expressiveness in traditional OOP. Not surprisingly, similar instances of domain knowledge emphasis abound. An age old mantra in software engineering is the segregation of business logic from presentation and infrastructure logic. This segregation is beneficial not only due to advantages of traditional layering but also due to the emergent isolation of domain knowledge. Alistair Cockburn's <a href="http://alistair.cockburn.us/Hexagonal+architecture">Hexagonal Architecture</a> builds upon this idea and applies it at an architectural level. Domain knowledge is placed at the center with infrastructure components <em>adapting to</em> it. In a sense, knowledge "ripples" from the core throughout components which integrate this knowledge with infrastructure. Another prominent example of knowledge isolation is <a href="http://stackoverflow.com/tags/domain-driven-design/info">Domain-Driven Design</a>. A fundamental premise of DDD is placing focus on the core domain, on domain knowledge. The intent is to capture the informational core of the business problem. The remaining components of a working system, while being absolutely essential, are supporting in nature. In retrospect, all of this makes a great deal of sense - after all, computers were designed to solve human problems, not the other way around.</p>
+
+<h2>Aspect-oriented</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented programming</a> introduces new mechanisms of composition, partitioning and encapsulation through the notion of a <em>concern</em>. Concerns contain pieces of domain knowledge and the facilities provided by AOP enable composition of concerns and associated behaviors. As a whole, the aspect-oriented paradigm establishes an informational topology wherein knowledge propagates from the core domain out to supporting components. Much like the other paradigms, this type of topology is effective due to its positioning of domain knowledge at the center.</p>
+
+<h2>Rediscovering the I in IT</h2>
+
+<p>Despite significant advances in programming language theory and software architecture, the I in <a href="http://en.wikipedia.org/wiki/Information_technology">IT</a> is all too often overshadowed by the T. <a href="https://twitter.com/raganwald">Reg Braithwaite</a> portrays this phenomenon in <a href="http://raganwald.com/2006/12/economizing-can-be-penny-wise-and.html">Economizing can be penny-wise and pound foolish</a> by coloring code to depict the signal to noise ratio. Green colored code is code that directly express the problem at hand. Yellow colored code represents the accidental complexity of a programming language. Red represents code which has no identifiable function. The goal then is to eliminate red code, reduce yellow code and emphasize the green code.</p>
+
+<p>How can we get there? Where are the weakest links? To some extent the issue is driven by the fact that programming languages carry a double burden. On one hand, a programming language is a place to organize one's thoughts and express domain knowledge. On the other hand, a programming language must be compiled or interpreted to be ultimately converted into a series of elementary memory manipulation statements. As such, programming languages must be expressive yet simple to use, unambiguous and preferably <a href="http://en.wikipedia.org/wiki/Formal_verification">verifiablee</a>. Expressiveness, simplicity and verifiability are a tough bunch to triage.</p>
+
+<h2>Formal Techniques</h2>
+
+<p>Systems such as <a href="http://en.wikipedia.org/wiki/Hoare_logic">Hoare logic</a>, <a href="http://en.wikipedia.org/wiki/Specification_language">algebraic specification languages</a> and <a href="http://en.wikipedia.org/wiki/Denotational_semantics">denotational semantics</a> are powerful formal verification methods but demand a great deal of sophistication on the part of the programmer and are often impractical as a result. <a href="http://en.wikipedia.org/wiki/Type_system">Type systems</a> encompass formal methods which are sufficiently tractable to be widely applicable, yet mainstream programming languages usually support only the tip of the iceberg of the theoretical capabilities. For instance, <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data types</a> such as <a href="http://msdn.microsoft.com/en-us/library/dd233226.aspx">discriminated unions</a> and the associated <a href="http://en.wikipedia.org/wiki/Pattern_matching">pattern matching</a> techniques are powerful mechanisms for expressing domain knowledge. Yet these techniques aren't available in mainstream OOP languages such as Java, C#, etc. They are available in functional languages such as F#, but even most functional languages don't support higher order techniques such as the polymorphic lambda calculus <a href="http://en.wikipedia.org/wiki/System_F">System F</a>. This seemingly relentless friction leads to some concerning questions. Are modern programming languages approaching the boundaries of the balance between power and accessibility? Will programmers need to embrace more advanced formal techniques in order to advance the state of the art?</p>
+
+<h2>Knowledge-Driven Architectures</h2>
+
+<p>All of the above-mentioned paradigms share a common goal of facilitating the conversation between humans and computers. <a href="http://en.wikipedia.org/wiki/Semantic_architecture">Semantic architectures</a> embody yet another approach to distilling knowledge in software systems. Semantic architectures involve technologies and practices such as <a href="http://en.wikipedia.org/wiki/Ontology_engineering">ontological engineering</a>, the <a href="http://en.wikipedia.org/wiki/Semantic_Web">semantic web</a> and the <a href="http://en.wikipedia.org/wiki/Web_Ontology_Language">Web Ontology Language (OWL)</a>. These relatively new fields of computer science evolved from the observation that domain knowledge is the the most important aspect of a computer system. In order to be practical, <a href="http://groups.csail.mit.edu/medg/ftp/psz/k-rep.html">knowledge representation</a> schemes should allow not only for expressive but also for seamless integration with the infrastructure. Ontology languages such as <a href="http://en.wikipedia.org/wiki/CycL">CycL</a> aim to provide such environments. With <a href="http://semanticweb.com/it-of-the-future-semantic-cloud-architecture_b31649">IT of the Future: Semantic Cloud Architecture</a> <a href="http://www.linkedin.com/pub/jeff-yefim-zhuk/6/76b/3a">Jeff Zhuk</a> outlines a transition from existing SOA architectures to novel knowledge-driven architectures. Knowledge-driven architectures aim to align business and IT and eliminate duplication of knowledge. In this way, they are an evolution of the SOA vision.</p>
+]]></content>
+  </entry>
+  
+</feed>

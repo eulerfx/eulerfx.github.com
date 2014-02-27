@@ -1,0 +1,283 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Domain-Driven Design (DDD) with F# and EventStore - Projections - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="In this post I cover the introduction of simple projections into the InventoryItem domain project implemented with F# and EventStore. Projections &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-24T18:36:00-05:00" pubdate data-updated="true">Feb 24<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/cqrs/'>CQRS</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/eventstore/'>EventStore</a>, <a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/event-sourcing/'>event sourcing</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Domain-Driven Design (DDD) With F# and EventStore - Projections</h1>
+	<div class="entry-content"><p><em>In this post I cover the introduction of simple projections into the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">InventoryItem domain project</a> implemented with F# and <a href="http://geteventstore.com/">EventStore</a>.</em></p>
+
+<p><a href="http://cqrsguide.com/doc:projection">Projections</a> implement the query side of CQRS. Specifically in EventStore, projections are a mechanism for transforming event streams into other event streams. This has a wide range of applications including <a href="http://en.wikipedia.org/wiki/Complex_event_processing">CEP</a>. For this project, projections were used to generate read models, also known as views or query models.</p>
+
+<!--more-->
+
+
+<h2>Overview Projection</h2>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/OverviewReadModelProjection.js">OverviewReadModelProjection.js</a> projection counts the total number of items in inventory. It does so by selecting events which change the count, namely <em>ItemsCheckedIn</em> and <em>ItemsRemoved</em>. Each occurrence of those events adjusts a state variable and emits a snapshot of the variable as an event. This event can then be retrieved as a read model to serve a query.</p>
+
+<div><script src='https://gist.github.com/5028145.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028145&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>As described in the <a href="http://geteventstore.com/blog/category/projections/">projections series</a> on the EventStore blog, the call to <em>emit</em> emits an event to an event stream with identity &#8220;InventoryItemOverviewReadModel&#8221;. The <em>fromCategory()</em> function selects events in a specified category. Events are categorized by a built-in projection <a href="https://github.com/EventStore/EventStore/blob/master/src/EventStore/EventStore.Projections.Core/Standard/CategorizeEventsByStreamPath.cs">$by_category</a> which determines the category from the stream ID. The object passed into the <em>when()</em> function contains functions for handling the desired events as well as a state initialization function. The first parameter of the event handling functions is a state variable maintained by EventStore. The state variable can be scoped at the projection level or per event stream, depending on how events are selected. In this case, the state variable is scoped at the projection level. The second variable is the event itself. It has the following structure:</p>
+
+<div><script src='https://gist.github.com/5028185.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028185&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The values contains the stream ID, event body, metadata, event type and other details. Note that this structure is dictated by the serialization format. As such, care must be take to ensure the structure is palatable both in streams, projections and code.</p>
+
+<h2>Inventory Item State Projection</h2>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/FlatReadModelProjection.js">FlatReadModelProjection.js</a> projection captures the state of individual inventory items including their name, count and active flag.</p>
+
+<div><script src='https://gist.github.com/5028201.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028201&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>In this case, events are partitioned by stream with the <em>foreachStream()</em> function. As a result, the state variable will be a associated with each stream. The emitted events will be retrievable using the ID of the source aggregate stream and have category &#8220;InventoryItemFlatReadModel&#8221;, for example &#8220;InventoryItemFlatReadModel-880852396f0f48c6b73d017333cb99ba&#8221;.</p>
+
+<h2>Reading</h2>
+
+<p>The projections are retrieved as read models using the <a href="https://github.com/EventStore/EventStore/blob/master/src/EventStore/EventStore.ClientAPI/EventStoreConnection.cs#L548">ReadStreamEventsBackward</a> function to read the last event:</p>
+
+<div><script src='https://gist.github.com/5028226.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028226&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The read models are declared in F# as follows in the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/ReadModels.fs">ReadModels module</a>:</p>
+
+<div><script src='https://gist.github.com/5028231.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028231&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>Note that the structure of the read models has to match the structure of the events emitted by the projection.</p>
+
+<h2>Conclusion</h2>
+
+<p>Projections in EventStore are a powerful mechanism with a wide array of applications. In this post, they were shown to support some basic read models. However, some scenarios can call for a document database or full-text search. In such cases events can be dispatched outside of the event store.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/';
+        var disqus_url = 'http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

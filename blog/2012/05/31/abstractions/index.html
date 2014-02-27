@@ -1,0 +1,286 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Abstractions - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="Abstraction is a fundamental operation of the mind. (According to Wikipedia, abstraction is believed to have developed between 50,000 and 100,000 &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2012/05/31/abstractions/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-31T00:02:00-04:00" pubdate data-updated="true">May 31<span>st</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/philosophy/'>philosophy</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Abstractions</h1>
+	<div class="entry-content"><p>Abstraction is a fundamental operation of the mind. (According to <a href="http://en.wikipedia.org/wiki/Abstraction#Origins">Wikipedia</a>, abstraction is believed to have developed between 50,000 and 100,000 years ago). In philosophy, <a href="http://en.wikipedia.org/wiki/John_Locke">Locke</a> views abstraction as the act of separating from ideas all other ideas which accompany them in their real existence. In computer science, <a href="http://en.wikipedia.org/wiki/Edsger_Dijkstra">Dijkstra</a> views abstraction as the creation of new semantic levels. Locke&#8217;s definition is structural in that abstraction tends to remove aspects of an idea, especially aspects that make an idea concrete. Dijkstra&#8217;s definition emphasizes the goal of abstraction. After all, it doesn&#8217;t seem sufficient for abstraction to be the separation of <strong>arbitrary</strong> aspects from ideas. Instead, it is the chiseling away of <strong>specific</strong> characteristics that bring value to abstraction. Characteristics are removed yielding an idea that isolates interesting components of a less abstract idea. One advantage of this process is that of generality - propositions believed to be true about an abstract notion should also hold for the more specific notion. Another advantage is that of encapsulation - references can be made to abstractions instead of concretions thereby simplifying the problem space by disregarding unimportant details. <a href="http://www.joelonsoftware.com/">Joel Spolsky</a>, with the <a href="http://www.joelonsoftware.com/articles/LeakyAbstractions.html">Law of Leaky Abstractions</a>, observes that &#8220;All non-trivial abstractions, to some degree, are leaky&#8221;. This observation alludes to the dark side of abstraction - the side where abstraction is misguided, shortsighted and of course leaky. The law stems from the software engineering perspective, however, it is applicable to all manifestations of abstraction. In software engineering in particular, the act of abstraction is pervasive - function declarations, class declarations, assignment of variables are all acts of abstraction. As such, software engineering also provides ample opportunity for leaky and needless abstractions.</p>
+
+<!--more-->
+
+
+<p>In hindsight, abstraction is absolutely fascinating. Without it, one would be hard-pressed to envision human thought let alone language, mathematics, art, etc. Abstraction breeds generalization and these concepts are perhaps shadows of a single principle cast in different directions. Abstraction itself hinges upon another capacity of thought, <a href="http://en.wikipedia.org/wiki/Symbol">symbology</a>, which at the most fundamental level is association between entities. And thus encapsulation is made - with association between a symbol and its meaning. Encapsulation is a mechanism for managing complexity in the face of limits upon resources of the mind. The mind can only have a certain number of things under consideration and without abstraction, generalization and encapsulation, compound ideas could not be formed. We&#8217;ve now derived Locke&#8217;s three acts of the mind:</p>
+
+<blockquote><p>The acts of the mind, wherein it exerts its power over simple ideas, are chiefly these three: 1. Combining several simple ideas into one compound one, and thus all complex ideas are made. 2. The second is bringing two ideas, whether simple or complex, together, and setting them by one another so as to take a view of them at once, without uniting them into one, by which it gets all its ideas of relations. 3. The third is separating them from all other ideas that accompany them in their real existence: this is called abstraction, and thus all its general ideas are made.</p><footer><strong>John Locke</strong> <cite>An Essay Concerning Human Understanding (1690)</cite></footer></blockquote>
+
+
+<p>The concept of abstraction can be illustrated in a variety of ways, all <a href="http://bit.ly/dbeIfU">reducible</a> to each other. In a sense, the different portrayals of abstraction are different manifestations and implications of a fundamental axiom. Abstraction can be viewed as representation in that an abstract entity <em>represents</em> a concrete entity. An abstraction can also be defined as a <a href="http://en.wikipedia.org/wiki/Subset">strict subsets</a> of commonalities between things.</p>
+
+<h2>Linguistics</h2>
+
+<p>In linguistics, abstraction emerges in various forms and one particularly peculiar form is the abstraction hierarchy that is the relation among <a href="http://en.wikipedia.org/wiki/Syntactics">syntax</a>, <a href="http://en.wikipedia.org/wiki/Semantics">semantics</a>, and <a href="http://en.wikipedia.org/wiki/Pragmatics">pragmatics</a>. Syntactics, is the study of relations of signs to one another. This is an abstraction of relations between signs and meanings, which is semantics. Semantics, in turn, is an abstraction of pragmatics which is the study of relations between signs and contextual interpretations. This hierarchical aspect of abstraction is also revealed in linguistics as relations between words ordered by generality, such as for instance the ordering between <a href="http://en.wikipedia.org/wiki/Noam_Chomsky">Noam Chomsky</a>, a specific person and the simply <a href="http://en.wikipedia.org/wiki/Person">person</a>, a more general term that encapsulates references to any person.</p>
+
+<h2>Nature</h2>
+
+<p>Abstraction is not a human made creation but is present throughout nature. Abstraction at the <a href="http://en.wikipedia.org/wiki/Quantum_mechanics">quantum level</a> allows for the formation of compound structures such as atoms and molecules which in turn combine into cells and ultimately into all forms of life. It is no surprise then that abstraction manifests in human <a href="http://en.wikipedia.org/wiki/Cognition">cognition</a> which can be viewed as an extension of the complex chain of abstractions leading up to it, as an <a href="http://www.iscid.org/encyclopedia/Emergent_Properties_of_Biological_Systems">emergent behavior</a>. The <a href="http://en.wikipedia.org/wiki/Brain">brain</a> is the <a href="http://www.wired.com/science/discoveries/news/2008/01/connectomics?currentPage=all">most complex structure in the universe</a> and perhaps computer systems will have to emulate biology beyond <a href="http://en.wikipedia.org/wiki/Artificial_neural_network">artificial neural networks</a> in order to exhibit such complexity.</p>
+
+<h2>Mathematics</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Category_theory">Category theory</a> is a pinnacle of abstraction in mathematics. It purports to formally unify all mathematical disciplines by way of abstractions - collections of <em>objects</em> and <em>arrows</em>. An example from an older discipline of Group Theory, follows. The <a href="http://en.wikipedia.org/wiki/Abelian_group">Abelian group</a> is an abstraction of the familiar integers (more specifically the operation of addition of integers). The group is named after, <a href="http://en.wikipedia.org/wiki/Niels_Henrik_Abel">Niels Henrik Abel</a>, who independently invented group theory to prove a theorem regarding solutions to 5th degree polynomials. This is an example of the power of generality in mathematics - it makes reasoning about certain aspects of mathematics more natural and even elegant.</p>
+
+<h3>Mathematical Physics</h3>
+
+<p>In 1928, With the <a href="http://en.wikipedia.org/wiki/Dirac_equation">Dirac equation</a>, Paul Dirac postulated the existence of the <a href="http://en.wikipedia.org/wiki/Positron">positron</a>. The mathematical model allowed for an electron with positive charge which seemed to contradict experimental results at the time. Ultimately, Dirac&#8217;s equation lead to a remarkable discovery in quantum physics and an eerie and intimate relationship between mathematics and reality. This marks yet another mathematical abstraction success story where mathematics, a discipline devised by humans, makes predictions about the physical world. In comparison to other disciplines, mathematics has an advantage in that it is self-defined and purified from real world concerns. Definitions and problem statements are reduced to elementary concepts which allows abstraction to thrive. By contrast, abstractions in programming can become &#8220;leaky&#8221; due to forces that cannot be removed from consideration.</p>
+
+<h2>Computer Science / Software Engineering</h2>
+
+<p>Abstraction is a cornerstone of computer programming and it echoes throughout the hierarchy starting with machine language, continuing with the C programming language and leading all the way up to user facing application components such as windows, buttons, etc. Low-level programming languages, such as assembly, are termed as such due to the low degree of abstraction between the language and the underlying hardware. Low-level languages are elementary, but difficult to use for construction of complex applications because of the impedance mis-match between human thought and machine codes. Furthermore, a low degree of abstraction implies a high degree of coupling to the underlying hardware thereby reducing portability. High-level programming languages consist of statements and expressions that are closer to natural language. Since high-level programming languages must still run on a computer they are translated to lower level languages, ultimately resulting in machine code. This translation process creates a layer of abstraction, which enables increased portability and expressiveness. The need for translation however is also a cause of trouble for abstractions in computer programming. The reality is that the mechanics of the underlying hardware cannot be entirely escaped and are bound to creep into higher levels if not managed properly. Take for example <a href="http://bit.ly/qaOHl">garbage collection</a> which purports to abstract away memory management. While a powerful abstraction it carries a set of compromises that cannot be overlooked. One is determinism - since required memory manipulation operations are executed behind the scenes, the programmer cannot be certain of the memory state of the system. Another compromise is hidden complexity - while for the most part programmers can forget about memory management, they must also be aware of a complex GC system at play to understand certain intricacies of their programs.</p>
+
+<h3>OOP</h3>
+
+<p>In <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">OOP</a>, classes and interfaces are mechanisms of abstraction. The concept of inheritance in OOP borrows from inheritance in nature and allows specialization and reuse. Classes, however, support only a narrow view of abstraction. Any graduate of an entry level OOP course should be able to understand the difference between a class and an instance of a class - an object. The difference however is very much arbitrary. An instance of a class stores state in fields declared in the class definition. In this way, an instance of a class is distinguished from the class itself - it can store specific values. What if the instance could not only hold state, but can be augmented with new behaviours? Is it still the same &#8220;class&#8221;, or is it a new thing all together? From the perspective of syntax the difference between a class and an object is evident. From a perspective outside of syntax, an object can be viewed as a class for a whole new set of objects which derive from and specialize the class in some way. <a href="http://en.wikipedia.org/wiki/Prototype-based_programming">Prototype-based programming</a> languages, such as JavaScript, don&#8217;t utilize classes as abstraction mechanisms, instead supporting the cloning of objects allowing any object to serve as a prototype for another. This is a more fluid and flexible approach to abstraction, although compromising on some of the benefits of OOP.</p>
+
+<h3>MDA</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Model-driven_architecture">Model-Driven architecture</a> aims to raise the level of abstractions in software engineering beyond specific development platforms with use of <a href="http://en.wikipedia.org/wiki/Domain-specific_language">domain-specific languages</a> and transformation tools. However, as of today, MDA techniques have yet to gain industry acceptance or demonstrate a concrete value proposition. This is due to a variety of <a href="http://en.wikipedia.org/wiki/Model-driven_architecture#MDA_concerns">reasons</a> and perhaps there is a limit to the degree of abstraction attainable, at least with current approaches.</p>
+
+<h3>Von Neumann Architecture</h3>
+
+<p>As another testament to elevating abstractions, <a href="http://en.wikipedia.org/wiki/John_Backus">John Backus</a> called for the liberation of programming from the <a href="http://en.wikipedia.org/wiki/Von_Neumann_programming_languages">Von Neumann style</a> in his Turing Award <a href="http://www.cs.cmu.edu/~crary/819-f09/Backus78.pdf">lecture</a>. The vast majority of modern computers are based on the Von Neumann Architecture and the vast majority of programming languages are abstract <a href="http://en.wikipedia.org/wiki/Isomorphism">isomorphisms</a> of this architecture. This basically means that there is a one-one mapping between the hardware and software. Backus coined the term &#8220;Von Neumann bottleneck&#8221; in reference to both hardware and software limitations that are byproducts of this isomorphism. In the hardware context there is a literal bottleneck which inhibits performance due to limits to data transfer between <a href="http://en.wikipedia.org/wiki/Computer_memory">memory</a> and the <a href="http://en.wikipedia.org/wiki/Central_processing_unit">processing unit</a>. In the intellectual sense, there is a bottleneck which inhibits reasoning about programs because the architecture encourages a variable-at-a-time thinking. Backus proposes <a href="http://en.wikipedia.org/wiki/Functional_programming">functional programming languages</a> as an evolution of the Von Neumann style and over 30 years after his lecture, his propositions are becoming mainstream. Unfortunately, we&#8217;ve yet to witness significant advancements beyond the Von Neumann bottleneck and it remains one of the challenges of abstraction in computer science.</p>
+
+<h3>Success</h3>
+
+<p>Although great challenges lie ahead, the fields of software and hardware engineering have had immense success with abstractions. Just consider all the intricacies involved in something as simple as opening a website as elucidated in <a href="https://plus.google.com/112218872649456413744/posts/dfydM2Cnepe">Dizzying but invisible depth</a>. It is a humbling experience to even begin to fathom the countless moving parts, the years of the evolution of human knowledge, the countless brilliant minds that make this seemingly simple action possible.</p>
+
+<h3>Needless Abstractions</h3>
+
+<p>Needless abstractions are abstractions that don&#8217;t bring value. The definition of value, of course, is subjective which highlights the qualitative nature of abstraction. In other words, not all abstractions are created equal - if abstraction is to create new semantic levels and manage complexity it must be invoked in ways appropriate to a given context. Needless abstractions arise when the programmer&#8217;s mental model of the program is reflected directly in code without regard for its utility. An interface may be extracted from a class thereby creating an abstraction, however if the interface isn&#8217;t used then it brings no value. Instead it can raise confusion and unnecessary dependencies. Avoiding needless abstractions can be difficult because designing abstractions is what programming is all about. The programmer scans his or hers mental model, detecting commonalities, forming composites, mapping relationships and this process can create abstraction-waste-by-product. An example from enterprise development is the <a href="http://codebetter.com/gregyoung/2009/01/16/ddd-the-generic-repository/">generic repository</a>. While the intent is alluring - to reuse and generalize data access code, the drawbacks outweigh the benefits. Moreover, the apparent benefits are misguided and can be attained using more appropriate methods.</p>
+
+<p>The drive for abstractions is a natural consequence of programming, however it must be kept in balance, as often presented by <a href="http://ayende.com/blog/">Ayende</a> with his &#8220;Limit your Abstractions&#8221; series. Conversely, avoiding abstractions for fear of complexity shouldn&#8217;t be the default position, because well designed abstractions have the potential to improve clarity, reuse and ultimately advance the state of the art. Additionally, abstractions can furnish encapsulation, which is much needed in programming where one must be capable of switching between levels of abstraction different by orders of magnitude.</p>
+
+<p>When designing abstractions, it is beneficial to keep in mind principles such as <a href="http://www.codinghorror.com/blog/2004/10/kiss-and-yagni.html">YAGNI and KISS</a>. <em>True wisdom is held in combating complexity with expressiveness, not at the cost of expressiveness - just enough abstraction, but no more.</em> Needless abstractions can emerge at all scopes of software engineering, from the developer to the architect. After all, developers and architects are on different ends of the same spectrum the central distinction being that architects analyze applications at higher levels of abstraction. Many of the driving forces however are the same, which is why many times patterns that apply at the class level are also applicable at the system integration level.</p>
+
+<h3>Abstraction Challenges</h3>
+
+<p>The leap in abstraction between machine language and C, achieved in the <a href="http://bit.ly/KPfUX">early seventies</a>, is yet to be surpassed. For instance, the leap in abstraction between C and C# is minimal and owes more to <a href="http://bit.ly/qaOHl">garbage collection</a>, runtime libraries and <a href="http://en.wikipedia.org/wiki/Syntactic_sugar">syntactic sugar</a> than to semantics and expressiveness. Both languages are <a href="http://en.wikipedia.org/wiki/Third-generation_programming_language">third generation</a>. Fourth-generation languages are domain-specific pockets of higher levels of abstraction and declarative-ness, such as SQL. Fifth-generation languages, such as <a href="http://en.wikipedia.org/wiki/Prolog">Prolog</a>, are further abstractions away from machine language however we&#8217;re still far from working with levels of abstraction accessible to humans. Japan&#8217;s failed <a href="http://en.wikipedia.org/wiki/Fifth_generation_computer">5th generation computer</a> project is a paragon of the challenges of abstraction. There seems to be a bottleneck in our current approaches and methodologies. If we encounter challenges with something seemingly simply as <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">object-to-relational mapping</a> then surely we will encounter challenges in mapping program code to natural thought. How do we map Von Neumann machines to a largely uncharted network of billions of neurons? Is there a limit to what can be achieved with current hardware technology? In order to attain greater sophistication, will computers have to become more like biological organisms? Will this compromise determinism?</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2012/05/31/abstractions/';
+        var disqus_url = 'http://gorodinski.com/blog/2012/05/31/abstractions/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

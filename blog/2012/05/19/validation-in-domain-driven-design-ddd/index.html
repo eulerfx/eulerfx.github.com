@@ -1,0 +1,307 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Validation in Domain-Driven Design (DDD) - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-19T14:27:00-04:00" pubdate data-updated="true">May 19<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Validation in Domain-Driven Design (DDD)</h1>
+	<div class="entry-content"><p>Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice because it must be implemented throughout all areas of an application, typically employing different methods for each area. In a general sense, validation is a mechanism for ensuring operations result in a valid states. The ambiguity in that statement must not be overlooked because it illustrates several important characteristics of validation. One characteristic is context - the context under which validation is invoked. Context is critical because validation in one context may not be applicable in another context. Another corollary is the open-endedness of what is regarded as valid. Validity may be a trivial statement such as &#8220;The string representing a customer&#8217;s name must not be null&#8221; or it may be a complex sequence of <a href="http://en.wikipedia.org/wiki/CycL">CycL</a> assertions. This post addresses validation as manifest in DDD-based enterprise applications. Validation, in this post, is distinct from a related discipline of <a href="http://bit.ly/JjLUA2">correctness</a> in theoretical computer science as researched by the likes of <a href="http://en.wikipedia.org/wiki/Edsger_Dijkstra">Edsger Dijkstra</a>.</p>
+
+<!--more-->
+
+
+<h2>Always Valid</h2>
+
+<p>In domain-driven design, there are two schools of thought regarding validation which revolve around the notion of the always valid <a href="http://domaindrivendesign.org/node/109">entity</a>. Jeffrey Palermo <a href="http://jeffreypalermo.com/blog/the-fallacy-of-the-always-valid-entity/">proposes</a> that the always valid entity is a fallacy. He suggests that validation logic should be decoupled from the entity which would defer the determination of the validation rules to invoke until runtime. The other school of thought, <a href="http://codebetter.com/gregyoung/2009/05/22/always-valid/">supported</a> by Greg Young and others, asserts that entities should be always valid. (<em>I must admit that I side with the always-valid school of though and therefore my statements are be biased.</em>)</p>
+
+<p>The scenarios explored by Palermo are certainly suitable and typical, however solutions involving always-valid entities can be implemented. He contends the following considerations for his example:</p>
+
+<ul>
+<li>The fact that name is required needs to be context-bound. When is it invalid?</li>
+<li>The message should be the responsibility of the presentation layer.</li>
+<li>When loading historical data, some genders may be missing. Should the application blow up when loading data?</li>
+<li>When loading historical data, perhaps the user needs to enter a gender when he edits his profile the next time.</li>
+</ul>
+
+
+<p>Point one addresses the fact that if the user profile entity prevents a null name from being assigned, all application code where a null name might be assigned will blow up. Palmero&#8217;s solution is to decouple validation such that code where this might happen invokes a different set of validation rules, if any. An alternative solution is to use a different model designed toward that particular scenario. In fact the <a href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">read-model pattern</a> can be a fitting approach. The second point discusses error messages in the presentation layer. User error messages certainly are the responsibility of the presentation layer, but the always-valid entity does not imply that error messages in exceptions raised by the entity should be propagated directly to the presentation layer. Contrarily, this is regarded as an anti-pattern and a potential security thread. Instead, the presentation layer, viewed as an adapter in a <a href="http://alistair.cockburn.us/Hexagonal+architecture">Hexagonal architecture</a>, should catch and interpret the exception translating it into a form applicable to the UI framework at hand. Finally, the last two points discuss an interesting evolutionary issue. Suppose that a gender attribute is introduced into the user profile entity. It is evident that existing users won&#8217;t have a gender specified. This is a realistic business scenario and a from a business perspective the users without a specified gender are simply users without a specified gender. When translated into code, this could mean a gender type of &#8220;unspecified&#8221;. This gender type can serve as a flag to initiate the workflow which asks the user to specify a gender. For new users, the presentation layer can enforce the rule that a gender must be specified. There is no need to allow the entity to enter an invalid state. From the DDD perspective, validation rules can be viewed as invariants. One of the central responsibilities of an <a href="http://domaindrivendesign.org/node/88">aggregate</a> is enforcement of invariants across state changes.</p>
+
+<p>Jimmy Bogard writes:</p>
+
+<blockquote><p>If we start looking at command/query separation and closure of operations not only on our service objects but our entities as well, we can treat our entities with a little more respect and not drag them around into areas they don&#8217;t really belong. Simply put, if we control the operation side of the equation, why in the world would we allow our entities to get into an invalid state? Life becomes much more complicated if we start having &#8220;IsValid&#8221; properties on our entities.</p><footer><strong>Jimmy Bogard</strong> <cite><a href='http://lostechies.com/jimmybogard/2009/02/15/validation-in-a-ddd-world/'>Validation in a DDD World</a></cite></footer></blockquote>
+
+
+<p>These succinct statements carry a great deal of information. First is the idea of the &#8220;IsValid&#8221; property. A requirement to invoke validation or to query an &#8220;IsValid&#8221; property requires calling code to be non-atomic and this can lead to inconsistencies and a greater potential for human error. It is a difference between:</p>
+
+<div><script src='https://gist.github.com/2733065.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2733065&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>and this:</p>
+
+<div><script src='https://gist.github.com/2733072.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2733072&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The second code sample requires clients of the UserProfile class to be aware of the &#8220;IsValid&#8221; property and always use it consistently. The first code sample avoids this all together - the operation of instantiating a user profile is atomic. This is a good example of leveraging programming language constructs to represent real world constraints.  The next important part of Bogard&#8217;s statement is &#8220;not drag them around into areas they don&#8217;t really belong&#8221; which leads into the subsequent section on application layers. If entity validation seems inappropriate in a certain area then this may be an indication that an entity doesn&#8217;t belong in that area.</p>
+
+<h2>Application Layers</h2>
+
+<p>All sufficiently complex enterprise applications consist of multiple layers. From a user&#8217;s perspective the layers are abstracted away and they exist solely to assist the programmer in managing all of the emergent complexity. Distinct layers imply that translation must happen between the layers in order for information to propagate. For example, in a typical enterprise use case, an entity is loaded from the database, operated upon, persisted back to the database and information regarding the operation is returned to the user through a presentation layer via perhaps a REST adapter. Applications layers imply the existence of boundaries and as per Mark Seemann&#8217;s post, <a href="http://blog.ploeh.dk/2011/05/31/AtTheBoundariesApplicationsAreNotObjectOriented.aspx">At the Boundaries, Applications are Not Object-Oriented</a>. The entity is contained within the domain layer and should not be dragged into areas it doesn&#8217;t belong. In the presentation layer, a specific <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC</a> view may require a user to enter a name and then gender. After having entered a name, the gender is still unspecified and the target entity is an invalid state. An always-valid entity cannot be bound to this view and it fact it should not be bound to the view - this is what the <a href="http://en.wikipedia.org/wiki/Model_View_ViewModel">view model</a> is for. The view model is a building block of the presentation layer and the domain entity doesn&#8217;t belong there. Instead, an appropriate domain layer entity should be created based on data contained in the view model. This can be done directly or by passing a <a href="http://en.wikipedia.org/wiki/Data_transfer_object">DTO</a> to a service.</p>
+
+<h2>Validation Frameworks</h2>
+
+<p>Validation can be implemented with trivial if-then control flows but this can become cumbersome and the programmer&#8217;s answer is the validation framework. A plurality of validation frameworks abound including <a href="http://msdn.microsoft.com/en-us/library/ee256141.aspx">data annotations</a>, <a href="http://fluentvalidation.codeplex.com/">FluentValidation</a>, <a href="http://nhforge.org/wikis/validator/nhibernate-validator-1-0-0-documentation.aspx">NHibernate Validators</a>, <a href="http://msdn.microsoft.com/en-us/library/ff648951.aspx">Enterprise Library Validation Block</a>, etc. Validation frameworks however, can be abused because one can be lead into thinking that a framework solves all validation concerns, across all application layers. Unfortunately, this is not always possible. In practice, I&#8217;ve found that validation frameworks are best suited for use at application layer boundaries - such as validation user input in the presentation layer, ensuring database constraints at the the persistence layer, or enforcing conformance to a schema in a REST adapter. Implementing validation at each layer separately allows validation to be context specific. However, this can lead to a degree of duplication, in response to which <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a> fanatics will scream blasphemy. This subject is addressed in the next section.</p>
+
+<p>The domain layer is best kept lean with use of plain-old-exceptions to enforce validation rules. This is because validation frameworks carry a requirement to invoke the application framework, similar to the &#8220;IsValid&#8221; methodology addressed above. A presentation layer developed with ASP.NET MVC provides action handlers to inject validation invocation logic. In this way, a validation framework can be applied globally toward the entire application. Similar injection points don&#8217;t exist in plain C# or Java code, and use of an <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">AOP</a> framework can add needless complexity. This programming language &#8220;short-coming&#8221; can be overcome with extensions to <a href="http://blogs.msdn.com/b/ericlippert/archive/2009/03/23/five-dollar-words-for-programmers-part-three-homoiconic.aspx">homoiconicity</a>. [.NET Code Contracts] can be regarded as a validation framework with extended static verification. The more general paradigm of <a href="http://en.wikipedia.org/wiki/Design_by_contract">Design by contract</a> proposes that software should be written in terms of formal and verifiable specifications. The <a href="http://bit.ly/YN6JL">Eiffel programming language</a>, the <a href="http://en.wikipedia.org/wiki/Bertrand_Meyer">creator</a> of which gave use [command-query separation] (http://bit.ly/oAo2b) among other things, is based on this principle at the its very core.</p>
+
+<h2>Duplication Validation Logic</h2>
+
+<p>A Stackoverflow <a href="http://stackoverflow.com/questions/6966288/ddd-client-side-validation/6976171">question</a> asks whether there is a way to re-use validation logic. In practice, it is often simpler to allow a degree of duplication rather than to strive for complete consistency. Consider the following example. Suppose we have a customer entity where the customer&#8217;s name is required. Enforcing this constraint in the entity is trivial:</p>
+
+<div><script src='https://gist.github.com/2766814.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2766814&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>An entity never stands alone however and we must consider the clients of this class. Who calls the constructor? In a web application implemented using ASP.NET MVC there would be a corresponding customer view model. This view model is part of the presentation layer and is designed with data binding in mind. Data annotations can be used to declare validation rules:</p>
+
+<div><script src='https://gist.github.com/2766824.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2766824&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>This class is very similar to the domain entity class but with several important differences. It has a parameterless constructor, a name property without a guard clause and a data annotations validation attribute. These aspects of this class make it suitable for use in the presentation layer. Instead of attempting to carry validation rules from the entity class, the name requirement constraint is effectively duplicated. This is indeed duplication, but it must much simpler to manager than a some sort of validation mapping framework.</p>
+
+<h2>Complex Validation</h2>
+
+<p>Entities can enforce certain invariants but the scope of these invariants are always limited by the entity itself. Since entities should be lean and self-contained, without access to external services or repositories, they may not have access to the resources required to enforce certain validation rules. In this case, the <a href="http://gorodinski.com/blog/2012/04/14/services-in-domain-driven-design-ddd/">application service</a> can serve a mediating role and procure the resources required to enforce validity. There exist business rules that are not natural responsibilities of an entity or a validation framework. For example, a uniqueness constraint on user&#8217;s user name cannot be verified by an entity because the entity does not and should not have access to the database of existing users. Instead, this rule can be enforced in the application service. Furthermore, rules may become sufficiently complex to warrant a <a href="http://en.wikipedia.org/wiki/Business_rules_engine">business rules engine</a>, in which case the application service is once again tasked with enforcing validation. An even more ambitious discipline is <a href="http://en.wikipedia.org/wiki/Ontology_engineering">ontology engineering</a> where CycL is an ontology language. Ontological engineering purports to formalize all business rules in machine executable representations. Jeff Zhuk, one of the leading practitioners in this field, proposes a <a href="http://semanticweb.com/from-business-as-usual-to-knowledge-driven-architecture-part-i_b21243">Knowledge Driven Architecture</a> based on these technologies.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>Entities should enforce their own consistency and be always-valid. What is the purpose of an entity if not to enforce its own consistency?</li>
+<li>If a need arises to allow an entity to enter an invalid state, consider whether application boundaries are at play which call for a different object model.</li>
+<li>Validation frameworks are best used at specific application layers, not across all layers.</li>
+<li>It is easier to duplicate validation logic than to keep it consistent across application layers.</li>
+<li>The application service can enforce complex validation rules not accessible to an entity.</li>
+</ul>
+
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/';
+        var disqus_url = 'http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

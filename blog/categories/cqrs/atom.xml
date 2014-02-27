@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: CQRS | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/cqrs/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Domain-Driven Design (DDD) with F# and EventStore - Projections]]></title>
+    <link href="http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/"/>
+    <updated>2013-02-24T18:36:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections</id>
+    <content type="html"><![CDATA[<p><em>In this post I cover the introduction of simple projections into the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">InventoryItem domain project</a> implemented with F# and <a href="http://geteventstore.com/">EventStore</a>.</em></p>
+
+<p><a href="http://cqrsguide.com/doc:projection">Projections</a> implement the query side of CQRS. Specifically in EventStore, projections are a mechanism for transforming event streams into other event streams. This has a wide range of applications including <a href="http://en.wikipedia.org/wiki/Complex_event_processing">CEP</a>. For this project, projections were used to generate read models, also known as views or query models.</p>
+
+<!--more-->
+
+
+<h2>Overview Projection</h2>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/OverviewReadModelProjection.js">OverviewReadModelProjection.js</a> projection counts the total number of items in inventory. It does so by selecting events which change the count, namely <em>ItemsCheckedIn</em> and <em>ItemsRemoved</em>. Each occurrence of those events adjusts a state variable and emits a snapshot of the variable as an event. This event can then be retrieved as a read model to serve a query.</p>
+
+<p><div><script src='https://gist.github.com/5028145.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028145&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>As described in the <a href="http://geteventstore.com/blog/category/projections/">projections series</a> on the EventStore blog, the call to <em>emit</em> emits an event to an event stream with identity "InventoryItemOverviewReadModel". The <em>fromCategory()</em> function selects events in a specified category. Events are categorized by a built-in projection <a href="https://github.com/EventStore/EventStore/blob/master/src/EventStore/EventStore.Projections.Core/Standard/CategorizeEventsByStreamPath.cs">$by_category</a> which determines the category from the stream ID. The object passed into the <em>when()</em> function contains functions for handling the desired events as well as a state initialization function. The first parameter of the event handling functions is a state variable maintained by EventStore. The state variable can be scoped at the projection level or per event stream, depending on how events are selected. In this case, the state variable is scoped at the projection level. The second variable is the event itself. It has the following structure:</p>
+
+<p><div><script src='https://gist.github.com/5028185.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028185&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The values contains the stream ID, event body, metadata, event type and other details. Note that this structure is dictated by the serialization format. As such, care must be take to ensure the structure is palatable both in streams, projections and code.</p>
+
+<h2>Inventory Item State Projection</h2>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/FlatReadModelProjection.js">FlatReadModelProjection.js</a> projection captures the state of individual inventory items including their name, count and active flag.</p>
+
+<p><div><script src='https://gist.github.com/5028201.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028201&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In this case, events are partitioned by stream with the <em>foreachStream()</em> function. As a result, the state variable will be a associated with each stream. The emitted events will be retrievable using the ID of the source aggregate stream and have category "InventoryItemFlatReadModel", for example "InventoryItemFlatReadModel-880852396f0f48c6b73d017333cb99ba".</p>
+
+<h2>Reading</h2>
+
+<p>The projections are retrieved as read models using the <a href="https://github.com/EventStore/EventStore/blob/master/src/EventStore/EventStore.ClientAPI/EventStoreConnection.cs#L548">ReadStreamEventsBackward</a> function to read the last event:</p>
+
+<p><div><script src='https://gist.github.com/5028226.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028226&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The read models are declared in F# as follows in the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/ReadModels.fs">ReadModels module</a>:</p>
+
+<p><div><script src='https://gist.github.com/5028231.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/5028231&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Note that the structure of the read models has to match the structure of the events emitted by the projection.</p>
+
+<h2>Conclusion</h2>
+
+<p>Projections in EventStore are a powerful mechanism with a wide array of applications. In this post, they were shown to support some basic read models. However, some scenarios can call for a document database or full-text search. In such cases events can be dispatched outside of the event store.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Domain-Driven Design (DDD) with F# and EventStore]]></title>
+    <link href="http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore/"/>
+    <updated>2013-02-17T19:04:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/02/17/domain-driven-design-with-fsharp-and-eventstore</id>
+    <content type="html"><![CDATA[<p><em>In this post I present a methodology for implementing Domain-Driven Design (DDD) using F# and <a href="http://geteventstore.com/">EventStore</a>. The described approach makes use of idiomatic functional constructs, especially where they bring value beyond the traditional object-oriented and procedural paradigms. In this manner, the functional and object-oriented paradigms are contrasted. The natural alignment between functional programming and event sourcing is exploited and implemented with EventStore. Note that this project is a spike and is a work in early stages of progress.</em></p>
+
+<!--more-->
+
+
+<p>Implementing a design in a programming language once the model is conceived in the mind is often trivial by comparison. As a result, over time, the apparent value of a programming language can become diminished. Regardless of the added features in the next version of C# or Java, they all seem like mere syntactic sugar. F# and the functional paradigm have shifted my perspective on this.</p>
+
+<p>The ambitions of both Domain-Driven Design and functional programming can be regarded as one and the same - that of streamlining the representation of domain knowledge in a formal system with the goal of enabling automation and integration. Functional programming emphasizes declarativeness with use of functions, expressions, immutability and algebraic data structures. These building blocks can be used for both the expression of domain knowledge and the furnishing of a framework for persistent execution of use cases.</p>
+
+<p>The example in this post is based on <a href="https://github.com/gregoryyoung/m-r">SimpleCQRS</a> by <a href="http://goodenoughsoftware.net/">Greg Young</a>. An existing F# implementation of this project is <a href="https://github.com/Thorium/SimpleCQRS-FSharp">SimpleCQRS-FSharp</a> by <a href="https://github.com/Thorium">Tuomas Hietanen</a>. A more idiomatic F# implementation is <a href="https://github.com/thinkbeforecoding/m-r">FsSimpleCQRS</a> by <a href="https://github.com/thinkbeforecoding">Jérémie Chassaing</a>. The example in this post aims to further free the implementation from establishmentarianist object-oriented practices. In fact, the use of classes is contained to integrations with the serialization library and the EventStore API. Classes were avoided in order to explore the benefits and drawbacks of the alternative. Caution was used to prevent focus on technology for the sake of technology alone. As such, the uses of functional techniques are entirely justified.</p>
+
+<h2>Analysis</h2>
+
+<p>The core of an OOP DDD implementation consists of classes which represent entities, value objects and domain services. These elements embody the informational core of the project. The remaining components integrate the informational core with infrastructure that connects the domain to databases for persistence, UIs for user interaction and other services.</p>
+
+<h3>Domain Module</h3>
+
+<p>The informational core in this example is contained in the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">InventoryItem</a> module:</p>
+
+<p><div><script src='https://gist.github.com/4975035.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975035&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This single F# source file contains the representation of <em>InventoryItem</em> aggregate state as well as the commands and events associated with the aggregate. Together, these elements capture the entirety of the core domain logic associated with an inventory item. Compared to both the original C# implementation and the referenced F# implementations, this implementation attains a greater degree of encapsulation. By looking at this module alone one could glean an understanding of the functionality of the domain. Furthermore, the use of discriminated unions ensures that all commands and events are explicitly handled with static verification. Unions bring the additional benefit of a uniform interface which is exploited by the <em>Aggregate</em> module described in the next section.</p>
+
+<p>There is no need for an aggregate base class because persistence of state is delegated to infrastructural components defined in outer layers. The identity value is taken out of the domain module because the domain logic itself has no need for it. This allows the identity value type to be defined in outer layers. Once we let go of the aging object-oriented and procedural practices we observe that they are only one of the many options.</p>
+
+<h3>Aggregate Module</h3>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">Aggregate</a> module declares an abstraction of an aggregate and uses the abstraction to define a persistent command handler:</p>
+
+<p><div><script src='https://gist.github.com/4975076.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4975076&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The aggregate abstraction is made possible by the use of a uniform interface for executing commands upon aggregate state. Application of persisted events is made with the <a href="http://en.wikipedia.org/wiki/Fold_(higher-order_function)">fold higher-order function</a> - another staple of functional programming. The <a href="https://github.com/eulerfx/DDDInventoryItemFSharpW/blob/master/DDDInventoryItemFSharp/IntegrationTests.fs">IntegrationTests</a> module employs the aggregate module to define a command handler by wiring the EventStore and the serialization module.</p>
+
+<h3>EventStore Module</h3>
+
+<p>The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs">EventStore</a> module contains the integration with EventStore. This initial implementation is specific to <em>InventoryItem</em> however it can be easily generalized by generalizing the serializer.</p>
+
+<h2>Summary</h2>
+
+<p>The F# implementation in this post is more concise, more encapsulated, more declarative, more statically verified, and contains far less noise. I would argue that it is also more readable. Explicit factoring by functions elegantly replaces implicit factoring by class hierarchies. This establishes a dependency topology where the informational core is at the center with infrastructural and state related components orbiting in outer layers.</p>
+
+<p>In subsequent iterations, I will expand this example to contain query support via projections and read-models as well as a service layer. A more complex domain will further test this methodology. Specifically, I would like to explore the viability of these techniques with the introduction of behaviors bearing dependencies on domain services and behaviors involving complex invariants. Moreover, I would like to dig deeper into the use of F# types for representing domain state as described in <a href="http://fsharpforfunandprofit.com/series/designing-with-types.html">The Designing with types series</a>. The applicability of this approach within scenarios not employing event sourcing is also of interest. F# paves the way for a language-oriented programming paradigm. In particular, computation expressions support the redefinition of control flow constructs in arbitrary contexts. This technique has the potential to define a persistent context for workflows which execute domain logic. This will allow further isolation and encapsulation of the informational domain core.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">GitHub</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

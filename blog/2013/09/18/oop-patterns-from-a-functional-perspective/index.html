@@ -1,0 +1,386 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Object-oriented design patterns from a functional perspective - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="In this post I interpret design patterns and principles commonplace in object-oriented programming languages from the perspective of functional &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2013/09/18/oop-patterns-from-a-functional-perspective/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-18T21:50:00-04:00" pubdate data-updated="true">Sep 18<span>th</span>, 2013</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/fp/'>FP</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Object-oriented Design Patterns From a Functional Perspective</h1>
+	<div class="entry-content"><p><em>In this post I interpret design patterns and principles commonplace in <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming</a> languages from the perspective of <a href="http://en.wikipedia.org/wiki/Functional_programming">functional programming</a>. Most of these patterns are trivially reduced to elementary functional constructs. The intent is to illustrate advantages and insight resulting from a shift in paradigm. After all, both the object-oriented and the functional paradigm have a shared goal - the solution of some problem. The patterns discussed herein are a testament to this commonality. The difference between the paradigms lies in the underlying abstractions upon which they are established which in turn have significant ramifications for the problem solving tactics they engender. In particular, I argue that the object-oriented inheritance model and the paradigm&#8217;s primary utilization as an adorned state encapsulation mechanism are limiting factors in composing higher-level abstractions. Conversely, functional programming, being based on an entirely different <a href="http://en.wikipedia.org/wiki/Model_of_computation">model of computation</a>, eschews state, thereby bypassing accompanying hurdles and mandates composion from the core, thereby encouraging resuable abstractions.</em></p>
+
+<!--more-->
+
+
+<h2>Introduction</h2>
+
+<p>The following claims are based on a few years of experience developing applications with the functional paradigm. In particular, contrasts of the paradigms have been distilled through porting code samples for <a href="http://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577">Implementing Domain-Driven Design</a> from a <a href="https://github.com/VaughnVernon/IDDD_Samples_NET">Java/C# implementation</a> to an <a href="https://github.com/eulerfx/IDDDFSharpSamples">implementation in F#</a>.</p>
+
+<h2>Disclaimers</h2>
+
+<p>The analysis of the object-oriented paradigm herein is based particularly on its manifestation in languages like Java, C# and related languages. (<a href="http://www.cs.utexas.edu/~wcook/papers/OOPvsADT/CookOOPvsADT90.pdf">Variations of object-oriented programming without state have characteristics orthogonal to abstract data types (ADTs) employed in functional programming</a>). Functional programming examples are provided in F#.</p>
+
+<p>This topic has been addressed priorly. Peter Norvig <a href="http://www.norvig.com/design-patterns/">discussed</a> how most of the <em>GoF</em> patterns are <em>invisible or simpler</em> in LISP, calling the patterns <em>&#8220;programming language bug reports&#8221;</em>. Paul Graham <a href="http://www.paulgraham.com/icad.html">echoes</a> the notion. Similarly, Joe Armstrong describes <a href="http://harmful.cat-v.org/software/OO_programming/why_oo_sucks">why OO sucks</a>. Although both LISP and Erlang (designed by Armstrong) are dynamically type-checked, the arguments hold just as well for statically typed languages. In fact, the issue of typing is orthogonal.</p>
+
+<p>Arguably, the power of abstraction in functional programming can be a double edged sword. For example, a <a href="http://apocalisp.wordpress.com/2010/06/14/on-monoids/">monoid</a> is in essence a very simple abstraction - an interface consisting of two members. However, without some context, it can be troublesome to sense its value and utility. Abuse of such abstractions can lead to cryptic code, however this isn&#8217;t representative of the functional approach.</p>
+
+<p>Finally, the intent herein is not to undermine the object-oriented paradigm. In many ways, well crafted object-oriented code converges upon a functional style. This is no surprise because as stated earlier, the eventual goals of both paradigms are one and the same. It should also be stated that given the present state of the art, functional programming isn&#8217;t practical for all domains.</p>
+
+<h2>Overview</h2>
+
+<p>In this post I survey the <a href="http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)">SOLID</a> patterns followed by tactical patterns of <a href="http://en.wikipedia.org/wiki/Domain-driven_design">Domain-Driven Design</a>. These patterns are intimately related. The single-responsibility principle fosters the interface-segregation principle; the open/closed principle fosters the Liskov substitution principle. The dependency inversion principle fosters Domain-Driven Design.</p>
+
+<p>The central grievances with object-oriented programming as presented herein are summarized as follows.</p>
+
+<ul>
+<li>Binding data structure to behavior is a mechanisms of state encapsulation which hides the underlying problem instead of solving it.</li>
+<li>A great deal of effort goes into making inheritance possible. Ironically, object-orientated patterns themselves favor composition over inheritance. Ultimately, in being a jack of two responsibilities - subtyping and reuse - inheritance is a master of neither and does a inferior job with both.</li>
+</ul>
+
+
+<p>The distinguishing characteristics of functional programming that address these grievances are summarized as follows.</p>
+
+<ul>
+<li>Explicit management of state is avoided through immutability.</li>
+<li>Explicit return values are favored over implicit side effects.</li>
+<li>Powerful composition facilities promote reuse without compromising encapsulation.</li>
+<li>The culmination of these characteristics is a more declarative paradigm.</li>
+</ul>
+
+
+<h2><a id="solid"></a>SOLID</h2>
+
+<h3><a id="single-responsibility-principle"></a>Single-responsibility Principle</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Single_responsibility_principle">single-responsibility principle</a> states that <em>every class should have a single responsibility</em> where a responsibility is roughly defined as a reason to change. The principle compensates for the anti-pattern where bloated classes play multiple roles. Classes can bloat for a few reasons. A core principle of object-oriented programming is the binding of data structure to behavior. The problem is that optimizing for data structure encapsulation not only weakens composition characteristics, but also hides the underlying problem of explicit state. As a result, object-oriented code typically contains many data structures with relatively few functions per data structure. Adding methods to a class exerts pressure on the single-responsibility principle and reducing the number of methods can either make the data structure difficult to compose or all together fruitless. Furthermore, the simple syntactical cost of declaring a class often compels programmers to marginalize. In less verbose languages, particularly dynamic ones like Ruby and Python, this problem is less prevalent. In my opinion, the importance of this purely mechanical issue must not be understated. A great deal of effort is put into optimizing development with IDEs and other tools, yet optimization can often be achieved at a far more fundamental level.</p>
+
+<p>In functional programming, the fundamental unit of abstraction is the function. Given that a function has a single input and a single output, functions naturally have a single responsibility. One could certainly define arbitrarily generic function, though this would be counterintuitive. Moreover, functions are syntacticly thrifty.</p>
+
+<h3><a id="open-closed-principle"></a>Open/closed Principle</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Open/closed_principle">open/closed principle</a> states that <em>software entities should be open for extension, but closed for modification</em>. The ambiguity of this statement can be resolved through two variations of the principle. The variation due to Bertrand Meyer simply states that existing classes should only be modified in order to correct bugs. This restriction delivers the closed aspect of the principle. The open aspect is delivered through <em>implementation inheritance</em>, or in other words, inheritance with the goal of reuse rather than <a href="http://en.wikipedia.org/wiki/Subtype_polymorphism">subtyping</a>. The variation due to Robert C. Martin espouses openness through polymorphism which by definition also provides for closure since extensibility is supported through substitution rather than modification. Unfortunately, substitution often leads to accidental complexity, which must be addressed by yet another principle - the Liskov substitution principle discussed in the following section.</p>
+
+<p>The primary utility of the open/closed principle is confinement of cascading changes while providing for extensibility. This is achieved by designing for extensibility and prohibiting changes to existing entities. Extensibility is attained by fancy tricks with abstract classes and virtual functions. Closure is attained by encapsulation, or rather by the hiding of moving parts. The existence of this principle merely exposes the object-oriented paradigm as a transitional introduction of polymorphism to imperative, state-oriented paradigms.</p>
+
+<p>In a functional language, functions can be substituted at will and as such, there is no need to &#8220;design&#8221; for extensibility. Functionality requiring parametrization is naturally declared as such. Instead of inventing a concept of a virtual method and inheritance, one can rely on an existing, elementary concept - the <a href="http://en.wikipedia.org/wiki/Higher-order_function">higher-order function</a>.</p>
+
+<h3><a id="liskov-substitution-principle"></a>Liskov Substitution Principle</h3>
+
+<p>The <a href="http://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a> is essentially a restricted instance of subtyping which aims to guarantee semantic portability across class hierarchies. Portability is achieved by ensuring that whatever is true of a base type is also true of all subtypes. Subclasses must not strengthen preconditions - they must accept all input and initial state that the base class accepts and subclasses must not weaken postconditions - behavioral expectations declared by the base class must be met by the subclass. These characteristics cannot be enforced by the type system alone. The <em>is a</em> relation of inheritance is thus deceptive - hence the need for a compensating principle. As such, the need for this principle demonstrates a pitfall in subtype (inclusion-based) polymorphism. Implicit factoring by class hierarchy imposes needless inclusion restrictions and requires complex principles o place a bound on accidental complexity.</p>
+
+<p>Functional languages favor <a href="http://en.wikipedia.org/wiki/Parametric_polymorphism">parametric polymorphism</a> with <a href="http://en.wikipedia.org/wiki/Bounded_quantification">bounded quantification</a> thereby avoiding some of the pitfalls of inheritance. Informally, functional languages emphasize substitutability and deemphasize implementation reuse since reuse is better achieved through composition. Most ambitions of the Liskov substitution principle <a href="http://apocalisp.wordpress.com/2010/10/06/liskov-substitution-principle-is-contravariance/">are effectively trivial</a> in a functional language.</p>
+
+<h3><a id="interface-segregation-principle"></a>Interface Segregation Principle</h3>
+
+<p>The interface segregation principle states that <em>no client should be forced to depend on methods it does not use</em>. In essence it is a restatement of the single-responsibility principle for interfaces and reflects the same underlying problem - the difficulty of balancing responsibility assignment, composition and encapsulation in object-oriented design. On the one hand, it is desirable to encapsulate, on the other hand it is desirable to compose. Furthermore, the problem with employing the interface-segregation principle alone is that it doesn&#8217;t directly protect against class bloat and in some ways hides the problem.</p>
+
+<p>Functional programming reduces the need for encapsulation by eschewing state and breeds composition at the core. There is no augmented concept of role-based interfaces because function roles are explicit at the onset. Functions are segregated by default.</p>
+
+<h3><a id="dependency-inversion-principle"></a>Dependency Inversion Principle</h3>
+
+<p>The dependency inversion principle states that high-level modules should be decoupled from low-level modules through abstractions. In other words, the principle states that code should be structured around the problem domain, and the domain should declare dependencies on required infrastructure as interfaces. Dependencies thus point inward to the domain model. The reason this principle is an <em>inversion</em> is because typical architectures promoted by the object-oriented approach (via layer architecture) exhibit dependency graphs where high-level modules consume low-level modules directly. Initially, this dependency graph seems natural, since in expressing domain models in code one inevitably depends upon the constructs of the language. Procedural programming allows dependencies to be encapsulated by procedures. Subtype polymorphism defers procedure implementation. Unfortunately, use of subtype polymorphism (interfaces) is often overlooked for expressing domain dependencies in object-oriented implementations. Given that infrastructure code is typically more voluminous, the focus of the code drifts away from the domain. Domain-Driven Design was devised in part to balance this drift.</p>
+
+<p>As a matter of course, the declarative and side-effect free nature of functional programming provide for dependency inversion. In object-oriented programming, high-level modules depend on infrastructure modules primarily to invoke side-effects. In functional programming, side-effects are more naturally triggered <em>in response</em> to domain behavior as opposed to being <em>directly invoked by</em> domain behavior. Thus dependencies become not merely inverted, but pushed to outer layers all together.</p>
+
+<h2><a id="tell-dont-ask"></a>Tell, Don&#8217;t Ask</h2>
+
+<p>The <a href="http://pragprog.com/articles/tell-dont-ask">Tell, Don&#8217;t Ask principle</a> states that <em>you should endeavor to tell objects what you want them to do; do not ask them questions about their state, make a decision, and then tell them what to do.</em> One strategy for this endeavor is the <a href="http://en.wikipedia.org/wiki/Command%E2%80%93query_separation">Command/Query Separation principle</a>. The paradox however is that in attempting to strengthen object-oriented code these principles propose a segregation of data structure and behavior. Combining data structure to behavior obfuscates the distinction between <em>observations</em> about an object and <em>behaviors</em> supported the object. In functional programming, observations are data structures and behaviors are functions - the distinction is crystal clear. Furthermore, invariants can be declared with types instead of state making invalid states irrepresentable. For example, the iterator referenced in the statement of the pattern can be succinctly represented as:</p>
+
+<div><script src='https://gist.github.com/7000167.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/7000167&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>When an iterator value is of type <em>End</em> there is no syntacticly valid way to obtain the next element. Not only is the code much shorter, it is more robust.</p>
+
+<h2><a id="domain-driven-design"></a>Domain-Driven Design</h2>
+
+<h3><a id="aggregate"></a>Aggregate</h3>
+
+<p>The concept of the aggregate remains in functional programming, however it isn&#8217;t expressed in terms of a class. Instead, it can be expressed as a quintuple, consisting of a set of aggregate states, an initial state, a set of commands, a set of events and a function mapping the set of commands onto the set of events given a state. Cohesion is provided by a module mechanism. The benefit of this formal definition is improved composition and reuse characteristics. A <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">functional F# implementation of a domain-driven design</a> illustrates this approach. There are no dependencies on persistence infrastructure and the same domain model can be used in an event-sourcing implementation, a key-value store as well as an ORM. Moreover, domain event side effects can be delegated to outer layers without reliance on side-effects. Contrast this implementation with <a href="https://github.com/gregoryyoung/m-r/blob/master/SimpleCQRS/Domain.cs">an implementation in C#</a> which only supports event sourcing.</p>
+
+<h3><a id="immutable-value-objects"></a>Immutable value objects</h3>
+
+<p>Functional languages typically provide immutable record (product) and union (sum) types with auto-implemented structural equality which addresses this pattern trivially. Heavy reliance on state in object-oriented programming makes references or pointers a first class citizen rather than the structure of the data itself. Furthermore, the syntactical cost of declaring value object classes as well as difficulties in operating upon them can lead to <a href="http://c2.com/cgi/wiki?PrimitiveObsession">primitive obsession</a>. While it is certainly possible to declare immutable classes in object-oriented languages, heavy use of this concept quite simply calls for better tools.</p>
+
+<p>Contrast</p>
+
+<div><script src='https://gist.github.com/6999570.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/6999570&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>with</p>
+
+<div><script src='https://gist.github.com/6999582.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/6999582&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<h3><a id="domain-events"></a>Domain Events</h3>
+
+<p>Domain events are a powerful mechanism for keeping domain models encapsulated. This is accomplished by allowing various handlers from outer layers to register for a domain event. The problem with domain events in object-oriented languages is that the <a href="http://www.udidahan.com/2009/06/14/domain-events-salvation/">typical implementation</a> is complex and relies on side-effects. Event registrations are typically declared in the <a href="http://blog.ploeh.dk/2011/07/28/CompositionRoot/">composition root</a> and thus it isn&#8217;t immediately obvious from the perspective of the publisher which handlers will be invoked. In a functional language, a domain event is simply a value returned by a function in an aggregate. Interested parties can be explicitly registered as filters. This technique is illustrated by the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/Aggregate.fs">F# DDD example</a>. Returning domain events from aggregate methods in an object-oriented language is prohibitive due to lack of union types and pattern matching.</p>
+
+<h3><a id="intention-revealing-interface"></a>Intention-revealing interface</h3>
+
+<p>In imperative object-oriented code, intent leaks through side-effects and through focus on the <em>how</em> rather than the <em>what</em>. Always having to bind behavior to data structure can also be problematic.</p>
+
+<blockquote><p>If a developer must consider the implementation of a component in order to use it, the<br/>value of encapsulation is lost. If someone other than the original developer must infer<br/>the purpose of an object or operation based on its implementation, that new developer<br/>may infer a purpose that the operation or class fulfills only by chance. If that was not<br/>the intent, the code may work for the moment, but the conceptual basis of the design<br/>will have been corrupted, and the two developers will be working at cross-purposes.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote>
+
+
+<p>Since functional programming is more declarative, function names and interfaces tend to be more focused on intent rather than the the underlying mechanics. In addition, the interfaces of side-effect-free functions are by nature more revealing because behavior is made explicit through the return value. As a result, in addition to a purely linguistic benefit of naming with intent, intent is also encoded by the type system. This is not to say that expressing intent is effortless in functional languages. Only that it is better supported by the paradigm.</p>
+
+<h3><a id="side-effect-free-functions"></a>Side-effect-free functions</h3>
+
+<p>The following excerpt is resounding evidence against the imperative object-oriented programming style. Side-effects are in direct opposition to encapsulation yet all too often they are the most handy tool.</p>
+
+<blockquote><p>Interactions of multiple rules or compositions of calculations become extremely<br/>difficult to predict. The developer calling an operation must understand its<br/>implementation and the implementation of all its delegations in order to anticipate the<br/>result. The usefulness of any abstraction of interfaces is limited if the developers are<br/>forced to pierce the veil. Without safely predictable abstractions, the developers must<br/>limit the combinatory explosion, placing a low ceiling on the richness of behavior that is<br/>feasible to build.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote>
+
+
+<p>Unlike imperative programming, functional programming makes side effects an explicitly designated exception - side-effect-free functions are the norm. This pattern is yet another example of how well crafted object-oriented design converges upon a functional style.</p>
+
+<h3><a id="assertions"></a>Assertions</h3>
+
+<p>Like many patterns rooted in imperative object-oriented design, assertions purport to wield implicit side-effects.</p>
+
+<blockquote><p>When the side effects of operations are only defined implicitly by their implementation,<br/>designs with a lot of delegation become a tangle of cause and effect. The only way to<br/>understand a program is to trace execution through branching paths. The value of<br/>encapsulation is lost. The necessity of tracing concrete execution defeats abstraction.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote>
+
+
+<p>As with intention-revealing interfaces, assertions in functional languages are automatically encoded in the return type of a function in addition to the function name. In languages with powerful type systems such as F# and to a greater extent Scala, assertions often can be encoded by types directly making invalid states irrepresentable.</p>
+
+<h3><a id="conceptual-contours"></a>Conceptual Contours</h3>
+
+<p>Conceptual contours emerge when domain knowledge permeates the code to a sufficient degree. In object-oriented languages this can be achieved by carefully following principles of Domain-Driven Design.</p>
+
+<blockquote><p>When elements of a model or design are embedded in a monolithic construct, their<br/>functionality gets duplicated. The external interface doesn&#8217;t say everything a client<br/>might care about. Their meaning is hard to understand, because different concepts are<br/>mixed together.</p><p>On the other hand, breaking down classes and methods can pointlessly complicate the<br/>client, forcing client objects to understand how tiny pieces fit together. Worse, a<br/>concept can be lost completely. Half of a uranium atom is not uranium. And of course, it<br/>isn&#8217;t just grain size that counts, but just where the grain runs.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote>
+
+
+<p>In functional languages, conceptual contours emerge more readily, once again due to the declarative and side-effect free nature of the paradigm. Specifically, clients of the domain model can rely on cohesive functionality attained with composition and yet still have access to constituents without breaking encapsulation.</p>
+
+<h3><a id="closure-of-operations"></a>Closure of operations</h3>
+
+<p>Closure of operations illustrates yet another example of coercing composition and structure upon object-oriented designs.</p>
+
+<blockquote><p>Where it fits, define an operation whose return type is the same as the type of its<br/>argument(s). If the implementer has state that is used in the computation, then the<br/>implementer is effectively an argument of the operation, so the argument(s) and return<br/>value should be of the same type as the implementer. Such an operation is closed<br/>under the set of instances of that type. A closed operation provides a high-level<br/>interface without introducing any dependency on other concepts.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote>
+
+
+<p>Essentially, closure simplifies reasoning about a problem by restricting the domain of discourse. The <a href="https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/InventoryItem.fs">example of a functional implementation of a domain</a> exhibits this characteristic at a fundamental levels. The operation of applying a domain event is closed under the set of domain states. In terms of persistence, this naturally translates to event-sourcing but also supports persistence in a key-value store or ORM with no required modification.</p>
+
+<h3><a id="declarative-design"></a>Declarative Design</h3>
+
+<p>The overall intent of the aforementioned patterns is to cultivate a declarative design. As witnessed, functional programming is inherently more declarative and therefore more accommodating in this regard. Through declarative design, we can better distill distinguishing characteristics of the domain and reduce or eliminate coupling to orthogonal concerns of infrastructure. Consequently, re-usability, testability, correctness, maintainability and productivity qualities are tremendously enhanced.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2013/09/18/oop-patterns-from-a-functional-perspective/';
+        var disqus_url = 'http://gorodinski.com/blog/2013/09/18/oop-patterns-from-a-functional-perspective/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

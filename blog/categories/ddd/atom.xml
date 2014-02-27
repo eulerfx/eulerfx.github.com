@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ddd | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/ddd/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Implementing associations with references and repositories in Domain-Driven Design (DDD)]]></title>
+    <link href="http://gorodinski.com/blog/2012/07/24/implementing-associations-with-references-or-repositories-in-domain-driven-design-ddd/"/>
+    <updated>2012-07-24T23:07:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/07/24/implementing-associations-with-references-or-repositories-in-domain-driven-design-ddd</id>
+    <content type="html"><![CDATA[<p>Domain-Driven Design places great emphasis on modeling the domain and representing the model in code and the ubiquitous language. A model is an abstraction of reality which preserves aspects interesting for solving a particular problem. Consider the stereotypical order model consisting of a sales order, line items and a customer. The problem is trivial - storing and managing order data and the aspects that are interesting to this problem are confined to a narrow perspective of the entirety of what an order and a customer is. The model of a sales order may contain an order number, a date, a shipping address and finally line item details such as price and quantity. Expressing every aspect of an order is of course prohibitive and defeats the utility of the model.</p>
+
+<!--more-->
+
+
+<p>A primary method for implementing associations is with object <a href="http://blogs.msdn.com/b/ericlippert/archive/2011/03/07/references-and-pointers-part-one.aspx">references</a>. For example, a customer class may reference an address class which allows calling code to traverse the relationship obtain a customer's address. Another method for expressing relationships is with a <a href="http://domaindrivendesign.org/node/123">repository</a>. Repositories can express relationships by providing access to associated entities by means of a database search. <a href="https://twitter.com/ericevans0/">Eric Evans</a> states:</p>
+
+<p><blockquote><p>Whether to provide a traversal or depend on a search becomes a design decision, trading off the decoupling of the search against the cohesiveness of the association. Should the Customer object hold a collection of all the Orders placed? Or should the Orders be found in the database, with a search on the Customer ID field? The right combination of search and association makes the design comprehensible.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>Making the decision between employing a reference or a repository is an art of compromise. Furthermore, neither can serve as a substitute for the other in all cases and thus the developer is faced with managing two very different implementation approaches. <strong>The important thing to remember is that both methods share a common goal of reflecting the model.</strong> A simple way to make the determination is by asking whether a reference is required to support behavior. Often times a reference is used to implement a relationship in order to fulfill a display requirement alone. This can lead one onto a precarious path resulting in the entity becoming increasingly convoluted and intractable. Instead, a repository can be used to implement the association keeping the entity lean. Additionally, the <a href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">read-model pattern</a> presents a suitable alternative for fulfilling display requirements. The benefits of <a href="http://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a> in the context of DDD further promote the notion of keeping entities behavior centric.</p>
+
+<p>Both references and repositories are pertinent implementations of associations in the model. References are inherently cohesive and are thus best suited for associations which are required for behavior or maintenance of integrity. Repositories are best suited for associations which can or must be decoupled from the entity. For example, a customer may be associated with a collection of orders. This collection may become arbitrarily large thus demanding filtering capabilities. Moreover, in a typical scenario, the only behavior in the customer class dependent on the collection of orders is the creating of new orders. The creation of new orders can be just as easily accommodated with a factory and a repository. Repositories can also be utilized instead of lazily loaded references because lazy loading can be <a href="http://gorodinski.com/blog/2012/06/16/orm-lazy-loading-pitfalls/">problematic</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

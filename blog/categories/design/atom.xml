@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: design | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/design/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Abstraction and Encapsulation]]></title>
+    <link href="http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation/"/>
+    <updated>2012-09-16T15:07:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation</id>
+    <content type="html"><![CDATA[<p>The notions of <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstraction</a> and encapsulation are prevalent throughout the realm of programming and are intimately related. Their differences are subtle indeed and warrant careful examination. Specifically, the differences are most apparent on the basis of <em>intent</em>. Ultimately, encapsulation can be viewed as a structural aspect of abstraction which can be employed without the intent to abstract.</p>
+
+<!--more-->
+
+
+<p>Abstraction is frequently associated with the intent to re-use. Identification of an abstraction followed by the preparation of a suitable representation allows code operating upon abstraction to be shared among derived instances of the abstraction. This is traditional <a href="http://en.wikipedia.org/wiki/Polymorphism_in_object-oriented_programming">OOP polymorphism</a> at play.</p>
+
+<p>Application of abstraction must be judicious because it incurs a non-trivial cost. It forges a dependency chain which in turn requires maintenance the cost of which can outweigh the benefits. Typically, this happens when abstraction focus is misapplied at non-critical caverns far beneath higher level structures in the code. <em>The importance of proper abstraction tends to increase at higher levels of abstraction.</em> A high number of abstractions at low levels results in significant re-factoring friction. Ideally, forces of the <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a> principle must be balanced by forces of the <a href="http://en.wikipedia.org/wiki/You_ain't_gonna_need_it">YAGNI</a> and <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a> principles. A cautionary tale of abstractions is the <a href="http://ayende.com/blog/154081/limit-your-abstractions-you-only-get-six-to-a-dozen-in-the-entire-app">Limit Your Abstractions series</a> by Ayende.</p>
+
+<p>Encapsulation is a trait of an abstraction. An <a href="http://bit.ly/PIc84T">interface</a> is abstract because implementation is delegated to implementing classes. As a by-product, it also <em>encapsulates</em> the implementation thereby facilitating new semantic levels. New semantic levels however need not be the immediate intent of encapsulation which is also suitable for purely organizational purposes. For example, to improve readability, a private class method can be used encapsulate an operation even if that operation is only invoked in a single place.</p>
+
+<p>These observations can be applied to discussions about the value of certain types of abstractions. There is a <a href="http://ayende.com/blog/4784/architecting-in-the-pit-of-doom-the-evils-of-the-repository-abstraction-layer">debate</a> about the value of the repository abstraction. The repository tends to be a very <a href="http://www.joelonsoftware.com/articles/LeakyAbstractions.html">leaky abstraction</a> because it tends to be difficult to reuse in its entirety across distinct persistence implementations. As a result, significant investment into intricate repository abstraction design ends up as wasted effort - the abstractions are never actually reused. However, the repository abstraction can still reap the benefits of encapsulation. This can be done without any interfaces at all simply by referencing a repository class containing data access methods. This "repository" doesn't implement an interface and isn't intended for polymorphism - it is only used to encapsulate.</p>
+
+<p>For example, the <a href="https://github.com/ayende/RaccoonBlog/">Raccoon Blog project</a> avoids repositories and places data access logic directly into the <a href="http://en.wikipedia.org/wiki/Model-view-controller">controller</a>. This has the immediate benefit of eliminating two code files - the interface declaration file and the implementation file. On the other hand, it increases the amount of code in the controller. This can make it difficult to distinguish between responsibilities of the controller and responsibilities of the data access layer. Additionally, reasoning about the data access layer of an application becomes trickier because the layer isn't explicit. Effectively, this is a matter of preference and organizations as well as individual developers can choose an approach best suited for them while considering the implications.</p>
+]]></content>
+  </entry>
+  
+</feed>

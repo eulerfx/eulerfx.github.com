@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>  
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/default.css" id="theme">
+  <!-- For syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+  <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+  <script>
+    document.write('<link rel="stylesheet" href="css/print/' + ( window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">');
+  </script>
+	<title>Domain-Driven Design and Event Sourcing with F# and EventStore</title>
+  <style type="text/css">
+  .reveal code {
+    max-height: 500px;
+  }
+  </style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">	
+
+	<section>
+    <div style="background-image:url(images/lambda.png);background-repeat:no-repeat;height:500px;">
+      <h2>Domain-Driven Design with <br />F# and EventStore</h2>
+      <p>Lev Gorodinski</p>
+      <p>gorodinski.com</p>
+      <p>@eulerfx</p>
+    </div>
+	</section>
+  
+
+  <section>
+    <section>
+      <h2>Goals</h2>
+      <ul>
+        <li class="fragment roll-in">Go beyond OOP</li>
+        <li class="fragment roll-in">Learn F# / Functional Programming</li>
+        <li class="fragment roll-in">Learn EventStore / Event sourcing</li>
+        <li class="fragment roll-in">Supple design</li>
+      </ul>
+    </section>
+    <section>
+      <img src="images/ddd-implementation-path.png" alt="Domain-Driven Design Implementation Path" />
+    </section>
+  </section>
+
+
+  <!--end Goals-->
+
+  
+  <section>
+    <section>
+      <h2>The Domain</h2>
+      <p>SaaSOvation / Collaboration</p>
+    </section>
+    <section>
+      <p><strong>Forum</strong> Aggregate</p>
+      <h3>Behaviors</h3>
+      <ul>
+        <li>Start</li>
+        <li>Assign Moderator</li>
+        <li>Change Description</li>
+        <li>Change Subject</li>
+        <li>Close</li>
+        <li>Re-Open</li>
+      </ul>
+    </section>    
+  </section>
+  <!--end The Domain-->
+
+
+  <section>
+    <section>
+      <h2>C#</h2>      
+      <div class="fragment roll-in">
+        <pre><code class="cs">
+public class Forum : EventSourcedRootEntity
+{
+	public void AssignModerator(Moderator moderator)
+	{
+		AssertionConcern.AssertArgumentNotNull(moderator, "The moderator must be provided.");
+	    AssertOpen();        
+	    Apply(new ForumModeratorChanged(this.tenantId, this.forumId, moderator, this.exclusiveOwner));
+	}
+
+	void AssertOpen()
+	{
+	    if (this.closed)
+	        throw new InvalidOperationException("Forum is closed.");
+	}
+
+	void When(ForumModeratorChanged e)
+	{
+	    this.moderator = e.Moderator;
+	}
+}
+        </code></pre>      
+        <a href="https://github.com/VaughnVernon/IDDD_Samples_NET/blob/master/iddd_collaboration/Domain.Model/Forums/Forum.cs">source</a>
+      </div>
+    </section>
+    <section>
+      <pre><code class="cs">
+public abstract class EventSourcedRootEntity : EntityWithCompositeId
+{
+	readonly List&lt;IDomainEvent&gt; mutatingEvents;
+	readonly int unmutatedVersion;
+
+	protected void Apply(IDomainEvent e)
+	{
+	    this.mutatingEvents.Add(e);
+	    When(e);
+	}
+
+	void When(IDomainEvent e)
+	{
+	    // dynamic dispatch
+	    (this as dynamic).When(e);
+	}    
+}
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Issues</h2>
+      <ul>
+        <li class="fragment roll-in">Verbose</li>
+        <li class="fragment roll-in">Not POCO</li>
+        <li class="fragment roll-in">Double dispatch voodoo</li>
+        <li class="fragment roll-in">Misuse of inheritance</li>
+        <li class="fragment roll-in">Conflation of state and identity</li>
+      </ul>
+    </section>
+    
+  </section>
+  <!--end C#-->
+
+
+
+  <section>
+
+    <section>
+      <h2>F#</h2>
+
+      <pre class="fragment roll-in"><code class="no-highlight">    
+type State = { 
+    moderator      : Collaborator;
+    description    : NonEmptyString;
+    closed         : bool; }
+      </pre></code>
+
+      <h3 class="fragment roll-in">Record Type</h3>  
+      <ul class="fragment roll-in">
+        <li>Immutable by default</li>
+        <li class="fragment roll-in">No inheritance</li>
+        <li class="fragment roll-in">Structural equality, comparison</li>
+      </ul>
+
+    </section>
+
+    <section>
+      <h3>Events & Commands</h3>
+      <pre class="fragment roll-in"><code class="no-highlight">    
+type Command = 
+    | AssignModerator of Collaborator
+    | ChangeDescription of NonEmptyString
+    
+type Event =
+    | ModeratorChanged of Id * Collaborator * ExclusiveOwner
+    | DescriptionChanged of Id * NonEmptyString * ExclusiveOwner
+      </pre></code>
+      <h3 class="fragment roll-in">Union Type</h3>
+      <ul class="fragment roll-in">
+        <li>Mutually exclusive, named cases</li>
+        <li class="fragment roll-in">Similar: closed class hiearachy, C union, enum on steroids</li>
+        <li class="fragment roll-in">Pattern matching</li>
+      </ul>
+    </section>
+
+
+    <section>
+      <div class="fragment">
+      <pre><code class="no-highlight">
+let apply state = function
+    | ModeratorChanged (_,moderator,_) -> 
+    	{ state with moderator = moderator }
+    | DescriptionChanged (_,desc,_)    -> 
+    	{ state with description = desc }
+      </code></pre>
+      </div>
+
+      <h3 class="fragment roll-in">Pattern Matching</h3>  
+      <ul class="fragment roll-in">
+        <li>Switch statement on steroids</li>
+        <li class="fragment roll-in">...lots of steroids</li>
+        <li class="fragment roll-in">Customizable</li>
+      </ul>
+
+    </section>
+
+    <section>
+      <div>
+      <pre><code class="no-highlight">
+let exec state =         
+    let assertOpen = validator (fun _ -> state.closed <> true) 
+    	["Forum must be open."] state
+    function
+    | AssignModerator moderator -&gt; assertOpen &lt;?&gt; [ModeratorChanged(...)]
+    | ChangeDescription desc -&gt; assertOpen &lt;?&gt; [DescriptionChanged(...)]
+      </code></pre>      
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/Forums.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Improvements</h2>
+      <ul>
+        <li class="fragment roll-in">Brevity</li>
+        <li class="fragment roll-in">Explicitness</li>
+        <li class="fragment roll-in">Uniformity</li>
+        <li class="fragment roll-in">Single responsibility</li>
+        <li class="fragment roll-in">Static verification</li>
+        <li class="fragment roll-in">Cohesion</li>
+      </ul>
+    </section>
+
+  </section>
+  <!--end F#-->
+
+
+  <section>
+    <section>
+      <h2>Benefits for DDD</h2>
+      <ul class="fragment roll-in">
+        <li>Focus on behavior</li>
+        <li class="fragment roll-in">Declarative</li>
+        <li class="fragment roll-in">Assertions</li>
+        <li class="fragment roll-in">Side-effect free</li>
+        <li class="fragment roll-in">Closure of operations</li>
+      </ul>
+    </section>
+  </section>
+  <!--end Benefits for DDD-->
+
+
+
+  <section>
+    <h2>Challenges</h2>
+    <ul>
+      <li class="fragment roll-in">New paradigm</li>
+      <li class="fragment roll-in">Different paradigms collide for attention</li>
+      <li class="fragment roll-in">Less tooling support</li>
+      <li class="fragment roll-in">C# interop can be less than pleasant</li>
+      <li class="fragment roll-in">Missing some advanced functional features</li>
+    </ul>
+  </section>
+  <!--end Challenges-->
+
+  <section>
+
+    <section>
+      <h2>Event Sourcing</h2>
+
+      <div class="fragment roll-in" style="width:500px;margin:0 auto;">
+      <blockquote class="twitter-tweet"><p>want to learn event sourcing? f(state, event) =&gt; state</p>&mdash; gregyoung (@gregyoung) <a href="https://twitter.com/gregyoung/status/313358540821647360">March 17, 2013</a></blockquote>
+      <script async src="http://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      </div>
+      <br />
+      <div class="fragment roll-in">
+        <h3>AHA!</h3>
+        <pre><code class="no-highlight">
+let apply state = function
+    | ModeratorChanged (_,moderator,_) -> { state with moderator = moderator }
+    | DescriptionChanged (_,desc,_)    -> { state with description = desc }
+        </code></pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>Event Sourcing</h2>
+      <div>
+        <blockquote>
+          Capture all changes to an application state as a sequence of events.        
+        </blockquote>      
+        <em style="float:right;">Martin Fowler</em>
+        <div style="clear:both"></div>
+      </div>
+      <br />
+      <blockquote class="fragment roll-in">
+        Capture all <strike>changes to an application state</strike> <strong>behaviors</strong> as a sequence of events.        
+      </blockquote>
+    </section>
+
+    <section>
+      <h2>Reconstitution</h2>
+      <p>Replay all past events to bring aggregate into current state.</p>
+    </section>
+
+
+    <section>
+      <h3>Aggregate Abstraction</h3>
+      <pre><code class="no-highlight">
+	type Aggregate<'TState, 'TCommand, 'TEvent> = {          
+		zero : 'TState;
+		apply : 'TState -> 'TEvent -> 'TState;
+		exec : 'TState -> 'TCommand -> 'TEvent; }
+      </code></pre>
+      <div class="fragment roll-in">
+      <h3>Replay</h3>
+      <pre><code class="no-highlight">
+      let events = load (typeof<'TEvent>,id)
+      let state = events |> Seq.fold aggregate.apply aggregate.zero        
+      </code></pre>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/Common.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h3>EventStore Integration</h3>
+      <div class="fragment roll-in">
+      <pre><code class="no-highlight">
+  let load (typ,id) =
+      let slice = conn.ReadStreamEventsForward(id,1,Int32.Max,false)
+      slice.Events 
+      |> Seq.map (fun e -> decode(typ,e.Event.EventType,e.Event.Data))
+      </code></pre>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/EventStore.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h3>Event Persistance</h3>
+      <div class="fragment roll-in">
+      <pre><code class="no-highlight">
+  let commit (id,expectedVersion) e =
+        let eventType,bytes = serialize e
+        let meta = [||] : byte array
+        let data = EventData(Guid.NewGuid(),eventType,true,bytes,meta)
+        if version = 0 then 
+          conn.CreateStream(id, Guid.NewGuid(), true, metaData)
+        conn.AppendToStream(id,expectedVersion,data)
+      </code></pre>
+      <a href="https://github.com/eulerfx/IDDDFSharpSamples/blob/master/Collaboration/EventStore.fs">source</a>
+      </div>
+    </section>
+
+    <section>
+      <h3>Projections</h3>
+      <ul>
+        <li class="fragment roll-in">Project stream onto new stream</li>
+        <li class="fragment roll-in">State</li>
+        <li class="fragment roll-in">Declared with JavaScript</li>
+        <li class="fragment roll-in">Simple read-models</li>
+        <li class="fragment roll-in">CEP</li>        
+      </ul>
+    </section>
+
+    <section>
+      <h3>Read Model Projection</h3>
+      <div class="fragment roll-in">
+        <pre><code class="javascript">
+fromCategory('Forum').foreachStream().when({
+  $init: function() {
+    return { description: null, moderator: null };
+  },
+  "ModeratorAssigned": function (s, e) {
+    s.moderator = e.body.moderator;
+    var streamId = "ReadModel-" + 
+          e.streamId.replace("Forum-", "");
+    var eventType = e.eventType + "_ReadModel";
+    emit(streamId, eventType, s);
+  },
+  "DescriptionChanged": function (s, e) {
+    s.description = e.body.description;
+    var streamId = "ReadModel-" + 
+          e.streamId.replace("Forum-", "");
+    var eventType = e.eventType + "_ReadModel";
+    emit(streamId, eventType, s);
+  }
+});
+        </code></pre>
+      </div>
+    </section>
+
+
+    <section>
+      <h2>Challenges</h2>
+      <ul>
+        <li class="fragment roll-in">Less tooling support</li>
+        <li class="fragment roll-in">Non-trivial shift in data modelling</li>
+        <li class="fragment roll-in">Queries must be implemented separately</li>
+        <li class="fragment roll-in">Eventual consistency</li>
+        <li class="fragment roll-in">Lack of referential integrity</li>
+        <li class="fragment roll-in">Schema maintenance, refactoring</li>
+      </ul>
+    </section>
+
+
+
+  </section>
+  <!--end Event sourcing-->
+
+
+
+  <section>
+    <h2>Why F# / Functional Programming?</h2>
+    <ul>
+      <li class="fragment roll-in">.NET, VisualStudio</li>
+      <li class="fragment roll-in">Multi-paradigm</li>
+      <li class="fragment roll-in">Powerful type inference</li>
+      <li class="fragment roll-in">Language oriented</li>
+      <li class="fragment roll-in">Better coupling characteristics</li>
+      <li class="fragment roll-in">Smaller, more numerous types</li>
+      <li class="fragment roll-in">Function as unit of coupling</li>
+      <li class="fragment roll-in">More explicit, declarative</li>
+      <li class="fragment roll-in">Pattern matching</li>
+      <li class="fragment roll-in">Avoid nulls</li>
+      <li class="fragment roll-in">Isolate, minimize state</li>
+      <li class="fragment roll-in">OOP patterns taken care of</li>
+      <li class="fragment roll-in">Draw on math research</li>
+    </ul>
+  </section>
+
+
+  <section>
+    <h2>Why EventStore / event sourcing?</h2>
+    <ul>
+      <li class="fragment roll-in">Immutable, preserve information</li>
+      <li class="fragment roll-in">Uniform</li>
+      <li class="fragment roll-in">Append only</li>
+      <li class="fragment roll-in">Natural model of reality</li>
+    </ul>
+  </section>
+
+  
+
+
+  <section>
+    <h2>Acknowledgements</h2>
+    <ul>
+      <li>Vaughn Vernon</li>
+      <li>Paul Rayner</li>      
+      <li>Community</li>
+    </ul>
+  </section>
+
+
+  <section>
+    <h2>References</h2>
+    <ul>
+      <li><a href="https://github.com/VaughnVernon/IDDD_Samples">Java IDDD Samples</a></li>
+      <li><a href="https://github.com/VaughnVernon/IDDD_Samples_NET">C# IDDD Samples</a></li>
+      <li><a href="https://github.com/eulerfx/IDDDFSharpSamples/">F# IDDD Samples</a></li>      
+    </ul>
+  </section>
+
+
+  <section>
+    <h2>Lev Gorodinski</h2>
+    <p><a href="http://gorodinski.com">gorodinski.com</a></p>
+    <p><a href="http://twitter.com/eulerfx">@eulerfx</a></p>
+    <p><a href="http://github.com/eulerfx">github.com/eulerfx</a></p>
+    <p><a href="mailto:eulerfx@gmail.com">eulerfx@gmail.com</a></p>
+  </section>
+
+
+</div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+
+    //theme: 'beige', // available themes are in /css/theme
+    transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+      // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+    ]
+  });
+</script>
+
+</body>
+</html>

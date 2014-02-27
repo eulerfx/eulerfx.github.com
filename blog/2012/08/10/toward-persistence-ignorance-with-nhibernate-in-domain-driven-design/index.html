@@ -1,0 +1,265 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Toward persistence ignorance with NHibernate in Domain-Driven Design (DDD) - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="Persistence ignorance is a quality of a design wherein entity classes are devoid of data access supporting characteristics. Adherence to this &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2012/08/10/toward-persistence-ignorance-with-nhibernate-in-domain-driven-design/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-10T12:35:00-04:00" pubdate data-updated="true">Aug 10<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/nhibernate/'>NHibernate</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Toward Persistence Ignorance With NHibernate in Domain-Driven Design (DDD)</h1>
+	<div class="entry-content"><p>Persistence ignorance is a quality of a design wherein entity classes are devoid of data access supporting characteristics. Adherence to this technique facilitates a separation between domain and infrastructure. By deflecting the technical noise, this separation streamlines the mapping between the model and its incarnation in code. In practice, persistence ignorance is an ideal seldom achieved in its entirety. Even if entities are stripped of all persistence related traits, the design tends to yield to influence from the persistence framework. Fortunately, like most things in programming, persistence ignorance falls upon a spectrum and can pay dividends even with partial application. After all, any type of code isn&#8217;t an entirely noiseless medium.</p>
+
+<!--more-->
+
+
+<p>In domain-driven design, one way to attain persistence ignorance is with the use of a <a href="http://devlicio.us/blogs/casey/archive/2009/02/20/ddd-the-repository-pattern.aspx">repository</a> and an <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>. On the .NET Framework, the ORM <a href="http://en.wikipedia.org/wiki/NHibernate">NHibernate</a> affords a relatively high degree of persistence ignorance with the use of out of band mapping declarations and reflection. What follows is a summary of various techniques for achieving persistence ignorance with NHibernate.</p>
+
+<h4>Default protected constructor</h4>
+
+<p>NHibernate requires that mapped classes provide a default (parameterless) constructor. This allows NHibernate to instantiate the mapped class during reconstitution. Although the footprint is relatively minor, this is an impure and unavoidable constraint for mapped entities. NHibernate could potentially employ a constructor injection technique, as utilized by <a href="http://james.newtonking.com/projects/json-net.aspx">JSON.NET</a>. If the default constructor is marked as protected then non-reflective client code cannot directly instantiate the class thus still restricting access with other constructors. An <strong>ImplicitAttribute</strong> could be created to mark protected constructors to prevent productivity tools from flagging them as unused.</p>
+
+<h4>Mapped member access strategies</h4>
+
+<p>NHibernate is capable of mapping database fields to object properties which have private setters. This is one of the most basic methods for maintaining persistence ignorance. Entities and value objects encapsulate domain concepts and as such should regulate access to their internal data. Private setters ensure that class data is only modified by the class itself thereby limiting scope and facilitating encapsulation. With use of <a href="http://www.nhforge.org/doc/nh/en/#mapping-declaration-property">access and naming strategies</a>, NHibernate can map to a backing field by convention. This can be useful when having a property setter invoked is undesirable during reconstitution, such as when the setter implements domain logic. If using <a href="http://www.fluentnhibernate.org/">FluentNHibernate</a> for mapping, private fields having no corresponding property member can be referenced using the <a href="https://github.com/jagregory/fluent-nhibernate/wiki/Mapping-private-properties"><strong>Reveal.Property<TEntity></strong></a> method.</p>
+
+<h4>Read-only collection mapping</h4>
+
+<p>A common pattern for implementing an aggregation relationship in DDD is with a collection coupled with a method which manipulates it. For example:</p>
+
+<div><script src='https://gist.github.com/3355179.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3355179&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The methods <strong>AddItem</strong> and <strong>RemoveItem</strong> encapsulate access to the collection of line items in the order entity. The collection can be effortlessly mapped as a <a href="http://www.nhforge.org/doc/nh/en/#collections-onetomany">one-to-many association</a>. A problem with this approach is that encapsulation can be easily broken because the collection property is publicly exposed and nothing restricts calling code from accessing it directly. To resolve this problem, a backing field access strategy can be used to map the collection to a private field. The property can then return a <a href="http://msdn.microsoft.com/en-us/library/ms132474.aspx">read-only wrapper</a> around the collection thereby isolating modification of the collection to class methods:</p>
+
+<div><script src='https://gist.github.com/3355222.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3355222&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>The methods now access the <strong>items</strong> field directly and attempts to modify the read-only collection returned by the <strong>Items</strong> property will throw a <a href="http://msdn.microsoft.com/en-us/library/system.notsupportedexception.aspx">NotSupportedException</a>.</p>
+
+<h4>Lazy loading with virtual members</h4>
+
+<p>By default, NHibernate requires class members to be virtual in order to support the <a href="http://en.wikipedia.org/wiki/Proxy_pattern">proxy pattern</a>; the proxy pattern in turn supports lazy loading. Lazy loading however <a href="http://gorodinski.com/blog/2012/06/16/orm-lazy-loading-pitfalls/">can be problematic</a> and the requirement to make all members virtual is certainly a infraction against persistence ignorance, despite how negligible. Fittingly, disabling lazy loading at the class mapping level waives this requirement.</p>
+
+<h4>Custom mapping type</h4>
+
+<p>To support mapping requirements that cannot be fulfilled by direct field to property mappings NHibernate provides the <a href="http://www.martinwilley.com/net/code/nhibernate/usertype.html"><strong>IUserType</strong></a> and <a href="http://geekswithblogs.net/opiesblog/archive/2006/08/05/87218.aspx"><strong>ICompositeUserType</strong></a> interfaces. They enable implementors to declare arbitrary mappings between a set of fields and a component type or value type. Arbitrarily complex value types can be mapped using this technique and since the implementor controls construction the mapped types don&#8217;t need to provide a parameterless constructor.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2012/08/10/toward-persistence-ignorance-with-nhibernate-in-domain-driven-design/';
+        var disqus_url = 'http://gorodinski.com/blog/2012/08/10/toward-persistence-ignorance-with-nhibernate-in-domain-driven-design/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,241 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Abstraction and Encapsulation - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="The notions of abstraction and encapsulation are prevalent throughout the realm of programming and are intimately related. Their differences are &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-16T15:07:00-04:00" pubdate data-updated="true">Sep 16<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/design/'>design</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Abstraction and Encapsulation</h1>
+	<div class="entry-content"><p>The notions of <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstraction</a> and encapsulation are prevalent throughout the realm of programming and are intimately related. Their differences are subtle indeed and warrant careful examination. Specifically, the differences are most apparent on the basis of <em>intent</em>. Ultimately, encapsulation can be viewed as a structural aspect of abstraction which can be employed without the intent to abstract.</p>
+
+<!--more-->
+
+
+<p>Abstraction is frequently associated with the intent to re-use. Identification of an abstraction followed by the preparation of a suitable representation allows code operating upon abstraction to be shared among derived instances of the abstraction. This is traditional <a href="http://en.wikipedia.org/wiki/Polymorphism_in_object-oriented_programming">OOP polymorphism</a> at play.</p>
+
+<p>Application of abstraction must be judicious because it incurs a non-trivial cost. It forges a dependency chain which in turn requires maintenance the cost of which can outweigh the benefits. Typically, this happens when abstraction focus is misapplied at non-critical caverns far beneath higher level structures in the code. <em>The importance of proper abstraction tends to increase at higher levels of abstraction.</em> A high number of abstractions at low levels results in significant re-factoring friction. Ideally, forces of the <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a> principle must be balanced by forces of the <a href="http://en.wikipedia.org/wiki/You_ain't_gonna_need_it">YAGNI</a> and <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a> principles. A cautionary tale of abstractions is the <a href="http://ayende.com/blog/154081/limit-your-abstractions-you-only-get-six-to-a-dozen-in-the-entire-app">Limit Your Abstractions series</a> by Ayende.</p>
+
+<p>Encapsulation is a trait of an abstraction. An <a href="http://bit.ly/PIc84T">interface</a> is abstract because implementation is delegated to implementing classes. As a by-product, it also <em>encapsulates</em> the implementation thereby facilitating new semantic levels. New semantic levels however need not be the immediate intent of encapsulation which is also suitable for purely organizational purposes. For example, to improve readability, a private class method can be used encapsulate an operation even if that operation is only invoked in a single place.</p>
+
+<p>These observations can be applied to discussions about the value of certain types of abstractions. There is a <a href="http://ayende.com/blog/4784/architecting-in-the-pit-of-doom-the-evils-of-the-repository-abstraction-layer">debate</a> about the value of the repository abstraction. The repository tends to be a very <a href="http://www.joelonsoftware.com/articles/LeakyAbstractions.html">leaky abstraction</a> because it tends to be difficult to reuse in its entirety across distinct persistence implementations. As a result, significant investment into intricate repository abstraction design ends up as wasted effort - the abstractions are never actually reused. However, the repository abstraction can still reap the benefits of encapsulation. This can be done without any interfaces at all simply by referencing a repository class containing data access methods. This &#8220;repository&#8221; doesn&#8217;t implement an interface and isn&#8217;t intended for polymorphism - it is only used to encapsulate.</p>
+
+<p>For example, the <a href="https://github.com/ayende/RaccoonBlog/">Raccoon Blog project</a> avoids repositories and places data access logic directly into the <a href="http://en.wikipedia.org/wiki/Model-view-controller">controller</a>. This has the immediate benefit of eliminating two code files - the interface declaration file and the implementation file. On the other hand, it increases the amount of code in the controller. This can make it difficult to distinguish between responsibilities of the controller and responsibilities of the data access layer. Additionally, reasoning about the data access layer of an application becomes trickier because the layer isn&#8217;t explicit. Effectively, this is a matter of preference and organizations as well as individual developers can choose an approach best suited for them while considering the implications.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation/';
+        var disqus_url = 'http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

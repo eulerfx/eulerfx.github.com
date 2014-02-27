@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: architecture | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/architecture/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Placing knowledge on center stage]]></title>
+    <link href="http://gorodinski.com/blog/2012/12/10/placing-knowledge-on-center-stage/"/>
+    <updated>2012-12-10T21:22:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2012/12/10/placing-knowledge-on-center-stage</id>
+    <content type="html"><![CDATA[<p><em>In this post I survey the evolution of various programming paradigms and emphasize the importance of expressing and isolating domain knowledge. Paradigms such as OOP, AOP, DCI, DDD, and Hexagonal are regarded as having a central goal of facilitating the representation of knowledge all while supporting integration with technical components. Finally I introduce a knowledge-driven architecture by Jeff Zhuk.</em></p>
+
+<!--more-->
+
+
+<p>The vast majority of computing today can be decomposed into operations of a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing Machine</a>. Contrarily, the vast majority of humans think in terms of concepts far beyond symbols on a tape. Perhaps, as alluded to by <a href="http://en.wikipedia.org/wiki/Douglas_Hofstadter">Douglas Hofstadter</a> in <a href="http://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach">Godel, Escher, Bach</a>, consciousness is merely an illusion established by a balance between self-knowledge and self-ignorance. Self-knowledge is the extent to which we are aware of our thoughts and are able to trace the actions of our mind. Self-ignorance consists of the sub-conscious as well as all of the functions of the <a href="http://en.wikipedia.org/wiki/Central_nervous_system">central nervous system</a>. Given a thought, we can likely factor it into constituent propositions and statements, which themselves may be further factored. On the other hand, we can't feel the firing of the underlying neurons or operations of the <a href="http://en.wikipedia.org/wiki/Cerebral_cortex">cerebral cortex</a>.</p>
+
+<p>Natural characteristics of the brain and mind are in turn reflected in the architectures of computing devices. The <a href="http://en.wikipedia.org/wiki/Central_processing_unit">CPU</a> performs very basic arithmetical and logical operations the fundamental principals of which have remained unchanged since its inception. The software which the CPU ultimately runs however is far more complex than those basic operations. Programming languages and the practice of software engineering have been devised to tame this dichotomy. Yet today, many years after the first CPU and the first program, there remains an ongoing battle between the lower-level forces of hardware and the higher-level forces of domain knowledge.</p>
+
+<h2>Imperative &amp; Declarative</h2>
+
+<p>The battle between man and machine is fittingly illustrated by the contrast between <a href="http://en.wikipedia.org/wiki/Imperative_programming">imperative languages</a> and <a href="http://en.wikipedia.org/wiki/Declarative_programming">declarative languages</a>. Imperative languages can be thought of as bottom-up <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstractions</a> over the underlying hardware. Declarative languages on the other hand are top-down - they represent information and leave it up to the language <a href="http://en.wikipedia.org/wiki/Compiler">compiler</a> to translate and convey this information to the underlying hardware. Functional languages in particular are declarative because they are implementations of the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a> on a Turing machine. In terms of practical utility, imperative languages have been winning the battle as evidenced by the <a href="http://langpop.com/">predominance of C</a> decades after its creation. The bare-bones simplicity of C and its proximity to the underlying machine are <a href="http://programmers.stackexchange.com/questions/141329/what-makes-c-so-popular-in-the-age-of-oop">part of the reason</a> for its continual relevance. What this indicates, however, is that programming language technology has yet to attain the level of abstraction and expressive power to make something like C less relevant.</p>
+
+<h2>Object-oriented</h2>
+
+<p>Regardless of the continual prevalence of lower level languages, ambitious attempts at elevating abstraction can provide valuable insight. Take for instance <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming</a>. <a href="http://en.wikipedia.org/wiki/Douglas_Engelbart">Douglas Engelbart</a> envisioned the computer as an extension of the human mind and OOP can be regarded as the incarnation of his vision. Today, OOP is a predominant programming paradigm. The problem is that the promise of object's capacity to capture the end user's mental can be deceptive. In the context of GUIs objects serve well in representing the domain. However, for other domains, especially ones based on reality such as <a href="http://en.wikipedia.org/wiki/Line_of_business">LOB</a> applications, OOP's weaknesses in expressing collaboration can become a notable design and modeling hindrance. OOP can also be somewhat misleading because a class can rarely represent its counterpart in reality to the full extent. For example, a bank account class in an ATM application may model state to represent the available balance and expose behavior for adjusting the balance while protecting invariants. This however represents a small fraction of the functionality required to perform a withdrawal, which also entails aspects such as transactions, server connections, etc. The ATM withdrawal example is drawn from an <a href="http://www.artima.com/articles/dci_vision.html">article on DCI architecture</a> which provides a framework for expressing collaborations between objects based on roles.</p>
+
+<h2>DCI, Hexagonal and Domain-Driven</h2>
+
+<p>The method of action of the DCI architecture facilitates explicit representation of domain knowledge by providing a tailored language of expression as an OOP based framework. DCI was devised in order to compensate for the lack of behavioral expressiveness in traditional OOP. Not surprisingly, similar instances of domain knowledge emphasis abound. An age old mantra in software engineering is the segregation of business logic from presentation and infrastructure logic. This segregation is beneficial not only due to advantages of traditional layering but also due to the emergent isolation of domain knowledge. Alistair Cockburn's <a href="http://alistair.cockburn.us/Hexagonal+architecture">Hexagonal Architecture</a> builds upon this idea and applies it at an architectural level. Domain knowledge is placed at the center with infrastructure components <em>adapting to</em> it. In a sense, knowledge "ripples" from the core throughout components which integrate this knowledge with infrastructure. Another prominent example of knowledge isolation is <a href="http://stackoverflow.com/tags/domain-driven-design/info">Domain-Driven Design</a>. A fundamental premise of DDD is placing focus on the core domain, on domain knowledge. The intent is to capture the informational core of the business problem. The remaining components of a working system, while being absolutely essential, are supporting in nature. In retrospect, all of this makes a great deal of sense - after all, computers were designed to solve human problems, not the other way around.</p>
+
+<h2>Aspect-oriented</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented programming</a> introduces new mechanisms of composition, partitioning and encapsulation through the notion of a <em>concern</em>. Concerns contain pieces of domain knowledge and the facilities provided by AOP enable composition of concerns and associated behaviors. As a whole, the aspect-oriented paradigm establishes an informational topology wherein knowledge propagates from the core domain out to supporting components. Much like the other paradigms, this type of topology is effective due to its positioning of domain knowledge at the center.</p>
+
+<h2>Rediscovering the I in IT</h2>
+
+<p>Despite significant advances in programming language theory and software architecture, the I in <a href="http://en.wikipedia.org/wiki/Information_technology">IT</a> is all too often overshadowed by the T. <a href="https://twitter.com/raganwald">Reg Braithwaite</a> portrays this phenomenon in <a href="http://raganwald.com/2006/12/economizing-can-be-penny-wise-and.html">Economizing can be penny-wise and pound foolish</a> by coloring code to depict the signal to noise ratio. Green colored code is code that directly express the problem at hand. Yellow colored code represents the accidental complexity of a programming language. Red represents code which has no identifiable function. The goal then is to eliminate red code, reduce yellow code and emphasize the green code.</p>
+
+<p>How can we get there? Where are the weakest links? To some extent the issue is driven by the fact that programming languages carry a double burden. On one hand, a programming language is a place to organize one's thoughts and express domain knowledge. On the other hand, a programming language must be compiled or interpreted to be ultimately converted into a series of elementary memory manipulation statements. As such, programming languages must be expressive yet simple to use, unambiguous and preferably <a href="http://en.wikipedia.org/wiki/Formal_verification">verifiablee</a>. Expressiveness, simplicity and verifiability are a tough bunch to triage.</p>
+
+<h2>Formal Techniques</h2>
+
+<p>Systems such as <a href="http://en.wikipedia.org/wiki/Hoare_logic">Hoare logic</a>, <a href="http://en.wikipedia.org/wiki/Specification_language">algebraic specification languages</a> and <a href="http://en.wikipedia.org/wiki/Denotational_semantics">denotational semantics</a> are powerful formal verification methods but demand a great deal of sophistication on the part of the programmer and are often impractical as a result. <a href="http://en.wikipedia.org/wiki/Type_system">Type systems</a> encompass formal methods which are sufficiently tractable to be widely applicable, yet mainstream programming languages usually support only the tip of the iceberg of the theoretical capabilities. For instance, <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data types</a> such as <a href="http://msdn.microsoft.com/en-us/library/dd233226.aspx">discriminated unions</a> and the associated <a href="http://en.wikipedia.org/wiki/Pattern_matching">pattern matching</a> techniques are powerful mechanisms for expressing domain knowledge. Yet these techniques aren't available in mainstream OOP languages such as Java, C#, etc. They are available in functional languages such as F#, but even most functional languages don't support higher order techniques such as the polymorphic lambda calculus <a href="http://en.wikipedia.org/wiki/System_F">System F</a>. This seemingly relentless friction leads to some concerning questions. Are modern programming languages approaching the boundaries of the balance between power and accessibility? Will programmers need to embrace more advanced formal techniques in order to advance the state of the art?</p>
+
+<h2>Knowledge-Driven Architectures</h2>
+
+<p>All of the above-mentioned paradigms share a common goal of facilitating the conversation between humans and computers. <a href="http://en.wikipedia.org/wiki/Semantic_architecture">Semantic architectures</a> embody yet another approach to distilling knowledge in software systems. Semantic architectures involve technologies and practices such as <a href="http://en.wikipedia.org/wiki/Ontology_engineering">ontological engineering</a>, the <a href="http://en.wikipedia.org/wiki/Semantic_Web">semantic web</a> and the <a href="http://en.wikipedia.org/wiki/Web_Ontology_Language">Web Ontology Language (OWL)</a>. These relatively new fields of computer science evolved from the observation that domain knowledge is the the most important aspect of a computer system. In order to be practical, <a href="http://groups.csail.mit.edu/medg/ftp/psz/k-rep.html">knowledge representation</a> schemes should allow not only for expressive but also for seamless integration with the infrastructure. Ontology languages such as <a href="http://en.wikipedia.org/wiki/CycL">CycL</a> aim to provide such environments. With <a href="http://semanticweb.com/it-of-the-future-semantic-cloud-architecture_b31649">IT of the Future: Semantic Cloud Architecture</a> <a href="http://www.linkedin.com/pub/jeff-yefim-zhuk/6/76b/3a">Jeff Zhuk</a> outlines a transition from existing SOA architectures to novel knowledge-driven architectures. Knowledge-driven architectures aim to align business and IT and eliminate duplication of knowledge. In this way, they are an evolution of the SOA vision.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Abstraction and Encapsulation]]></title>
+    <link href="http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation/"/>
+    <updated>2012-09-16T15:07:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/09/16/abstraction-and-encapsulation</id>
+    <content type="html"><![CDATA[<p>The notions of <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstraction</a> and encapsulation are prevalent throughout the realm of programming and are intimately related. Their differences are subtle indeed and warrant careful examination. Specifically, the differences are most apparent on the basis of <em>intent</em>. Ultimately, encapsulation can be viewed as a structural aspect of abstraction which can be employed without the intent to abstract.</p>
+
+<!--more-->
+
+
+<p>Abstraction is frequently associated with the intent to re-use. Identification of an abstraction followed by the preparation of a suitable representation allows code operating upon abstraction to be shared among derived instances of the abstraction. This is traditional <a href="http://en.wikipedia.org/wiki/Polymorphism_in_object-oriented_programming">OOP polymorphism</a> at play.</p>
+
+<p>Application of abstraction must be judicious because it incurs a non-trivial cost. It forges a dependency chain which in turn requires maintenance the cost of which can outweigh the benefits. Typically, this happens when abstraction focus is misapplied at non-critical caverns far beneath higher level structures in the code. <em>The importance of proper abstraction tends to increase at higher levels of abstraction.</em> A high number of abstractions at low levels results in significant re-factoring friction. Ideally, forces of the <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a> principle must be balanced by forces of the <a href="http://en.wikipedia.org/wiki/You_ain't_gonna_need_it">YAGNI</a> and <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a> principles. A cautionary tale of abstractions is the <a href="http://ayende.com/blog/154081/limit-your-abstractions-you-only-get-six-to-a-dozen-in-the-entire-app">Limit Your Abstractions series</a> by Ayende.</p>
+
+<p>Encapsulation is a trait of an abstraction. An <a href="http://bit.ly/PIc84T">interface</a> is abstract because implementation is delegated to implementing classes. As a by-product, it also <em>encapsulates</em> the implementation thereby facilitating new semantic levels. New semantic levels however need not be the immediate intent of encapsulation which is also suitable for purely organizational purposes. For example, to improve readability, a private class method can be used encapsulate an operation even if that operation is only invoked in a single place.</p>
+
+<p>These observations can be applied to discussions about the value of certain types of abstractions. There is a <a href="http://ayende.com/blog/4784/architecting-in-the-pit-of-doom-the-evils-of-the-repository-abstraction-layer">debate</a> about the value of the repository abstraction. The repository tends to be a very <a href="http://www.joelonsoftware.com/articles/LeakyAbstractions.html">leaky abstraction</a> because it tends to be difficult to reuse in its entirety across distinct persistence implementations. As a result, significant investment into intricate repository abstraction design ends up as wasted effort - the abstractions are never actually reused. However, the repository abstraction can still reap the benefits of encapsulation. This can be done without any interfaces at all simply by referencing a repository class containing data access methods. This "repository" doesn't implement an interface and isn't intended for polymorphism - it is only used to encapsulate.</p>
+
+<p>For example, the <a href="https://github.com/ayende/RaccoonBlog/">Raccoon Blog project</a> avoids repositories and places data access logic directly into the <a href="http://en.wikipedia.org/wiki/Model-view-controller">controller</a>. This has the immediate benefit of eliminating two code files - the interface declaration file and the implementation file. On the other hand, it increases the amount of code in the controller. This can make it difficult to distinguish between responsibilities of the controller and responsibilities of the data access layer. Additionally, reasoning about the data access layer of an application becomes trickier because the layer isn't explicit. Effectively, this is a matter of preference and organizations as well as individual developers can choose an approach best suited for them while considering the implications.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ORM Lazy Loading Pitfalls]]></title>
+    <link href="http://gorodinski.com/blog/2012/06/16/orm-lazy-loading-pitfalls/"/>
+    <updated>2012-06-16T12:28:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/06/16/orm-lazy-loading-pitfalls</id>
+    <content type="html"><![CDATA[<p><a href="http://en.wikipedia.org/wiki/Object-relational_mapping">Object-relational mappers</a> furnish a mapping layer between <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented code</a> and <a href="http://en.wikipedia.org/wiki/Relational_database">relational databases</a>. ORMs such as NHibernate and Entity Framework support lazy loaded associations which allow the loading of specific subsets of an object graph from an underlying relational store. This is beneficial because an object model can construct an object graph which is unfeasible to contain in main memory in its entirety. Lazy loading can prevent unnecessary data from being loaded and as such it is often presented as a performance optimization technique. This technique however incurs several drawbacks and is limited in its scalability. One drawback is that classes are static declarations and object associations will be accessible regardless of whether they are lazy loaded or eager loaded. As a result, it becomes more difficult to understand code because it isn't immediately certain whether navigating an association will result in a database call behind the scenes. Moreover, care must be taken to ensure that an ORM session is available lest we run into the dreaded <a href="http://docs.jboss.org/hibernate/core/3.5/api/org/hibernate/LazyInitializationException.html">LazyInitializationException</a>. Given that lazy loading is typically implemented using the <a href="http://en.wikipedia.org/wiki/Proxy_pattern">proxy pattern</a>, data access implementation details inevitably and invisibly leak into the rest of the application. In sense these characteristics can be regarded as a violation of the <a href="http://en.wikipedia.org/wiki/Principle_of_least_astonishment">principle of least astonishment</a>.</p>
+
+<!--more-->
+
+
+<p>The problem that lazy loading attempts to address can be illustrated with an analogy to the <a href="http://en.wikipedia.org/wiki/World_Wide_Web">world wide web</a>. The success of the word wide web can be attributed in part to its hyperlinked nature - resources are connected with links allowing for navigation of the web graph loading resources as they are needed. It is unrealistic for the entire web to be loaded into memory, <a href="http://jots.mypopescu.com/post/219463131/google-can-keep-all-web-in-memory">unless you are Google, of course</a>. A relational database can be viewed as a web which ORMs attempt to navigate while at the same time mapping relational data to an object model. The reality is that there is a subtle mismatch between the object model and the relational model. More accurately, No-SQL, corresponding to the object model, and SQL, corresponding to the relational model are <a href="http://bit.ly/KQoKA6">mathematical duals</a> as described by <a href="http://research.microsoft.com/en-us/um/people/emeijer/">Erik Meijer</a> in <a href="http://queue.acm.org/detail.cfm?id=1961297">"A co-Relational Model of Data for Large Shared Data Banks"</a>. <em>(Meijer was also responsible for the <a href="http://msdn.microsoft.com/en-us/data/gg577609.aspx">Reactive Extensions Framework</a> and demonstrating the duality between <a href="http://msdn.microsoft.com/en-us/library/9eekhta0.aspx">IEnumerable<T></a> and <a href="http://msdn.microsoft.com/en-us/library/dd990377.aspx">IObservable<T></a>).</em></p>
+
+<p>In practice, the mismatch exists because SQL is best suited for ad hoc queries and ad hoc field selection whereas OOP is best suited for static models. From the relational perspective there is a tension to select data specifically for a given query which is in turn designed for a specific use case. From the OOP perspective there is a tension to conform the query to an object model which is designed for a variety of use cases. An important observation is that these mapping issues are most prominent on the query side of the equation. Consequently, a technique such as <a href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">read-models</a> can be utilized to mitigate lazy loading issues all together. Instead of devising intricate fetching strategies with lazy loading it is much simpler to create read-model classes purposed toward representing queries for specific use cases. In the <a href="http://martinfowler.com/bliki/CQRS.html">CQRS</a> and <a href="http://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a> world, persistent read-models or projections are a similar technique for implementing queries.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>Lazy loading can bring performance benefits in certain use cases.</li>
+<li>Lazy loading is not a data loading panacea and can lead to unexpected results.</li>
+<li>Lazy loading doesn't scale because it is always restricted by the static nature of the target object model.</li>
+<li>Read-models or projections can be used in place of lazy loading.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Validation in Domain-Driven Design (DDD)]]></title>
+    <link href="http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/"/>
+    <updated>2012-05-19T14:27:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd</id>
+    <content type="html"><![CDATA[<p>Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice because it must be implemented throughout all areas of an application, typically employing different methods for each area. In a general sense, validation is a mechanism for ensuring operations result in a valid states. The ambiguity in that statement must not be overlooked because it illustrates several important characteristics of validation. One characteristic is context - the context under which validation is invoked. Context is critical because validation in one context may not be applicable in another context. Another corollary is the open-endedness of what is regarded as valid. Validity may be a trivial statement such as "The string representing a customer's name must not be null" or it may be a complex sequence of <a href="http://en.wikipedia.org/wiki/CycL">CycL</a> assertions. This post addresses validation as manifest in DDD-based enterprise applications. Validation, in this post, is distinct from a related discipline of <a href="http://bit.ly/JjLUA2">correctness</a> in theoretical computer science as researched by the likes of <a href="http://en.wikipedia.org/wiki/Edsger_Dijkstra">Edsger Dijkstra</a>.</p>
+
+<!--more-->
+
+
+<h2>Always Valid</h2>
+
+<p>In domain-driven design, there are two schools of thought regarding validation which revolve around the notion of the always valid <a href="http://domaindrivendesign.org/node/109">entity</a>. Jeffrey Palermo <a href="http://jeffreypalermo.com/blog/the-fallacy-of-the-always-valid-entity/">proposes</a> that the always valid entity is a fallacy. He suggests that validation logic should be decoupled from the entity which would defer the determination of the validation rules to invoke until runtime. The other school of thought, <a href="http://codebetter.com/gregyoung/2009/05/22/always-valid/">supported</a> by Greg Young and others, asserts that entities should be always valid. (<em>I must admit that I side with the always-valid school of though and therefore my statements are be biased.</em>)</p>
+
+<p>The scenarios explored by Palermo are certainly suitable and typical, however solutions involving always-valid entities can be implemented. He contends the following considerations for his example:</p>
+
+<ul>
+<li>The fact that name is required needs to be context-bound. When is it invalid?</li>
+<li>The message should be the responsibility of the presentation layer.</li>
+<li>When loading historical data, some genders may be missing. Should the application blow up when loading data?</li>
+<li>When loading historical data, perhaps the user needs to enter a gender when he edits his profile the next time.</li>
+</ul>
+
+
+<p>Point one addresses the fact that if the user profile entity prevents a null name from being assigned, all application code where a null name might be assigned will blow up. Palmero's solution is to decouple validation such that code where this might happen invokes a different set of validation rules, if any. An alternative solution is to use a different model designed toward that particular scenario. In fact the <a href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">read-model pattern</a> can be a fitting approach. The second point discusses error messages in the presentation layer. User error messages certainly are the responsibility of the presentation layer, but the always-valid entity does not imply that error messages in exceptions raised by the entity should be propagated directly to the presentation layer. Contrarily, this is regarded as an anti-pattern and a potential security thread. Instead, the presentation layer, viewed as an adapter in a <a href="http://alistair.cockburn.us/Hexagonal+architecture">Hexagonal architecture</a>, should catch and interpret the exception translating it into a form applicable to the UI framework at hand. Finally, the last two points discuss an interesting evolutionary issue. Suppose that a gender attribute is introduced into the user profile entity. It is evident that existing users won't have a gender specified. This is a realistic business scenario and a from a business perspective the users without a specified gender are simply users without a specified gender. When translated into code, this could mean a gender type of "unspecified". This gender type can serve as a flag to initiate the workflow which asks the user to specify a gender. For new users, the presentation layer can enforce the rule that a gender must be specified. There is no need to allow the entity to enter an invalid state. From the DDD perspective, validation rules can be viewed as invariants. One of the central responsibilities of an <a href="http://domaindrivendesign.org/node/88">aggregate</a> is enforcement of invariants across state changes.</p>
+
+<p>Jimmy Bogard writes:</p>
+
+<p><blockquote><p>If we start looking at command/query separation and closure of operations not only on our service objects but our entities as well, we can treat our entities with a little more respect and not drag them around into areas they don't really belong. Simply put, if we control the operation side of the equation, why in the world would we allow our entities to get into an invalid state? Life becomes much more complicated if we start having "IsValid" properties on our entities.</p><footer><strong>Jimmy Bogard</strong> <cite><a href='http://lostechies.com/jimmybogard/2009/02/15/validation-in-a-ddd-world/'>Validation in a DDD World</a></cite></footer></blockquote></p>
+
+<p>These succinct statements carry a great deal of information. First is the idea of the "IsValid" property. A requirement to invoke validation or to query an "IsValid" property requires calling code to be non-atomic and this can lead to inconsistencies and a greater potential for human error. It is a difference between:</p>
+
+<p><div><script src='https://gist.github.com/2733065.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2733065&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>and this:</p>
+
+<p><div><script src='https://gist.github.com/2733072.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2733072&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The second code sample requires clients of the UserProfile class to be aware of the "IsValid" property and always use it consistently. The first code sample avoids this all together - the operation of instantiating a user profile is atomic. This is a good example of leveraging programming language constructs to represent real world constraints.  The next important part of Bogard's statement is "not drag them around into areas they don't really belong" which leads into the subsequent section on application layers. If entity validation seems inappropriate in a certain area then this may be an indication that an entity doesn't belong in that area.</p>
+
+<h2>Application Layers</h2>
+
+<p>All sufficiently complex enterprise applications consist of multiple layers. From a user's perspective the layers are abstracted away and they exist solely to assist the programmer in managing all of the emergent complexity. Distinct layers imply that translation must happen between the layers in order for information to propagate. For example, in a typical enterprise use case, an entity is loaded from the database, operated upon, persisted back to the database and information regarding the operation is returned to the user through a presentation layer via perhaps a REST adapter. Applications layers imply the existence of boundaries and as per Mark Seemann's post, <a href="http://blog.ploeh.dk/2011/05/31/AtTheBoundariesApplicationsAreNotObjectOriented.aspx">At the Boundaries, Applications are Not Object-Oriented</a>. The entity is contained within the domain layer and should not be dragged into areas it doesn't belong. In the presentation layer, a specific <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC</a> view may require a user to enter a name and then gender. After having entered a name, the gender is still unspecified and the target entity is an invalid state. An always-valid entity cannot be bound to this view and it fact it should not be bound to the view - this is what the <a href="http://en.wikipedia.org/wiki/Model_View_ViewModel">view model</a> is for. The view model is a building block of the presentation layer and the domain entity doesn't belong there. Instead, an appropriate domain layer entity should be created based on data contained in the view model. This can be done directly or by passing a <a href="http://en.wikipedia.org/wiki/Data_transfer_object">DTO</a> to a service.</p>
+
+<h2>Validation Frameworks</h2>
+
+<p>Validation can be implemented with trivial if-then control flows but this can become cumbersome and the programmer's answer is the validation framework. A plurality of validation frameworks abound including <a href="http://msdn.microsoft.com/en-us/library/ee256141.aspx">data annotations</a>, <a href="http://fluentvalidation.codeplex.com/">FluentValidation</a>, <a href="http://nhforge.org/wikis/validator/nhibernate-validator-1-0-0-documentation.aspx">NHibernate Validators</a>, <a href="http://msdn.microsoft.com/en-us/library/ff648951.aspx">Enterprise Library Validation Block</a>, etc. Validation frameworks however, can be abused because one can be lead into thinking that a framework solves all validation concerns, across all application layers. Unfortunately, this is not always possible. In practice, I've found that validation frameworks are best suited for use at application layer boundaries - such as validation user input in the presentation layer, ensuring database constraints at the the persistence layer, or enforcing conformance to a schema in a REST adapter. Implementing validation at each layer separately allows validation to be context specific. However, this can lead to a degree of duplication, in response to which <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a> fanatics will scream blasphemy. This subject is addressed in the next section.</p>
+
+<p>The domain layer is best kept lean with use of plain-old-exceptions to enforce validation rules. This is because validation frameworks carry a requirement to invoke the application framework, similar to the "IsValid" methodology addressed above. A presentation layer developed with ASP.NET MVC provides action handlers to inject validation invocation logic. In this way, a validation framework can be applied globally toward the entire application. Similar injection points don't exist in plain C# or Java code, and use of an <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">AOP</a> framework can add needless complexity. This programming language "short-coming" can be overcome with extensions to <a href="http://blogs.msdn.com/b/ericlippert/archive/2009/03/23/five-dollar-words-for-programmers-part-three-homoiconic.aspx">homoiconicity</a>. [.NET Code Contracts] can be regarded as a validation framework with extended static verification. The more general paradigm of <a href="http://en.wikipedia.org/wiki/Design_by_contract">Design by contract</a> proposes that software should be written in terms of formal and verifiable specifications. The <a href="http://bit.ly/YN6JL">Eiffel programming language</a>, the <a href="http://en.wikipedia.org/wiki/Bertrand_Meyer">creator</a> of which gave use [command-query separation] (http://bit.ly/oAo2b) among other things, is based on this principle at the its very core.</p>
+
+<h2>Duplication Validation Logic</h2>
+
+<p>A Stackoverflow <a href="http://stackoverflow.com/questions/6966288/ddd-client-side-validation/6976171">question</a> asks whether there is a way to re-use validation logic. In practice, it is often simpler to allow a degree of duplication rather than to strive for complete consistency. Consider the following example. Suppose we have a customer entity where the customer's name is required. Enforcing this constraint in the entity is trivial:</p>
+
+<p><div><script src='https://gist.github.com/2766814.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2766814&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>An entity never stands alone however and we must consider the clients of this class. Who calls the constructor? In a web application implemented using ASP.NET MVC there would be a corresponding customer view model. This view model is part of the presentation layer and is designed with data binding in mind. Data annotations can be used to declare validation rules:</p>
+
+<p><div><script src='https://gist.github.com/2766824.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2766824&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This class is very similar to the domain entity class but with several important differences. It has a parameterless constructor, a name property without a guard clause and a data annotations validation attribute. These aspects of this class make it suitable for use in the presentation layer. Instead of attempting to carry validation rules from the entity class, the name requirement constraint is effectively duplicated. This is indeed duplication, but it must much simpler to manager than a some sort of validation mapping framework.</p>
+
+<h2>Complex Validation</h2>
+
+<p>Entities can enforce certain invariants but the scope of these invariants are always limited by the entity itself. Since entities should be lean and self-contained, without access to external services or repositories, they may not have access to the resources required to enforce certain validation rules. In this case, the <a href="http://gorodinski.com/blog/2012/04/14/services-in-domain-driven-design-ddd/">application service</a> can serve a mediating role and procure the resources required to enforce validity. There exist business rules that are not natural responsibilities of an entity or a validation framework. For example, a uniqueness constraint on user's user name cannot be verified by an entity because the entity does not and should not have access to the database of existing users. Instead, this rule can be enforced in the application service. Furthermore, rules may become sufficiently complex to warrant a <a href="http://en.wikipedia.org/wiki/Business_rules_engine">business rules engine</a>, in which case the application service is once again tasked with enforcing validation. An even more ambitious discipline is <a href="http://en.wikipedia.org/wiki/Ontology_engineering">ontology engineering</a> where CycL is an ontology language. Ontological engineering purports to formalize all business rules in machine executable representations. Jeff Zhuk, one of the leading practitioners in this field, proposes a <a href="http://semanticweb.com/from-business-as-usual-to-knowledge-driven-architecture-part-i_b21243">Knowledge Driven Architecture</a> based on these technologies.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>Entities should enforce their own consistency and be always-valid. What is the purpose of an entity if not to enforce its own consistency?</li>
+<li>If a need arises to allow an entity to enter an invalid state, consider whether application boundaries are at play which call for a different object model.</li>
+<li>Validation frameworks are best used at specific application layers, not across all layers.</li>
+<li>It is easier to duplicate validation logic than to keep it consistent across application layers.</li>
+<li>The application service can enforce complex validation rules not accessible to an entity.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Read-models as a tactical pattern in Domain-Driven Design (DDD)]]></title>
+    <link href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/"/>
+    <updated>2012-04-25T22:18:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd</id>
+    <content type="html"><![CDATA[<p>Domain-Driven Design espouses the <a href="http://domaindrivendesign.org/node/123">repository pattern</a> as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to <a href="http://domaindrivendesign.org/node/88">aggregate</a> roots, <a href="http://domaindrivendesign.org/node/109">entities</a> and less frequently to <a href="http://domaindrivendesign.org/node/135">value objects</a>. Eric Evans attributes another potential responsibility to a repository in the blue book:</p>
+
+<!--more-->
+
+
+<p><blockquote><p>Although most queries return an object or a collection of objects, it also fits within the concept to return some types of summary calculations, such as an object count, or a sum of a numerical attribute that was intended by the model to be tallied.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote></p>
+
+<p>This particular responsibility is not well explored or developed and as a result is often overlooked in practice. The basic premise of this approach is to leverage the underlying database, a relational database in particular, for what it's good at - namely aggregation, filtering, and projection. The requirement for this type of summarizing information depends on the project, but is commonplace in applications involving any type of GUI.</p>
+
+<p>Consider the standard order model with an order entity containing a collection of line items. The order total is a sum of the constituent line item totals and the tax and shipping charges. In C# the corresponding classes might look something like this:</p>
+
+<p><div><script src='https://gist.github.com/2486326.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2486326&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p><em>Note that much of the behavior and constraint checking have been omitted for brevity.</em></p>
+
+<p>This model appropriately represents the domain at hand. The only real behavior on this model is the calculation of the total. A typical application requirement calls for a view that displays a list of recent orders showing the order number, date and total. To support this, a repository contract might look like this:</p>
+
+<p><div><script src='https://gist.github.com/2486375.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2486375&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>From a client perspective the repository contract satisfies the requirements. However if implemented using an <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a> such as NHibernate certain caveats arise even in this simplistic scenario. The relationship between an order and an order line item is one-to-many and in a relational model there would be a table for the orders and a table for the order line items related by a foreign key. When retrieving an order entity, the repository must also retrieve the order line items in order for the entity to be complete. This can be achieved using several fetching strategies, including joining the order line items table or issuing a second select statement to the database. For retrieving a single instance of an order entity this approach is acceptable however for collections of orders, as in the case of the GetMostRecent method on the order repository, this results in the <a href="http://ayende.com/blog/1328/combating-the-select-n-1-problem-in-nhibernate">select N+1 problem</a>. While NHibernate and other ORMs offer solutions to this problem, these solutions are relatively complex and can become a performance burden for both the database and the ORM. An alternative solution, one that is accordance with <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a>, is to create an aggregating database query and map the results to simple, read-only objects:</p>
+
+<p><div><script src='https://gist.github.com/2495688.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2495688&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>One could also use the projection facilities provided by NHibernate. Regardless, the target class should match the shape of the query:</p>
+
+<p><div><script src='https://gist.github.com/2495699.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2495699&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Note that this class contains no behavior and is read only. Instances of this class are meant for read-only purposes such as for display in a GUI. Accordingly, these types of classes are called read-models. Alternative names for these types of objects are reporting objects, views, projections and probably something else I'm not thinking of at the moment.</p>
+
+<p>This trivial pattern boasts several advantages. The first of course is performance since relational databases are very adept at these types of queries. Next is simplicity - there is no simpler way of pulling data from a database - no ORM, no mapping magic, no problem! Furthermore, the developer isn't faced with coercing the order entity class to match the shape of the query at hand. <strong>This is perhaps the central advantage from the DDD perspective - keeping the aggregates and entities pure and <a href="http://en.wikipedia.org/wiki/Occam's_razor">Occam-esque</a>.</strong> <a href="http://dddcommunity.org/library/vernon_2011">Recent DDD guidance</a> suggests that aggregates should reference other aggregates using only the <a href="http://martinfowler.com/eaaCatalog/identityField.html">identity</a> instead of direct association. This also simplifies the model and transitively the mappings. What if, however, a particular view requires the display of data contained in the associated aggregate? The aggregate itself can no longer be used but this is where the read-model pattern comes to the rescue. Conversely to the read-model, the write-model aggregate only need to be retrievable using its identity in which case an ORM is a suitable solution due to several convenient accommodations such as change tracking, generated SQL, concurrency control, etc.</p>
+
+<p>The read-model pattern can be compared to the notion of <a href="http://martinfowler.com/articles/consumerDrivenContracts.html">consumer-driven contracts</a>. Additionally, the read-model pattern can be viewed as a special case of <a href="http://martinfowler.com/bliki/CQRS.html">CQRS</a> in that the model used for querying is different from the model used for processing commands. This is not full-fledged CQRS because read-models are pulled from the same data source as the write model. There is no requirement for a synchronization mechanism and the affiliated consistency and cache control concerns. However, the option remains to implement the synchronization mechanism at a later time when performance tests clamor for it. In CQRS, these read-models are usually called persistent read-models and are generated by event projections. The CQRS foreshadow also positions read-models as an intermediary refactoring step toward a CQRS implementation. For in depth treatment on CQRS look no further than <a href="http://abdullin.com/">Rinat Abdullin</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,280 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Request/Acknowledge/Poll with ASP.NET WebAPI and NServiceBus - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="Request/Acknowledge is a service design pattern wherein clients receive an acknowledgement as an immediate response while the original request is &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-13T17:26:00-04:00" pubdate data-updated="true">Jul 13<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/asp-net-webapi/'>ASP.NET WebAPI</a>, <a class='category' href='/blog/categories/nservicebus/'>NServiceBus</a>, <a class='category' href='/blog/categories/rest/'>REST</a>, <a class='category' href='/blog/categories/soa/'>SOA</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Request/Acknowledge/Poll With ASP.NET WebAPI and NServiceBus</h1>
+	<div class="entry-content"><p><a href="http://servicedesignpatterns.com/ClientServiceInteractions/RequestAcknowledge">Request/Acknowledge</a> is a service design pattern wherein clients receive an acknowledgement as an immediate response while the original request is processed in the background. The acknowledgement typically contains a token for identifying the background task which can in turn be used to query the processing status of the task. This pattern is employed to reduce <a href="http://bit.ly/ricVKj">temporal coupling</a> which is especially critical for requests requiring a long processing times. Instead of having the client wait for the final response a pull method for querying the status of the task or a push method for notifying the client is implemented. Similarly, the <a href="http://msdn.microsoft.com/en-us/library/wewwczdw.aspx">event-based asynchronous pattern</a> in <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">OOP</a> shares the goal of reducing wasted wait time. Request/Acknowledge/Poll is a variation of this pattern wherein a method is provided for the client to query for the status of the task being processed. The other variation is Request/Acknowledge/Callback wherein a client is notified of task status immediately via callback mechanism. The callback variation ensures that the client receives task status information as it is generated but can be a burden to implement because the client must support the callback mechanism. Furthermore, it places the additional burden of tracking and invoking callbacks upon the server. The poll variation is simpler to implement and keeps the client in control of retrieving status information as it is needed.</p>
+
+<!--more-->
+
+
+<p>The pattern consists of the following roles - the client, the service, the message queue, the request processor and the status repository. The client sends the initial request and polls the service for status information. The service receives the request, relays it to a message queue and returns an acknowledgement which typically contains a token to be used for identifying the task in subsequent status queries. The message queue serves to dismantle the temporal coupling between the sending of the request and receipt of the response. The request processor continuously dequeues messages from the queue and performs the actual processing of the request. The status repository is used to store information about the processing status of the task for retrieval by the client via the same service that accepted the initial request or by another service. Various frameworks can be utilized to implement the roles of the request/acknowledge/poll pattern and on the .NET platform a popular combination is <a href="http://www.asp.net/web-api">ASP.NET WebAPI</a> for the service, <a href="http://nservicebus.com/">NServiceBus</a> for messaging and the request processor and a dead simple implementation of the status repository backed by SQL Server or a plain old file system.</p>
+
+<p><strong> Example Domain </strong></p>
+
+<p>A specific example based on a production system is in order. Consider the domain of an online retailer which sources products from various suppliers, optimizes the content and pricing and posts listings on sales channels. Product information is retrieved from the suppliers website, web service or a flat file. After import, product data is sanitized, optimized and merged with existing data. The import process is seeded by a list of product <a href="http://en.wikipedia.org/wiki/Stock-keeping_unit">SKUs</a> provided by the supplier. As one can imagine, importing a product is a long running operation consisting of several steps and thus importing multiple products is also a long running operation. Furthermore, the import of multiple products bears a structure shared by processes where an identical operation is to be repeated for a set of items. The status of such processes typically contains the total number of items to be processed, the number of items processed so far as well as the number of errors.</p>
+
+<p><strong> The service with ASP.NET WebAPI </strong></p>
+
+<p>The service of the request/acknowledge pattern is trivial to implement because it serves a delegating role - a gateway between the client and the messaging infrastructure as well as the status repository. The ASP.NET WebAPI is an abstraction over <a href="http://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a> which has specifications to fulfill the use case at hand - namely the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">202 Accepted</a> response status code as well as the <a href="http://en.wikipedia.org/wiki/HTTP_location">Location header</a> or <a href="http://www.w3.org/Protocols/9707-link-header.html">Link header</a>. Status code 202 indicates to clients that &#8220;the request has been accepted for processing, but the processing has not been completed.&#8221;. The location or link header can be used to specify the location of the resource representing the status of the process.</p>
+
+<div><script src='https://gist.github.com/3157819.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3157819&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>In the sample, the import controller implements a controller resource which accepts an import request, generates a unique identifier for the task and creates an internal message to be sent with NServiceBus. Additionally, the service can handle authorization and validation. The model representing the import request, <strong>ImportRequestModel</strong>, is nearly identical to the internal command message, <strong>ImportProducts</strong>, however it is best to implement them as separate classes because they have slightly different roles and are handled by different frameworks with different constraints. The task status resource referenced in the location header can also be implemented with the WebAPI.</p>
+
+<p><strong> The queue and request processor with NServiceBus </strong></p>
+
+<p>An asynchronous message queue decouples the sender of a message from the receiver while ensuring message delivery despite downtime of either one. NServiceBus is an abstraction over an underlying messaging technology, typically <a href="http://en.wikipedia.org/wiki/Microsoft_Message_Queuing">MSMQ</a>. While there is a managed client for MSMQ, NServiceBus provides several industrial strength facilities beyond MSMQ that will help make the system production ready - namely <a href="http://nservicebus.com/pubsub.aspx">pub/sub</a> and <a href="http://nservicebus.com/Sagas.aspx">sagas</a>. For the request/acknowledge pattern, NServiceBus serves as a framework for implementing the queue and request processor roles. The <strong>IBus</strong> interface encapsulates the queue and a class implementing <strong>IHandleMessages</strong> will be the request processor. A saga can be used to implement the processing &#8220;loop&#8221; for importing multiple products. This saga will handle the <strong>ImportProducts</strong> message and send individual <strong>ImportProduct</strong> messages to the appropriate endpoint. This endpoint, also implemented with NServiceBus, will handle individual <strong>ImportProduct</strong> messages and publish an event upon completion or failure. The aforementioned coordinating saga will subscribe to these events in order to manage status information for the import task as a whole. The following is a sample implementation.</p>
+
+<div><script src='https://gist.github.com/3161028.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3161028&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>This saga implements the request processor with the method for handling the <strong>ImportProducts</strong> message. Furthermore, the saga entity <strong>ImportSagaData</strong> is used to track the processing status of the import task. Accordingly, this data is used to update the status of the task with the status repository. In this way, the saga coordinates the import task effectively implementing a distributed, fault tolerant processing loop. The saga data itself can be used instead of the status repository however the status repository is more convenient for a few reasons. First, the saga method <strong>MarkAsComplete</strong> deletes the saga data entity making the status unaccessible after the task complete. While it is possible to omit the call to the method, leaving it serves as documentation. Second, the saga data is persisted with the <strong>ISagaPersister</strong> which creates a dependency on the specific implementation. Third, the saga entity isn&#8217;t accessible until the initial message completes processing and the entity is persisted. Depending on the size of the task, there may be a number of products that have already been imported at that point without the status being updated.</p>
+
+<p>Utilization of a durable messaging technology, such as MSMQ, makes the system resilient to crashes and downtime all while normalizing the load curve. The endpoint which handles individual <strong>ImportProduct</strong> messages can go down in the middle of an import and pick up where it left off once it is back up. Furthermore, with the use of the NServiceBus <a href="http://nservicebus.com/Distributor.aspx">distributor</a>, processing can be scaled out transparently. A caveat in implementing the coordinating saga with NServiceBus v2.6 and below is that the default NHibernate based saga persister <a href="http://tech.groups.yahoo.com/group/nservicebus/message/12975">isn&#8217;t thread safe</a> which means that the endpoint can only have a single worker thread. Given that the work performed by this saga is relatively lightweight this isn&#8217;t usually an issue.</p>
+
+<p><strong> The status repository </strong></p>
+
+<p>The status repository can be implemented in a variety of ways and is hardly worth a mention. As a tangential aside, like the ones so forever tantalizing for software engineers, <a href="http://redis.io/">Redis</a> presents an attractive solution for the status repository because of its data structural commands such as <a href="http://redis.io/commands/INCR">INCR</a>. The status repository interface used in the example follows.</p>
+
+<div><script src='https://gist.github.com/3161060.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/3161060&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p><strong> Summary </strong></p>
+
+<p>As demonstrated, it is straightforward to implement the request/acknowledge pattern with the ASP.NET WebAPI and NServiceBus. This pattern allows clients to invoke long running operations without having to be bound to the processing time. The service role is implemented with ASP.NET WebAPI. The queue and request processor roles are implemented with an NServiceBus saga, which also coordinates the processing loop. Beyond the elimination of temporal coupling the described system is resilient and horizontally scalable. Despite their conveniences, we aren&#8217;t bound to any particular framework or platform - there exist a plethora of messaging technologies and web service frameworks that can fulfill the required roles. For reference, queuing can be supported by <a href="http://masstransit-project.com/">MassTransit</a> over <a href="http://www.rabbitmq.com/">RabbitMQ</a> or <a href="http://activemq.apache.org/">ActiveMQ</a>. <a href="http://en.wikipedia.org/wiki/Java_API_for_XML_Web_Services">JAX</a> on the Java platform can be used in place of ASP.NET WebAPI. Most importantly, one must understand the role each technology plays and envision the system as being composed with these roles. Care must be taken to ensure that the system isn&#8217;t deeply locked into any particular vendor.</p>
+
+<p><strong> Resources </strong></p>
+
+<ul>
+<li><a href="http://www.amazon.com/Service-Design-Patterns-Fundamental-Solutions/dp/032154420X">Service Design Patterns: Fundamental Design Solutions for SOAP/WSDL and RESTful Web Services</a></li>
+<li><a href="http://www.amazon.com/RESTful-Web-Services-Cookbook-Scalability/dp/0596801688/">RESTful Web Services Cookbook: Solutions for Improving Scalability and Simplicity</a></li>
+<li><a href="http://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf">SAGAS</a></li>
+</ul>
+
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/';
+        var disqus_url = 'http://gorodinski.com/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>

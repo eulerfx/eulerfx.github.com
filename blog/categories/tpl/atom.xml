@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: TPL | Lev Gorodinski]]></title>
+  <link href="http://gorodinski.com/blog/categories/tpl/atom.xml" rel="self"/>
+  <link href="http://gorodinski.com/"/>
+  <updated>2014-02-27T10:49:20-05:00</updated>
+  <id>http://gorodinski.com/</id>
+  <author>
+    <name><![CDATA[Lev Gorodinski]]></name>
+    <email><![CDATA[eulerfx@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Retry with the .NET Task Parallel Library (TPL)]]></title>
+    <link href="http://gorodinski.com/blog/2012/03/22/retry-with-the-net-task-parallel-library-tpl/"/>
+    <updated>2012-03-22T23:06:00-04:00</updated>
+    <id>http://gorodinski.com/blog/2012/03/22/retry-with-the-net-task-parallel-library-tpl</id>
+    <content type="html"><![CDATA[<p>The <a href="http://msdn.microsoft.com/en-us/library/dd460717.aspx">.NET Task Parallel Library</a> simplifies development of and reasoning about asynchronous code.
+However, working with <a href="http://msdn.microsoft.com/en-us/library/system.threading.tasks.task.aspx">Task</a> instances instead of blocking method results can still be difficult and un-intuitive.
+One example where this is true is in implementing retry logic for functions that return Task instances.
+Consider this helper function which retries a provided function a specified number of times:</p>
+
+<!--more-->
+
+
+<p><div><script src='https://gist.github.com/2161734.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2161734&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This was a response to <a href="http://stackoverflow.com/questions/6090026/how-to-implement-retry-logic-with-task-parallel-librarytpl">this Stackoverflow.com question</a> and works as expected for blocking methods.
+However, suppose you have a function which returns a Task<TResult> and you would like to decorate it with retry logic as well.
+The above implementation won't work because it will only handle exceptions that are thrown by calling the task returning function,
+not exceptions thrown inside the task. What is needed is something that will retry based on task faults.
+The basic idea is to add a continuation to the returned task that will determine whether a task is faulted,
+examine the exception and retry or fail accordingly. The following is a sample implementation:</p>
+
+<p><div><script src='https://gist.github.com/2161819.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2161819&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The core functionality is in the RetryContinuation method. It takes a task instance, the original task returning function,
+a number of remaining attempts and a predicate function which determines whether a given exception should result in a retry.
+This function calls itself recursively until the task is either successful or the maximum number of attempts have been reached.</p>
+]]></content>
+  </entry>
+  
+</feed>

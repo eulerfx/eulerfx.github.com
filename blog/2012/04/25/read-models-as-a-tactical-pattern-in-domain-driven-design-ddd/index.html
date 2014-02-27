@@ -1,0 +1,270 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Read-models as a tactical pattern in Domain-Driven Design (DDD) - Lev Gorodinski</title>
+	<meta name="author" content="Lev Gorodinski">
+
+	
+	<meta name="description" content="Domain-Driven Design espouses the repository pattern as a way to persist and reconstitute domain objects from a persistent store such as a database. &hellip;">
+	
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Lev Gorodinski" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700' rel='stylesheet' type='text/css'>
+	
+	
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><!-- <div class="profilepic">	
+	<img src="/images/dp.jpg" alt="Profile Picture" style="width: 160px;">
+</div> -->
+<h1><a href="/">Lev Gorodinski</a></h1>
+<p class="subtitle">Computing, Math, Philosophy</p>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/presentations/">Presentations</a></li>
+	<li><a href="/about/">About</a></li>
+</ul>
+</nav>
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/103805433293437107323?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/eulerfx" title="Twitter">Twitter</a>
+		
+		
+		<a class="github" href="https://github.com/eulerfx" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+<section class="stackexchange">
+	<br />
+	<a href="http://stackoverflow.com/users/13855/eulerfx">
+      <img src="http://stackexchange.com/users/flair/7876.png" width="208" height="58" alt="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for eulerfx at Stack Overflow, Q&amp;A for professional and enthusiast programmers" style="float:left"/>
+    </a>
+</section>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+<!-- <div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script> -->
+
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-25T22:18:00-04:00" pubdate data-updated="true">Apr 25<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
+
+
+</div>
+	</div>
+	<h1 class="title">Read-models as a Tactical Pattern in Domain-Driven Design (DDD)</h1>
+	<div class="entry-content"><p>Domain-Driven Design espouses the <a href="http://domaindrivendesign.org/node/123">repository pattern</a> as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to <a href="http://domaindrivendesign.org/node/88">aggregate</a> roots, <a href="http://domaindrivendesign.org/node/109">entities</a> and less frequently to <a href="http://domaindrivendesign.org/node/135">value objects</a>. Eric Evans attributes another potential responsibility to a repository in the blue book:</p>
+
+<!--more-->
+
+
+
+
+<blockquote><p>Although most queries return an object or a collection of objects, it also fits within the concept to return some types of summary calculations, such as an object count, or a sum of a numerical attribute that was intended by the model to be tallied.</p><footer><strong>Eric Evans</strong> <cite>Domain-Driven Design</cite></footer></blockquote>
+
+
+<p>This particular responsibility is not well explored or developed and as a result is often overlooked in practice. The basic premise of this approach is to leverage the underlying database, a relational database in particular, for what it&#8217;s good at - namely aggregation, filtering, and projection. The requirement for this type of summarizing information depends on the project, but is commonplace in applications involving any type of GUI.</p>
+
+<p>Consider the standard order model with an order entity containing a collection of line items. The order total is a sum of the constituent line item totals and the tax and shipping charges. In C# the corresponding classes might look something like this:</p>
+
+<div><script src='https://gist.github.com/2486326.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2486326&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p><em>Note that much of the behavior and constraint checking have been omitted for brevity.</em></p>
+
+<p>This model appropriately represents the domain at hand. The only real behavior on this model is the calculation of the total. A typical application requirement calls for a view that displays a list of recent orders showing the order number, date and total. To support this, a repository contract might look like this:</p>
+
+<div><script src='https://gist.github.com/2486375.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2486375&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>From a client perspective the repository contract satisfies the requirements. However if implemented using an <a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a> such as NHibernate certain caveats arise even in this simplistic scenario. The relationship between an order and an order line item is one-to-many and in a relational model there would be a table for the orders and a table for the order line items related by a foreign key. When retrieving an order entity, the repository must also retrieve the order line items in order for the entity to be complete. This can be achieved using several fetching strategies, including joining the order line items table or issuing a second select statement to the database. For retrieving a single instance of an order entity this approach is acceptable however for collections of orders, as in the case of the GetMostRecent method on the order repository, this results in the <a href="http://ayende.com/blog/1328/combating-the-select-n-1-problem-in-nhibernate">select N+1 problem</a>. While NHibernate and other ORMs offer solutions to this problem, these solutions are relatively complex and can become a performance burden for both the database and the ORM. An alternative solution, one that is accordance with <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a>, is to create an aggregating database query and map the results to simple, read-only objects:</p>
+
+<div><script src='https://gist.github.com/2495688.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2495688&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>One could also use the projection facilities provided by NHibernate. Regardless, the target class should match the shape of the query:</p>
+
+<div><script src='https://gist.github.com/2495699.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/2495699&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+
+
+<p>Note that this class contains no behavior and is read only. Instances of this class are meant for read-only purposes such as for display in a GUI. Accordingly, these types of classes are called read-models. Alternative names for these types of objects are reporting objects, views, projections and probably something else I&#8217;m not thinking of at the moment.</p>
+
+<p>This trivial pattern boasts several advantages. The first of course is performance since relational databases are very adept at these types of queries. Next is simplicity - there is no simpler way of pulling data from a database - no ORM, no mapping magic, no problem! Furthermore, the developer isn&#8217;t faced with coercing the order entity class to match the shape of the query at hand. <strong>This is perhaps the central advantage from the DDD perspective - keeping the aggregates and entities pure and <a href="http://en.wikipedia.org/wiki/Occam's_razor">Occam-esque</a>.</strong> <a href="http://dddcommunity.org/library/vernon_2011">Recent DDD guidance</a> suggests that aggregates should reference other aggregates using only the <a href="http://martinfowler.com/eaaCatalog/identityField.html">identity</a> instead of direct association. This also simplifies the model and transitively the mappings. What if, however, a particular view requires the display of data contained in the associated aggregate? The aggregate itself can no longer be used but this is where the read-model pattern comes to the rescue. Conversely to the read-model, the write-model aggregate only need to be retrievable using its identity in which case an ORM is a suitable solution due to several convenient accommodations such as change tracking, generated SQL, concurrency control, etc.</p>
+
+<p>The read-model pattern can be compared to the notion of <a href="http://martinfowler.com/articles/consumerDrivenContracts.html">consumer-driven contracts</a>. Additionally, the read-model pattern can be viewed as a special case of <a href="http://martinfowler.com/bliki/CQRS.html">CQRS</a> in that the model used for querying is different from the model used for processing commands. This is not full-fledged CQRS because read-models are pulled from the same data source as the write model. There is no requirement for a synchronization mechanism and the affiliated consistency and cache control concerns. However, the option remains to implement the synchronization mechanism at a later time when performance tests clamor for it. In CQRS, these read-models are usually called persistent read-models and are generated by event projections. The CQRS foreshadow also positions read-models as an intermediary refactoring step toward a CQRS implementation. For in depth treatment on CQRS look no further than <a href="http://abdullin.com/">Rinat Abdullin</a>.</p>
+</div>
+
+</article>
+
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+
+<div id="banner" class="inner">
+	<div class="container">
+		<ul class="feed"></ul>
+	</div>
+	<small><a href="http://twitter.com/eulerfx">eulerfx</a> @ <a href="http://twitter.com">Twitter</a></small>
+	<div class="loading">Loading...</div>
+</div>
+<script src="/javascripts/twitter.js"></script>
+<script type="text/javascript">
+	(function($){
+		$('#banner').getTwitterFeed('eulerfx', 5, false);
+	})(jQuery);
+</script>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Lev Gorodinski
+
+
+| Design by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+| Powered by <a href="http://octopress.org">Octopress</a></footer>
+			<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'eulerfx';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/';
+        var disqus_url = 'http://gorodinski.com/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-30683601-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+		</div>
+	</div>
+</body>
+</html>
