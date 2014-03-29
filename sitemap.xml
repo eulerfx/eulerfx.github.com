@@ -1,15 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://gorodinski.com/blog/2006/04/17/music-and-mathematics/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
         <loc>http://gorodinski.com/blog/2006/04/17/the-secret-garden/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>http://gorodinski.com/blog/2006/04/18/beauty-part-1-epistemology-of-beauty/</loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
     <url>
@@ -29,19 +21,11 @@
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
     <url>
-        <loc>http://gorodinski.com/blog/2006/09/18/paper-as-memory-register-can-hinder/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
         <loc>http://gorodinski.com/blog/2007/01/04/why-democracy-and-lyrics/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
+        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/blog/2007/03/16/patterns/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>http://gorodinski.com/blog/2007/03/16/why-drunks-fight/</loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
     <url>
@@ -60,10 +44,6 @@
     </url>
     <url>
         <loc>http://gorodinski.com/blog/2008/07/29/is-universe-simple-or-complex/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>http://gorodinski.com/blog/2012/03/18/the-genealogy-of-rest/</loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
     <url>
@@ -210,15 +190,15 @@
     </url>
     <url>
         <loc>http://gorodinski.com/archives/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
+        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/blog/archives/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
+        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/</loc>
-        <lastmod>2013-11-04T22:52:50-05:00</lastmod>
+        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/presentations/</loc>
