@@ -147,7 +147,7 @@
   <section>
     <section>
       <h2>Architecture</h2>
-      <img src="images/ouro.svg" style="border:0;margin:0;padding:0;width:650px" />
+      <img src="images/ouro.svg" style="border:0;margin:0;padding:0;width:500px" />
     </section>   
   </section>
   <!--end Architecture-->
@@ -158,12 +158,13 @@
       <h2>EventStore API</h2>
       <pre><code class="csharp">
       type Conn = IEventStoreConnection
-      type StreamId = string
+      type Stream = string
       type From = int
       type Count = int
 
-      val write : Conn -> StreamId -> EventData
-      val read  : Conn -> StreamId -> From -> Count -> StreamEventSlice
+      val write : Conn -> Stream -> EventData -> Async&lt;unit&gt;
+
+      val read  : Conn -> Stream -> From -> int -> Async&lt;StreamEventSlice&gt;
       </code></pre>
     </section>   
   </section>
@@ -202,7 +203,7 @@
         <li>Input</li>
         <li>Output</li>
         <li>State</li>
-        <li>S0</li>
+        <li>S<sub>0</sub></li>
         <li>(Input, State) -> (Output,State)</li>
       </ul>
     </section>
