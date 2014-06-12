@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>  
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/default.css" id="theme">
+  <!-- For syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+  <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+  <script>
+    document.write('<link rel="stylesheet" href="css/print/' + ( window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">');
+  </script>
+	<title>Event-driven services with F# and EventStore</title>
+  <style type="text/css">
+  .reveal code {
+    max-height: 500px;
+  }
+  </style>
+</head>
+<body>
+
+
+
+<div class="reveal">
+
+<div style="display:block;margin:0;position:fixed;bottom:52px;left:40px">
+  <img src="images/jet-name.png" width="150" height="31" />  
+</div>
+
+<div class="slides">	  
+
+	<section>
+    <div style="background-image:url(images/lambda.png);background-repeat:no-repeat;height:500px;">
+      <h2>Event-driven services<br/>with F# and EventStore</h2>
+      <p>Leo Gorodinski</p>
+      <p>@eulerfx</p>      
+    </div>
+	</section>
+  
+
+  <section>
+    <section>
+      <h2>Plan</h2>
+      <ul>
+        <li>Define "service"</li>        
+        <li>Implement basic services in F#</li>
+        <li>Persistence and integration with EventStore</li>
+        <li>Contrast with other solutions</li>
+      </ul>
+    </section>
+  </section>
+  <!--end Plan-->
+
+
+  <section>
+    <section>
+      <img src="images/einstein-simplicity.jpg" />
+    </section>
+  </section>
+  <!--end Einstein-->
+
+  
+  <section>
+    <section>
+      <h2>Service</h2>
+      <pre><code class="no-highlight">
+      val service : Input -> Output
+      </code></pre>
+    </section>
+  </section>
+  <!--end Service-->
+
+
+  <section>
+    <section>
+      <h2>Service</h2>
+      <pre><code class="csharp">
+      type Input = 
+        | AddItem    of productId:string
+        | RemoveItem of productId:string
+
+      type Output = 
+        | ItemAdded   of productId:string
+        | ItemRemoved of productId:string
+
+      let service input : Input -> Output =
+        match input with
+        | AddItem productId    -> ItemAdded productId
+        | RemoveItem productId -> ItemRemoved productId
+      </code></pre>
+    </section>
+  </section>
+  <!--end Service2-->
+
+
+  <section>
+    <section>
+      <h2>Service</h2>
+      <pre><code class="csharp">
+      type Input = 
+        | AddItem    of productId:string
+        | RemoveItem of productId:string
+
+      type Output = 
+        | ItemAdded   of productId:string
+        | ItemRemoved of productId:string
+
+      let service input : Input -> Async&lt;Output&gt; = 
+        async {
+          do! Async.Sleep 1000
+          match input with
+          | AddItem productId    -> return ItemAdded productId
+          | RemoveItem productId -> return ItemRemoved productId }
+      </code></pre>
+    </section>
+  </section>
+  <!--end Service3-->
+
+
+  <section>
+    <section>
+      <h2>Service</h2>
+      <pre><code class="csharp">
+      type Input = 
+        | AddItem    of productId:string
+        | RemoveItem of productId:string
+
+      type Output = 
+        | ItemAdded   of productId:string
+        | ItemRemoved of productId:string
+
+      let service (d:string) input : string -> Input -> Async&lt;Output&gt; = 
+        async {
+          do! Async.Sleep 1000
+          printfn "hello=%s" d
+          match input with
+          | AddItem productId    -> return ItemAdded productId
+          | RemoveItem productId -> return ItemRemoved productId }
+      </code></pre>
+    </section>
+  </section>
+  <!--end Service4-->
+
+
+  <section>
+    <section>
+      <h2>Architecture</h2>
+      <img src="images/ouro.svg" style="border:0;margin:0;padding:0;width:650px" />
+    </section>   
+  </section>
+  <!--end Architecture-->
+
+
+  <section>
+    <section>
+      <h2>EventStore API</h2>
+      <pre><code class="csharp">
+      type Conn = IEventStoreConnection
+      type StreamId = string
+      type From = int
+      type Count = int
+
+      val write : Conn -> StreamId -> EventData
+      val read  : Conn -> StreamId -> From -> Count -> StreamEventSlice
+      </code></pre>
+    </section>   
+  </section>
+  <!--end EventStore API-->
+
+
+
+  <section>    
+    <section>
+      <h2>N-TIER</h2>
+      <img src="images/db_wire_mess.png" />
+    </section>   
+  </section>
+
+
+  <section>    
+    <section>
+      <h2>Message Queue</h2>
+      <img src="images/db_queue.png" />
+    </section>   
+  </section>
+
+
+  <section>     
+    <section>
+      <h2>EventStore</h2>
+      <img src="images/db_eventstore.png" />
+    </section>   
+  </section>
+
+
+  <section>
+    <section>
+      <h2>State Machine</h2>
+      <ul>
+        <li>Input</li>
+        <li>Output</li>
+        <li>State</li>
+        <li>S0</li>
+        <li>(Input, State) -> (Output,State)</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Event-sourcing</h2>
+      <pre><code class="no-highlight">
+      val exec  : Input * State -> Output
+
+      val apply : Output * State -> State
+
+      let T (input,state) : Input * State -> Output * State =
+        let output = exec  (input,state)
+        let state' = apply (output,state)
+        (output,state')  
+      </code></pre>
+    </section>   
+  </section>
+
+
+  <section>     
+    <section>
+      <h2>Event-driven Service Network</h2>
+      <img src="images/event_network.png" width="600" />
+    </section>   
+  </section>
+
+
+  <section>
+    <h2>Leo Gorodinski</h2>
+    <p><a href="http://twitter.com/eulerfx">@eulerfx</a></p>
+    <p><a href="http://github.com/eulerfx">github.com/eulerfx</a></p>
+  </section>
+
+
+</div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+
+    //theme: 'beige', // available themes are in /css/theme
+    transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+      // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+    ]
+  });
+</script>
+
+</body>
+</html>
