@@ -2,7 +2,7 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://gorodinski.com/blog/2006/04/17/the-secret-garden/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
+        <lastmod>2014-07-21T20:29:59-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/blog/2006/04/28/walt-whitman/</loc>
@@ -25,10 +25,6 @@
         <lastmod>2014-03-28T22:23:06-04:00</lastmod>
     </url>
     <url>
-        <loc>http://gorodinski.com/blog/2007/03/16/patterns/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
         <loc>http://gorodinski.com/blog/2008/03/29/developing-and-learning-theories/</loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
@@ -49,12 +45,6 @@
     <url>
         <loc>
             http://gorodinski.com/blog/2012/03/22/retry-with-the-net-task-parallel-library-tpl/
-        </loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://gorodinski.com/blog/2012/04/03/bounded-contexts-as-a-strategic-pattern-beyond-ddd/
         </loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
@@ -116,7 +106,7 @@
     </url>
     <url>
         <loc>http://gorodinski.com/blog/2012/12/10/placing-knowledge-on-center-stage/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
+        <lastmod>2014-07-21T20:27:39-04:00</lastmod>
     </url>
     <url>
         <loc>
@@ -127,12 +117,6 @@
     <url>
         <loc>
             http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/
-        </loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/
         </loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
@@ -150,16 +134,6 @@
     </url>
     <url>
         <loc>http://gorodinski.com/blog/2013/03/11/the-two-sides-of-domain-driven-design/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>
-            http://gorodinski.com/blog/2013/03/22/distilling-distinctions-in-the-ubiquitous-language-in-domain-driven-design/
-        </loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
-    </url>
-    <url>
-        <loc>http://gorodinski.com/blog/2013/03/31/the-domain-driven-design-maturity-model/</loc>
         <lastmod>2013-11-04T22:52:49-05:00</lastmod>
     </url>
     <url>
@@ -186,19 +160,19 @@
     </url>
     <url>
         <loc>http://gorodinski.com/about/</loc>
-        <lastmod>2013-11-04T22:52:49-05:00</lastmod>
+        <lastmod>2014-07-21T20:24:37-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/archives/</loc>
-        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
+        <lastmod>2014-07-21T20:29:59-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/blog/archives/</loc>
-        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
+        <lastmod>2014-07-21T20:29:59-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/</loc>
-        <lastmod>2014-03-28T22:23:06-04:00</lastmod>
+        <lastmod>2014-07-21T20:29:59-04:00</lastmod>
     </url>
     <url>
         <loc>http://gorodinski.com/presentations/</loc>

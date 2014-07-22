@@ -7,7 +7,7 @@
 	<meta name="author" content="Lev Gorodinski">
 
 	
-	<meta name="description" content="This post explores Domain-Driven Design from the tactical and strategic perspectives with the goal of clearing confusion around these orthogonal &hellip;">
+	<meta name="description" content="In this post I present a methodology for implementing Domain-Driven Design (DDD) using F# and EventStore. The described approach makes use of &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -121,80 +121,6 @@
   
 
 
-<time datetime="2013-03-11T23:10:00-04:00" pubdate data-updated="true">Mar 11<span>th</span>, 2013</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/ddd/'>DDD</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2013/03/11/the-two-sides-of-domain-driven-design/">The Two Sides of Domain-Driven Design (DDD)</a></h1>
-	<div class="entry-content">
-		<p><em>This post explores Domain-Driven Design from the tactical and strategic perspectives with the goal of clearing confusion around these orthogonal axes. Motivation sourced from <a href="http://blog.ploeh.dk/2013/03/04/outside-in-tdd-versus-ddd/">Outside In TDD versus DDD</a> by <a href="https://twitter.com/ploeh">Mark Seemann</a> where the author examines this misunderstanding surrounding DDD.</em></p>
-
-
-		
-		<a href="/blog/2013/03/11/the-two-sides-of-domain-driven-design/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-24T18:36:00-05:00" pubdate data-updated="true">Feb 24<span>th</span>, 2013</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/cqrs/'>CQRS</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/eventstore/'>EventStore</a>, <a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/event-sourcing/'>event sourcing</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/">Domain-Driven Design (DDD) With F# and EventStore - Projections</a></h1>
-	<div class="entry-content">
-		<p><em>In this post I cover the introduction of simple projections into the <a href="https://github.com/eulerfx/DDDInventoryItemFSharp">InventoryItem domain project</a> implemented with F# and <a href="http://geteventstore.com/">EventStore</a>.</em></p>
-
-<p><a href="http://cqrsguide.com/doc:projection">Projections</a> implement the query side of CQRS. Specifically in EventStore, projections are a mechanism for transforming event streams into other event streams. This has a wide range of applications including <a href="http://en.wikipedia.org/wiki/Complex_event_processing">CEP</a>. For this project, projections were used to generate read models, also known as views or query models.</p>
-
-
-		
-		<a href="/blog/2013/02/24/domain-driven-design-with-fsharp-and-eventstore-projections/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
 <time datetime="2013-02-17T19:04:00-05:00" pubdate data-updated="true">Feb 17<span>th</span>, 2013</time></div>
 		<div class="tags">
 
@@ -231,23 +157,23 @@
   
 
 
-<time datetime="2013-01-25T20:55:00-05:00" pubdate data-updated="true">Jan 25<span>th</span>, 2013</time></div>
+<time datetime="2013-01-21T21:41:00-05:00" pubdate data-updated="true">Jan 21<span>st</span>, 2013</time></div>
 		<div class="tags">
 
 
-	<a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/fp/'>FP</a>
+	<a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/fp/'>FP</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>
 
 
 </div>
 		
 	</div>
-	<h1 class="title"><a href="/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/">Subtleties of F# Currying, Partial Application and Eta-conversion</a></h1>
+	<h1 class="title"><a href="/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/">Inverting Object-orientation With F# Discriminated Unions and Pattern Matching</a></h1>
 	<div class="entry-content">
-		<p>F# is a functional programming language and as such provides various facilities for declaring, composing and transforming functions. Among these is <a href="http://en.wikipedia.org/wiki/Currying">currying</a> which allows multi-variable functions to be regarded as chains of single-parameter functions each returning a function with one less variable that the last. Partial application allows fixing variables of a curried function returning a new function of smaller arity. Viewing functions in this way affords several advantages, including representation in the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a>. An example in F# and a comparable C# implementation follow.</p>
+		<p><em>In this post I compare and contrast the use discriminated unions and pattern matching in F# to the object-oriented paradigm, particularly in C#. Additionally, aspects of the object-oriented approach are linked with GoF design patterns, multiple dispatch and the open-closed principle. Ultimately, discriminated unions are shown to address deficiencies in the imperative, object-oriented approach.</em></p>
 
 
 		
-		<a href="/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/" class="more-link">Read on &rarr;</a>
+		<a href="/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/" class="more-link">Read on &rarr;</a>
 	</div>
 
 </article>
@@ -267,23 +193,95 @@
   
 
 
-<time datetime="2013-01-21T21:41:00-05:00" pubdate data-updated="true">Jan 21<span>st</span>, 2013</time></div>
+<time datetime="2013-01-05T16:16:00-05:00" pubdate data-updated="true">Jan 5<span>th</span>, 2013</time></div>
 		<div class="tags">
 
 
-	<a class='category' href='/blog/categories/f-/'>F#</a>, <a class='category' href='/blog/categories/fp/'>FP</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>
+	<a class='category' href='/blog/categories/f-/'>F#</a>
 
 
 </div>
 		
 	</div>
-	<h1 class="title"><a href="/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/">Inverting Object-orientation With F# Discriminated Unions and Pattern Matching</a></h1>
+	<h1 class="title"><a href="/blog/2013/01/05/json-dot-net-type-converters-for-f-option-list-tuple/">Json.NET Type Converters for the F# Option, List and Tuple Types</a></h1>
 	<div class="entry-content">
-		<p><em>In this post I compare and contrast the use discriminated unions and pattern matching in F# to the object-oriented paradigm, particularly in C#. Additionally, aspects of the object-oriented approach are linked with GoF design patterns, multiple dispatch and the open-closed principle. Ultimately, discriminated unions are shown to address deficiencies in the imperative, object-oriented approach.</em></p>
+		<p><a href="http://json.codeplex.com/">Json.NET</a> is a popular <a href="http://www.json.org/">JSON</a> serialization library on the .NET Framework. F# contains several types that aren&#8217;t supported by Json.NET out of the box because they don&#8217;t have direct analogs in C#. To enable support for these types in Json.NET a type provider implementation must be provided for each type. The types addressed in this post are <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">option</a>, <a href="http://msdn.microsoft.com/en-us/library/ee370372.aspx">list</a> and <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">tuple</a>.</p>
 
 
 		
-		<a href="/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/" class="more-link">Read on &rarr;</a>
+		<a href="/blog/2013/01/05/json-dot-net-type-converters-for-f-option-list-tuple/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-10T21:22:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/aop/'>AOP</a>, <a class='category' href='/blog/categories/dci/'>DCI</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/fp/'>FP</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/ontology/'>ontology</a>, <a class='category' href='/blog/categories/philosophy/'>philosophy</a>, <a class='category' href='/blog/categories/semantic-web/'>semantic-web</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/12/10/placing-knowledge-on-center-stage/">Placing Knowledge on Center Stage</a></h1>
+	<div class="entry-content">
+		<p><em>In this post I survey the evolution of various programming paradigms and emphasize the importance of expressing and isolating domain knowledge. Paradigms such as OOP, AOP, DCI, DDD, and Hexagonal are regarded as having a central goal of facilitating the representation of knowledge all while supporting integration with technical components. Finally I introduce a knowledge-driven architecture by Jeff Zhuk.</em></p>
+
+
+		
+		<a href="/blog/2012/12/10/placing-knowledge-on-center-stage/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-16T15:07:00-04:00" pubdate data-updated="true">Sep 16<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/design/'>design</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/09/16/abstraction-and-encapsulation/">Abstraction and Encapsulation</a></h1>
+	<div class="entry-content">
+		<p>The notions of <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstraction</a> and encapsulation are prevalent throughout the realm of programming and are intimately related. Their differences are subtle indeed and warrant careful examination. Specifically, the differences are most apparent on the basis of <em>intent</em>. Ultimately, encapsulation can be viewed as a structural aspect of abstraction which can be employed without the intent to abstract.</p>
+
+
+		
+		<a href="/blog/2012/09/16/abstraction-and-encapsulation/" class="more-link">Read on &rarr;</a>
 	</div>
 
 </article>

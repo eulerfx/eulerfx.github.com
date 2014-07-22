@@ -7,7 +7,8 @@
 	<meta name="author" content="Lev Gorodinski">
 
 	
-	<meta name="description" content="Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice &hellip;">
+	<meta name="description" content="The .NET Task Parallel Library simplifies development of and reasoning about asynchronous code.
+However, working with Task instances instead of &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -121,153 +122,6 @@
   
 
 
-<time datetime="2012-05-19T14:27:00-04:00" pubdate data-updated="true">May 19<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/05/19/validation-in-domain-driven-design-ddd/">Validation in Domain-Driven Design (DDD)</a></h1>
-	<div class="entry-content">
-		<p>Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice because it must be implemented throughout all areas of an application, typically employing different methods for each area. In a general sense, validation is a mechanism for ensuring operations result in a valid states. The ambiguity in that statement must not be overlooked because it illustrates several important characteristics of validation. One characteristic is context - the context under which validation is invoked. Context is critical because validation in one context may not be applicable in another context. Another corollary is the open-endedness of what is regarded as valid. Validity may be a trivial statement such as &#8220;The string representing a customer&#8217;s name must not be null&#8221; or it may be a complex sequence of <a href="http://en.wikipedia.org/wiki/CycL">CycL</a> assertions. This post addresses validation as manifest in DDD-based enterprise applications. Validation, in this post, is distinct from a related discipline of <a href="http://bit.ly/JjLUA2">correctness</a> in theoretical computer science as researched by the likes of <a href="http://en.wikipedia.org/wiki/Edsger_Dijkstra">Edsger Dijkstra</a>.</p>
-
-
-		
-		<a href="/blog/2012/05/19/validation-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-25T22:18:00-04:00" pubdate data-updated="true">Apr 25<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">Read-models as a Tactical Pattern in Domain-Driven Design (DDD)</a></h1>
-	<div class="entry-content">
-		<p>Domain-Driven Design espouses the <a href="http://domaindrivendesign.org/node/123">repository pattern</a> as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to <a href="http://domaindrivendesign.org/node/88">aggregate</a> roots, <a href="http://domaindrivendesign.org/node/109">entities</a> and less frequently to <a href="http://domaindrivendesign.org/node/135">value objects</a>. Eric Evans attributes another potential responsibility to a repository in the blue book:</p>
-
-
-		
-		<a href="/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-14T22:07:00-04:00" pubdate data-updated="true">Apr 14<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/04/14/services-in-domain-driven-design-ddd/">Services in Domain-Driven Design (DDD)</a></h1>
-	<div class="entry-content">
-		<p><strong>UPDATE:</strong> <em><a href="https://twitter.com/vaughnvernon">Vaughn Vernon</a> provided some very valuable insight into the differences between application services and domain services as well as emphasizing the Hexagonal architectural style.</em></p>
-
-<p>The term service is overloaded and its meaning takes on different shades depending on the context. As a result, there is a cloud of confusion surrounding the notion of services as one tries to distinguish between application services, domain services, infrastructural services, SOA services, etc. In all these cases the term &#8220;service&#8221; is valid, however the roles are different and can span all layers of an application.</p>
-
-
-		
-		<a href="/blog/2012/04/14/services-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-03T23:15:00-04:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/soa/'>SOA</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/04/03/bounded-contexts-as-a-strategic-pattern-beyond-ddd/">Bounded Contexts as a Strategic Pattern Beyond DDD</a></h1>
-	<div class="entry-content">
-		<p>The term bounded context (BC) was introduced by Eric Evans in the Domain-Driven Design <a href="http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/ref=sr_1_1?ie=UTF8&amp;qid=1332969996&amp;sr=8-1">&#8220;blue book&#8221;</a> Part IV <em>Strategic Design</em>,
-Chapter 14 <em>Maintaining Model Integrity</em>.</p>
-
-
-		
-		<a href="/blog/2012/04/03/bounded-contexts-as-a-strategic-pattern-beyond-ddd/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
 <time datetime="2012-03-22T23:06:00-04:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time></div>
 		<div class="tags">
 
@@ -288,6 +142,146 @@ Consider this helper function which retries a provided function a specified numb
 
 		
 		<a href="/blog/2012/03/22/retry-with-the-net-task-parallel-library-tpl/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-07-29T17:10:00-04:00" pubdate data-updated="true">Jul 29<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/philosophy/'>philosophy</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2008/07/29/is-universe-simple-or-complex/">Is the Universe Simple or Complex?</a></h1>
+	<div class="entry-content">
+		<p>The <a href="http://en.wikipedia.org/wiki/Law_of_large_numbers">Law of Large Numbers</a> and the <a href="http://en.wikipedia.org/wiki/Central_limit_theorem">Central Limit Theorem</a> imply that the world is in a state that has the highest probability in relation other conceivable states. The previous statement refers to the world as a whole and thus minor variations in the probabilities of proximal states are expected. The fundamental technique in the mentioned mathematical theories is that of measuring the likelihood of an outcome based on a determined function. In particular cases, such as the familiar deck of cards, this function is derived from ratios of expected cards versus the entire sample space - the deck. It is reasonable to believe that the things that happen, in a large environment and over a sufficient period of time, are the things that have the highest probability. In fact this empirical data is where the probability functions derive from. The question here is whether these things that do happen are simple or complex. And surely the next question asks for the definition of simplicity and complexity.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-07-29T17:10:00-04:00" pubdate data-updated="true">Jul 29<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/philosophy/'>philosophy</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2008/07/29/inverse-syllogism-within-evolution-and-ai/">The Inverse Syllogism Within Evolution and AI</a></h1>
+	<div class="entry-content">
+		<p>A.I. purports to understand thought and create systems that are able to perform thought, or think. In this endeavor we attempt to observe, study and analyze our own thinking, and make conclusions about thinking in general. These conclusions become the axioms in the syllogisms of Aristotle. Subsequently, traditional intelligence models follow this paradigm. An important observation is that these models are not only designed to follow syllogisms, but are also arrived at in the same fashion. This however is in great contrast to how our own intelligence evolved. Our own intelligence evolved through millions of years of random trial and error, extinction and survival. The logical backbone behind the rationality humans posses is the confluence of our environment and the challenges it entails for survival, which of course is a requisite for any sort of intelligence to exist.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-04-05T10:17:00-04:00" pubdate data-updated="true">Apr 5<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/philosophy/'>philosophy</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2008/04/05/frontiers-of-thought/">Frontiers of Thought</a></h1>
+	<div class="entry-content">
+		<p>An interesting challenge arises in abstract matematics when it is required to translate intuitive notions into formalisms. The existence of a particular formalism is always uncertain and the path to its discovery is often a walk on thin ice challenging mathematics at each step.</p>
+
+		
+		
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-03-29T18:39:00-04:00" pubdate data-updated="true">Mar 29<span>th</span>, 2008</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/philosophy/'>philosophy</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2008/03/29/developing-and-learning-theories/">Developing and Learning Theories</a></h1>
+	<div class="entry-content">
+		<p>There seems to exist natural beginnings of thought in approaching problems to be solved. As an example take the problem of finding the volume of a solid. It is natural and certainly reasonable to think that the volume is related to the shape and size, therefore it is possible to measure. This vague notion of relationship eventually develops into a more formal notion of function and thus a strict formula. At this point a natural inclination, and a general pattern of human thought is abstraction. We now seek similarities between measuring the volume of different solids. Skipping ahead to the mathematics of real analysis we have measure theory, integration theory, etc. These theories we developed from this cycle of making particular observations and then creating generalizations. Thus after the efforts of hundreds of years of mathematical research we have the ability to measure the volume of a solid, and therefore a mathematical theory of measuring - measure theory. When a new generation of mathematicians is learning the work of the past they approach solved problems from the perspective of these theories. The important thing to note is that this is the reverse of the approach that resulted in the theories. A student&#8217;s effort is then directed towards understanding the theory, or in essence an encoded thought of another mathematician, instead of understanding the problem the theory addresses in the first place. Not to say it is a wasted effort it is an interesting pattern in learning.</p>
+
+		
+		
 	</div>
 
 </article>

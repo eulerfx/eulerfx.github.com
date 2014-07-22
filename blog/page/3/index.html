@@ -7,7 +7,7 @@
 	<meta name="author" content="Lev Gorodinski">
 
 	
-	<meta name="description" content="Json.NET is a popular JSON serialization library on the .NET Framework. F# contains several types that aren&#8217;t supported by Json.NET out of the &hellip;">
+	<meta name="description" content="In this post I will overview a port of a persistence implementation of a Domain-Driven Design project from a solution based on SQL Server and &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -121,114 +121,6 @@
   
 
 
-<time datetime="2013-01-05T16:16:00-05:00" pubdate data-updated="true">Jan 5<span>th</span>, 2013</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/f-/'>F#</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2013/01/05/json-dot-net-type-converters-for-f-option-list-tuple/">Json.NET Type Converters for the F# Option, List and Tuple Types</a></h1>
-	<div class="entry-content">
-		<p><a href="http://json.codeplex.com/">Json.NET</a> is a popular <a href="http://www.json.org/">JSON</a> serialization library on the .NET Framework. F# contains several types that aren&#8217;t supported by Json.NET out of the box because they don&#8217;t have direct analogs in C#. To enable support for these types in Json.NET a type provider implementation must be provided for each type. The types addressed in this post are <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">option</a>, <a href="http://msdn.microsoft.com/en-us/library/ee370372.aspx">list</a> and <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">tuple</a>.</p>
-
-
-		
-		<a href="/blog/2013/01/05/json-dot-net-type-converters-for-f-option-list-tuple/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-10T21:22:00-05:00" pubdate data-updated="true">Dec 10<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/aop/'>AOP</a>, <a class='category' href='/blog/categories/dci/'>DCI</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/fp/'>FP</a>, <a class='category' href='/blog/categories/oop/'>OOP</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/ontology/'>ontology</a>, <a class='category' href='/blog/categories/semantic-web/'>semantic-web</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/12/10/placing-knowledge-on-center-stage/">Placing Knowledge on Center Stage</a></h1>
-	<div class="entry-content">
-		<p><em>In this post I survey the evolution of various programming paradigms and emphasize the importance of expressing and isolating domain knowledge. Paradigms such as OOP, AOP, DCI, DDD, and Hexagonal are regarded as having a central goal of facilitating the representation of knowledge all while supporting integration with technical components. Finally I introduce a knowledge-driven architecture by Jeff Zhuk.</em></p>
-
-
-		
-		<a href="/blog/2012/12/10/placing-knowledge-on-center-stage/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-16T15:07:00-04:00" pubdate data-updated="true">Sep 16<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/design/'>design</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/09/16/abstraction-and-encapsulation/">Abstraction and Encapsulation</a></h1>
-	<div class="entry-content">
-		<p>The notions of <a href="http://gorodinski.com/blog/2012/05/31/abstractions/">abstraction</a> and encapsulation are prevalent throughout the realm of programming and are intimately related. Their differences are subtle indeed and warrant careful examination. Specifically, the differences are most apparent on the basis of <em>intent</em>. Ultimately, encapsulation can be viewed as a structural aspect of abstraction which can be employed without the intent to abstract.</p>
-
-
-		
-		<a href="/blog/2012/09/16/abstraction-and-encapsulation/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
 <time datetime="2012-08-28T19:45:00-04:00" pubdate data-updated="true">Aug 28<span>th</span>, 2012</time></div>
 		<div class="tags">
 
@@ -282,6 +174,114 @@
 
 		
 		<a href="/blog/2012/08/10/toward-persistence-ignorance-with-nhibernate-in-domain-driven-design/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-06T22:16:00-04:00" pubdate data-updated="true">Aug 6<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/ddd/'>DDD</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/08/06/distinguishing-between-entities-and-data-in-domain-driven-design-ddd/">Distinguishing Between Entities and Data in Domain-Driven Design (DDD)</a></h1>
+	<div class="entry-content">
+		<p>In Domain-Driven Design, entities have a strictly defined life-cycle and identity. Accordingly, creation of entity instances should be restricted by a constructor with required parameters and possibly a factory. <a href="http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/">Ideally</a>, entities should not be allowed to enter an undefined state such as the state typically resulting from a parameterless constructor. There should be a small number of well defined places where new entity instances are created. Moreover, <a href="http://www.udidahan.com/2009/06/29/dont-create-aggregate-roots/">as described by Udi Dahan</a>, creation of aggregate roots can often be delegated to an existing entity in the context. These constraints simplify reasoning about code in addition to keeping focus on the domain and forcing one to carefully evaluate life-cycle related operations.</p>
+
+
+		
+		<a href="/blog/2012/08/06/distinguishing-between-entities-and-data-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-24T23:07:00-04:00" pubdate data-updated="true">Jul 24<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/ddd/'>ddd</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/07/24/implementing-associations-with-references-or-repositories-in-domain-driven-design-ddd/">Implementing Associations With References and Repositories in Domain-Driven Design (DDD)</a></h1>
+	<div class="entry-content">
+		<p>Domain-Driven Design places great emphasis on modeling the domain and representing the model in code and the ubiquitous language. A model is an abstraction of reality which preserves aspects interesting for solving a particular problem. Consider the stereotypical order model consisting of a sales order, line items and a customer. The problem is trivial - storing and managing order data and the aspects that are interesting to this problem are confined to a narrow perspective of the entirety of what an order and a customer is. The model of a sales order may contain an order number, a date, a shipping address and finally line item details such as price and quantity. Expressing every aspect of an order is of course prohibitive and defeats the utility of the model.</p>
+
+
+		
+		<a href="/blog/2012/07/24/implementing-associations-with-references-or-repositories-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-13T17:26:00-04:00" pubdate data-updated="true">Jul 13<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/asp-net-webapi/'>ASP.NET WebAPI</a>, <a class='category' href='/blog/categories/nservicebus/'>NServiceBus</a>, <a class='category' href='/blog/categories/rest/'>REST</a>, <a class='category' href='/blog/categories/soa/'>SOA</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/">Request/Acknowledge/Poll With ASP.NET WebAPI and NServiceBus</a></h1>
+	<div class="entry-content">
+		<p><a href="http://servicedesignpatterns.com/ClientServiceInteractions/RequestAcknowledge">Request/Acknowledge</a> is a service design pattern wherein clients receive an acknowledgement as an immediate response while the original request is processed in the background. The acknowledgement typically contains a token for identifying the background task which can in turn be used to query the processing status of the task. This pattern is employed to reduce <a href="http://bit.ly/ricVKj">temporal coupling</a> which is especially critical for requests requiring a long processing times. Instead of having the client wait for the final response a pull method for querying the status of the task or a push method for notifying the client is implemented. Similarly, the <a href="http://msdn.microsoft.com/en-us/library/wewwczdw.aspx">event-based asynchronous pattern</a> in <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">OOP</a> shares the goal of reducing wasted wait time. Request/Acknowledge/Poll is a variation of this pattern wherein a method is provided for the client to query for the status of the task being processed. The other variation is Request/Acknowledge/Callback wherein a client is notified of task status immediately via callback mechanism. The callback variation ensures that the client receives task status information as it is generated but can be a burden to implement because the client must support the callback mechanism. Furthermore, it places the additional burden of tracking and invoking callbacks upon the server. The poll variation is simpler to implement and keeps the client in control of retrieving status information as it is needed.</p>
+
+
+		
+		<a href="/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/" class="more-link">Read on &rarr;</a>
 	</div>
 
 </article>

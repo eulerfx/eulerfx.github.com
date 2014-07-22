@@ -4,7 +4,7 @@
   <title><![CDATA[Category: FP | Lev Gorodinski]]></title>
   <link href="http://gorodinski.com/blog/categories/fp/atom.xml" rel="self"/>
   <link href="http://gorodinski.com/"/>
-  <updated>2014-06-12T11:59:18-04:00</updated>
+  <updated>2014-07-21T20:33:50-04:00</updated>
   <id>http://gorodinski.com/</id>
   <author>
     <name><![CDATA[Lev Gorodinski]]></name>
@@ -172,46 +172,6 @@
 <h3><a id="declarative-design"></a>Declarative Design</h3>
 
 <p>The overall intent of the aforementioned patterns is to cultivate a declarative design. As witnessed, functional programming is inherently more declarative and therefore more accommodating in this regard. Through declarative design, we can better distill distinguishing characteristics of the domain and reduce or eliminate coupling to orthogonal concerns of infrastructure. Consequently, re-usability, testability, correctness, maintainability and productivity qualities are tremendously enhanced.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Subtleties of F# currying, partial application and eta-conversion]]></title>
-    <link href="http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/"/>
-    <updated>2013-01-25T20:55:00-05:00</updated>
-    <id>http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion</id>
-    <content type="html"><![CDATA[<p>F# is a functional programming language and as such provides various facilities for declaring, composing and transforming functions. Among these is <a href="http://en.wikipedia.org/wiki/Currying">currying</a> which allows multi-variable functions to be regarded as chains of single-parameter functions each returning a function with one less variable that the last. Partial application allows fixing variables of a curried function returning a new function of smaller arity. Viewing functions in this way affords several advantages, including representation in the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a>. An example in F# and a comparable C# implementation follow.</p>
-
-<!--more-->
-
-
-<p><div><script src='https://gist.github.com/4640182.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640182&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>and C#</p>
-
-<p><div><script src='https://gist.github.com/4640272.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640272&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>The F# example contains a function <em>add</em> which is curried by default. The <em>add1</em> function is created via partial application on the <em>add</em> function. The <em>add1'</em> function has the same signature as <em>add1</em> and is declared without partial application but instead as direct invocation of <em>add</em>. In the C# example, the <em>Adder.Add1</em> function calls <em>Adder.Add</em> much like the <em>add1'</em> function in the F# example. The <em>CurriedAdder.Add1</em> is created in a manner more similar to F# by first curring <em>CurriedAdder.Add</em> with <em>CurriedAdder.Curry</em> and then fixing the first parameter.</p>
-
-<p>The difference between <em>add1</em> and <em>add1'</em> is subtle. They have the same signatures and produce equivalent results. However, the declaration of <em>add1</em> states that it <strong>is</strong> <em>add</em> with the first parameter fixed. The declaration of <em>add1'</em> however states that it <strong>calls</strong> <em>add</em> with <em>1</em> as the first argument and its own argument as the second. In the scenario of these simple arithmetic functions, the difference is insignificant. If instead of using an integer literal a <a href="http://en.wikipedia.org/wiki/Pure_function">impure function</a> call is made, behavior may change. For example:</p>
-
-<p><div><script src='https://gist.github.com/4662084.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662084&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>Calling functions <em>addRand1</em> and <em>addRand2</em> will generate a new random number each time whereas in <em>addRand</em> the random value is effectively cached. The introduction of the variable <em>x</em> causes the invocation of the random function to be delayed and repeated. There are cases where this behavior is desirable, such as when encapsulating access to a cached data structure. For example:</p>
-
-<p><div><script src='https://gist.github.com/4662337.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662337&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>Again, the signatures of <em>isPrime</em> and <em>isPrime2</em> are equivalent, except for presence of parenthesis in the first and explicit variable <em>x</em> in the second. The behavior is different however and in a scenario with larger sets it would be significant.</p>
-
-<p>The transformation from <em>isPrime</em> to <em>isPrime2</em> is called an <a href="http://www.haskell.org/haskellwiki/Eta_conversion">eta-abstraction</a> in the lambda calculus. The inverse transformation is called an eta-reduction and the functions are said to be equivalent under eta-conversion. However, while functions are equivalent under eta-conversion, their behavior may be different in a subtle way. Beyond the examples given here, eta-abstractions can also be used to resolve <a href="http://blogs.msdn.com/b/mulambda/archive/2010/05/01/value-restriction-in-f.aspx">value restriction errors</a> and to improve clarity of a <a href="http://en.wikipedia.org/wiki/Tacit_programming">point-free expression</a>.</p>
 ]]></content>
   </entry>
   

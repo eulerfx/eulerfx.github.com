@@ -7,7 +7,7 @@
 	<meta name="author" content="Lev Gorodinski">
 
 	
-	<meta name="description" content="In Domain-Driven Design, entities have a strictly defined life-cycle and identity. Accordingly, creation of entity instances should be restricted by &hellip;">
+	<meta name="description" content="Object-relational mappers furnish a mapping layer between object-oriented code and relational databases. ORMs such as NHibernate and Entity &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -121,114 +121,6 @@
   
 
 
-<time datetime="2012-08-06T22:16:00-04:00" pubdate data-updated="true">Aug 6<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/ddd/'>DDD</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/08/06/distinguishing-between-entities-and-data-in-domain-driven-design-ddd/">Distinguishing Between Entities and Data in Domain-Driven Design (DDD)</a></h1>
-	<div class="entry-content">
-		<p>In Domain-Driven Design, entities have a strictly defined life-cycle and identity. Accordingly, creation of entity instances should be restricted by a constructor with required parameters and possibly a factory. <a href="http://gorodinski.com/blog/2012/05/19/validation-in-domain-driven-design-ddd/">Ideally</a>, entities should not be allowed to enter an undefined state such as the state typically resulting from a parameterless constructor. There should be a small number of well defined places where new entity instances are created. Moreover, <a href="http://www.udidahan.com/2009/06/29/dont-create-aggregate-roots/">as described by Udi Dahan</a>, creation of aggregate roots can often be delegated to an existing entity in the context. These constraints simplify reasoning about code in addition to keeping focus on the domain and forcing one to carefully evaluate life-cycle related operations.</p>
-
-
-		
-		<a href="/blog/2012/08/06/distinguishing-between-entities-and-data-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-24T23:07:00-04:00" pubdate data-updated="true">Jul 24<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/ddd/'>ddd</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/07/24/implementing-associations-with-references-or-repositories-in-domain-driven-design-ddd/">Implementing Associations With References and Repositories in Domain-Driven Design (DDD)</a></h1>
-	<div class="entry-content">
-		<p>Domain-Driven Design places great emphasis on modeling the domain and representing the model in code and the ubiquitous language. A model is an abstraction of reality which preserves aspects interesting for solving a particular problem. Consider the stereotypical order model consisting of a sales order, line items and a customer. The problem is trivial - storing and managing order data and the aspects that are interesting to this problem are confined to a narrow perspective of the entirety of what an order and a customer is. The model of a sales order may contain an order number, a date, a shipping address and finally line item details such as price and quantity. Expressing every aspect of an order is of course prohibitive and defeats the utility of the model.</p>
-
-
-		
-		<a href="/blog/2012/07/24/implementing-associations-with-references-or-repositories-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-07-13T17:26:00-04:00" pubdate data-updated="true">Jul 13<span>th</span>, 2012</time></div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/asp-net-webapi/'>ASP.NET WebAPI</a>, <a class='category' href='/blog/categories/nservicebus/'>NServiceBus</a>, <a class='category' href='/blog/categories/rest/'>REST</a>, <a class='category' href='/blog/categories/soa/'>SOA</a>
-
-
-</div>
-		
-	</div>
-	<h1 class="title"><a href="/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/">Request/Acknowledge/Poll With ASP.NET WebAPI and NServiceBus</a></h1>
-	<div class="entry-content">
-		<p><a href="http://servicedesignpatterns.com/ClientServiceInteractions/RequestAcknowledge">Request/Acknowledge</a> is a service design pattern wherein clients receive an acknowledgement as an immediate response while the original request is processed in the background. The acknowledgement typically contains a token for identifying the background task which can in turn be used to query the processing status of the task. This pattern is employed to reduce <a href="http://bit.ly/ricVKj">temporal coupling</a> which is especially critical for requests requiring a long processing times. Instead of having the client wait for the final response a pull method for querying the status of the task or a push method for notifying the client is implemented. Similarly, the <a href="http://msdn.microsoft.com/en-us/library/wewwczdw.aspx">event-based asynchronous pattern</a> in <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">OOP</a> shares the goal of reducing wasted wait time. Request/Acknowledge/Poll is a variation of this pattern wherein a method is provided for the client to query for the status of the task being processed. The other variation is Request/Acknowledge/Callback wherein a client is notified of task status immediately via callback mechanism. The callback variation ensures that the client receives task status information as it is generated but can be a burden to implement because the client must support the callback mechanism. Furthermore, it places the additional burden of tracking and invoking callbacks upon the server. The poll variation is simpler to implement and keeps the client in control of retrieving status information as it is needed.</p>
-
-
-		
-		<a href="/blog/2012/07/13/request-acknowledge-poll-with-nservicebus-and-aspnet-webapi/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
-
-    <article class="post">
-	<div class="meta">
-		<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
 <time datetime="2012-06-16T12:28:00-04:00" pubdate data-updated="true">Jun 16<span>th</span>, 2012</time></div>
 		<div class="tags">
 
@@ -282,6 +174,116 @@
 
 		
 		<a href="/blog/2012/05/31/abstractions/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-19T14:27:00-04:00" pubdate data-updated="true">May 19<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/05/19/validation-in-domain-driven-design-ddd/">Validation in Domain-Driven Design (DDD)</a></h1>
+	<div class="entry-content">
+		<p>Validation is a broad subject because it is prevalent throughout all areas of an application. Validation is difficult to implement in practice because it must be implemented throughout all areas of an application, typically employing different methods for each area. In a general sense, validation is a mechanism for ensuring operations result in a valid states. The ambiguity in that statement must not be overlooked because it illustrates several important characteristics of validation. One characteristic is context - the context under which validation is invoked. Context is critical because validation in one context may not be applicable in another context. Another corollary is the open-endedness of what is regarded as valid. Validity may be a trivial statement such as &#8220;The string representing a customer&#8217;s name must not be null&#8221; or it may be a complex sequence of <a href="http://en.wikipedia.org/wiki/CycL">CycL</a> assertions. This post addresses validation as manifest in DDD-based enterprise applications. Validation, in this post, is distinct from a related discipline of <a href="http://bit.ly/JjLUA2">correctness</a> in theoretical computer science as researched by the likes of <a href="http://en.wikipedia.org/wiki/Edsger_Dijkstra">Edsger Dijkstra</a>.</p>
+
+
+		
+		<a href="/blog/2012/05/19/validation-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-25T22:18:00-04:00" pubdate data-updated="true">Apr 25<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/">Read-models as a Tactical Pattern in Domain-Driven Design (DDD)</a></h1>
+	<div class="entry-content">
+		<p>Domain-Driven Design espouses the <a href="http://domaindrivendesign.org/node/123">repository pattern</a> as a way to persist and reconstitute domain objects from a persistent store such as a database. Repositories are typically used to provide access to <a href="http://domaindrivendesign.org/node/88">aggregate</a> roots, <a href="http://domaindrivendesign.org/node/109">entities</a> and less frequently to <a href="http://domaindrivendesign.org/node/135">value objects</a>. Eric Evans attributes another potential responsibility to a repository in the blue book:</p>
+
+
+		
+		<a href="/blog/2012/04/25/read-models-as-a-tactical-pattern-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
+
+
+    <article class="post">
+	<div class="meta">
+		<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-14T22:07:00-04:00" pubdate data-updated="true">Apr 14<span>th</span>, 2012</time></div>
+		<div class="tags">
+
+
+	<a class='category' href='/blog/categories/c-/'>C#</a>, <a class='category' href='/blog/categories/ddd/'>DDD</a>, <a class='category' href='/blog/categories/architecture/'>architecture</a>
+
+
+</div>
+		
+	</div>
+	<h1 class="title"><a href="/blog/2012/04/14/services-in-domain-driven-design-ddd/">Services in Domain-Driven Design (DDD)</a></h1>
+	<div class="entry-content">
+		<p><strong>UPDATE:</strong> <em><a href="https://twitter.com/vaughnvernon">Vaughn Vernon</a> provided some very valuable insight into the differences between application services and domain services as well as emphasizing the Hexagonal architectural style.</em></p>
+
+<p>The term service is overloaded and its meaning takes on different shades depending on the context. As a result, there is a cloud of confusion surrounding the notion of services as one tries to distinguish between application services, domain services, infrastructural services, SOA services, etc. In all these cases the term &#8220;service&#8221; is valid, however the roles are different and can span all layers of an application.</p>
+
+
+		
+		<a href="/blog/2012/04/14/services-in-domain-driven-design-ddd/" class="more-link">Read on &rarr;</a>
 	</div>
 
 </article>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: F# | Lev Gorodinski]]></title>
   <link href="http://gorodinski.com/blog/categories/f-/atom.xml" rel="self"/>
   <link href="http://gorodinski.com/"/>
-  <updated>2014-06-12T11:59:18-04:00</updated>
+  <updated>2014-07-21T20:33:50-04:00</updated>
   <id>http://gorodinski.com/</id>
   <author>
     <name><![CDATA[Lev Gorodinski]]></name>
@@ -258,46 +258,6 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Subtleties of F# currying, partial application and eta-conversion]]></title>
-    <link href="http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion/"/>
-    <updated>2013-01-25T20:55:00-05:00</updated>
-    <id>http://gorodinski.com/blog/2013/01/25/subtleties-of-fsharp-currying-partial-application-and-eta-conversion</id>
-    <content type="html"><![CDATA[<p>F# is a functional programming language and as such provides various facilities for declaring, composing and transforming functions. Among these is <a href="http://en.wikipedia.org/wiki/Currying">currying</a> which allows multi-variable functions to be regarded as chains of single-parameter functions each returning a function with one less variable that the last. Partial application allows fixing variables of a curried function returning a new function of smaller arity. Viewing functions in this way affords several advantages, including representation in the <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda calculus</a>. An example in F# and a comparable C# implementation follow.</p>
-
-<!--more-->
-
-
-<p><div><script src='https://gist.github.com/4640182.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640182&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>and C#</p>
-
-<p><div><script src='https://gist.github.com/4640272.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4640272&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>The F# example contains a function <em>add</em> which is curried by default. The <em>add1</em> function is created via partial application on the <em>add</em> function. The <em>add1'</em> function has the same signature as <em>add1</em> and is declared without partial application but instead as direct invocation of <em>add</em>. In the C# example, the <em>Adder.Add1</em> function calls <em>Adder.Add</em> much like the <em>add1'</em> function in the F# example. The <em>CurriedAdder.Add1</em> is created in a manner more similar to F# by first curring <em>CurriedAdder.Add</em> with <em>CurriedAdder.Curry</em> and then fixing the first parameter.</p>
-
-<p>The difference between <em>add1</em> and <em>add1'</em> is subtle. They have the same signatures and produce equivalent results. However, the declaration of <em>add1</em> states that it <strong>is</strong> <em>add</em> with the first parameter fixed. The declaration of <em>add1'</em> however states that it <strong>calls</strong> <em>add</em> with <em>1</em> as the first argument and its own argument as the second. In the scenario of these simple arithmetic functions, the difference is insignificant. If instead of using an integer literal a <a href="http://en.wikipedia.org/wiki/Pure_function">impure function</a> call is made, behavior may change. For example:</p>
-
-<p><div><script src='https://gist.github.com/4662084.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662084&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>Calling functions <em>addRand1</em> and <em>addRand2</em> will generate a new random number each time whereas in <em>addRand</em> the random value is effectively cached. The introduction of the variable <em>x</em> causes the invocation of the random function to be delayed and repeated. There are cases where this behavior is desirable, such as when encapsulating access to a cached data structure. For example:</p>
-
-<p><div><script src='https://gist.github.com/4662337.js?file='></script>
-<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4662337&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
-</p>
-
-<p>Again, the signatures of <em>isPrime</em> and <em>isPrime2</em> are equivalent, except for presence of parenthesis in the first and explicit variable <em>x</em> in the second. The behavior is different however and in a scenario with larger sets it would be significant.</p>
-
-<p>The transformation from <em>isPrime</em> to <em>isPrime2</em> is called an <a href="http://www.haskell.org/haskellwiki/Eta_conversion">eta-abstraction</a> in the lambda calculus. The inverse transformation is called an eta-reduction and the functions are said to be equivalent under eta-conversion. However, while functions are equivalent under eta-conversion, their behavior may be different in a subtle way. Beyond the examples given here, eta-abstractions can also be used to resolve <a href="http://blogs.msdn.com/b/mulambda/archive/2010/05/01/value-restriction-in-f.aspx">value restriction errors</a> and to improve clarity of a <a href="http://en.wikipedia.org/wiki/Tacit_programming">point-free expression</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
     <title type="html"><![CDATA[Inverting object-orientation with F# discriminated unions and pattern matching]]></title>
     <link href="http://gorodinski.com/blog/2013/01/21/inverting-object-orientation-with-fsharp-discriminated-unions-and-pattern-matching/"/>
     <updated>2013-01-21T21:41:00-05:00</updated>
@@ -348,6 +308,80 @@
 <h2>Conclusion</h2>
 
 <p>We've witnessed the elegance with which discriminated unions address OOP deficiencies and lack of multiple dispatch. Discriminated unions and pattern matching allow data structures to be <em>inverted</em> such that they are not only open for extension but extension is guided by support from the type system. Additionally, brevity of expression establishes the discriminated union as an effective modeling tool - after all, a language should be a place to organize one's thoughts. By contrast, the optimization for extensibility by inheritance in the object-oriented paradigm hides inner object structure making it more difficult to augment class hierarchies. Given the OOP adage of favoring composition over inheritance, this leaves much to be desired in existing object-oriented languages.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Json.NET Type Converters for the F# option, list and tuple types]]></title>
+    <link href="http://gorodinski.com/blog/2013/01/05/json-dot-net-type-converters-for-f-option-list-tuple/"/>
+    <updated>2013-01-05T16:16:00-05:00</updated>
+    <id>http://gorodinski.com/blog/2013/01/05/json-dot-net-type-converters-for-f-option-list-tuple</id>
+    <content type="html"><![CDATA[<p><a href="http://json.codeplex.com/">Json.NET</a> is a popular <a href="http://www.json.org/">JSON</a> serialization library on the .NET Framework. F# contains several types that aren't supported by Json.NET out of the box because they don't have direct analogs in C#. To enable support for these types in Json.NET a type provider implementation must be provided for each type. The types addressed in this post are <a href="http://msdn.microsoft.com/en-us/library/dd233245.aspx">option</a>, <a href="http://msdn.microsoft.com/en-us/library/ee370372.aspx">list</a> and <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">tuple</a>.</p>
+
+<!--more-->
+
+
+<h2>Option</h2>
+
+<p>The F# option is a type which explicitly represents the presence or absence of a value and is an <a href="http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx">example of a monad</a>. It is a discriminated union declared as follows.</p>
+
+<p><div><script src='https://gist.github.com/4464415.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4464415&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>In C#, <strong>Nullable<T></strong> is an analog for value types. For reference types, an absence of a value is normally represented with a <strong>null</strong> reference - <a href="http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare">a billion dollar mistake</a>. Neither the <strong>Nullable</strong> type or <strong>null</strong> references however, can provide the elegance of the option type.</p>
+
+<p>In JSON, all values can be null, including .NET value types such as <strong>Int32</strong>. Therefore, an empty option can be represented in JSON with a <strong>null</strong>. The <a href="http://json.codeplex.com/SourceControl/changeset/view/69709#128133">JsonConverter</a> implementation for the option follows.</p>
+
+<p><div><script src='https://gist.github.com/4464462.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4464462&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The <strong>CanConvert</strong> method determines whether the converter supports a give type - an option in this case. The <a href="http://msdn.microsoft.com/en-us/library/ee353533.aspx">typedefof&lt;T&gt;</a> construct returns the generic type definition of the type <strong>T</strong>. The <strong>WriteJson</strong> method serializes an instance of the supported type. In .NET, an empty option is a null reference and is serialized as such. Given the earlier observation that options are discriminated unions, the value of a non-empty option can be extracted using the <a href="http://msdn.microsoft.com/en-us/library/ee353849.aspx">FSharpValue.GetUnionFields</a> helper method. The <strong>ReadJson</strong> method determines the type wrapped by the option and deserializes the value as usual. Next it creates an instance of an option value using the <a href="http://msdn.microsoft.com/en-us/library/ee340309.aspx">FSharpValue.MakeUnion</a> helper method.</p>
+
+<h2>List</h2>
+
+<p>An F# list represents an immutable series of values of the same type. It is implemented as a linked list and like the option type, it is a discriminated union declared roughly as follows.</p>
+
+<p><div><script src='https://gist.github.com/4464532.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4464532&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>This declaration states that a list is either empty or it is a tuple (pair) of a head, which is the first value in the list and a tail which is the remainder of the values in the list. The converter for the list type is defined as follows.</p>
+
+<p><div><script src='https://gist.github.com/4464543.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4464543&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The list is serialized by first being converted to a <strong>IEnumerable</strong> which Json.NET already supports. Deserializing is achieved by first deserializing into an <strong>IEnumerable</strong> and then creating a suitable instance of the F# list type. Since a list is a recursive discriminated union, an instance of it is also created recursively with the inner <strong>make</strong> function which in turn calls <strong>FSharpValue.MakeUnion</strong>.</p>
+
+<h2>Tuple</h2>
+
+<p>An F# tuple is a grouping of unnamed and potentially heterogeneous values. While an <a href="http://msdn.microsoft.com/en-us/library/system.tuple.aspx">analog</a> exists in .NET version 4 and above, a custom converter implementation is still required. JSON does not provide direct support for tuples, but they can be represented in several ways.</p>
+
+<p>One way to represent a tuple in JSON is as an array so that the tuple <strong>("hello",123)</strong> would serialize to <strong>["hello",123]</strong>. This representation has the advantage that arrays already have serialization support and all that is required is the construction of a suitable tuple instance upon deserialization. F# provides the <a href="http://msdn.microsoft.com/en-us/library/ee340410.aspx">FSharpValue.MakeTuple</a> helper method for creating tuple instances of a specified type given an array of objects denoting the values of the tuple. A first attempt might look like this:</p>
+
+<p><div><script src='https://gist.github.com/4464684.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4464684&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>Unfortunately, an object array deserialized in this way may not have the correct type for certain values, numeric values in particular. For instance, the tuple <strong>("hello", 123)</strong> is an instance of the tuple type <strong>string</strong> <strong>*</strong> <strong>Int32</strong>. Upon deserialization however, the second element will have type <a href="http://msdn.microsoft.com/en-us/library/system.int64.aspx">Int64</a> not <a href="http://msdn.microsoft.com/en-us/library/system.int32.aspx">Int32</a>. As a result, each array element must be deserialized individually into a type corresponding to the item in the tuple. This can be done as follows.</p>
+
+<p><div><script src='https://gist.github.com/4464710.js?file='></script>
+<noscript><pre><code>&lt;html&gt;&lt;body&gt;You are being &lt;a href=&quot;https://github.com/gist/4464710&quot;&gt;redirected&lt;/a&gt;.&lt;/body&gt;&lt;/html&gt;</code></pre></noscript></div>
+</p>
+
+<p>The <a href="http://msdn.microsoft.com/en-us/library/ee353762.aspx">FSharpType.GetTupleElements</a> helper method returns an array of types stored by a tuple. The function <strong>readElements</strong> in the <strong>ReadJson</strong> method deserializes array elements individually thus ensuring an appropriate type.</p>
+
+<p>Another way to serialize a tuple is to mirror the serialized shape of a <a href="http://msdn.microsoft.com/en-us/library/system.tuple.aspx">C# tuple</a> so that the tuple <strong>("hello", 123)</strong> becomes <strong>{"Item1":"hello","Item2":123}</strong>. This representation is more explicit and will easily deserialize into C# tuples. A excellent account of serializing tuples in this format is depicted in <a href="http://pblasucci.wordpress.com/2011/06/16/getting-json-net-to-talk-f-part-1-tuples/">Getting Json.NET to Talk F#, Part 1: Tuples</a>.</p>
+
+<h2>Summary</h2>
+
+<p>F# to C# inter-op isn't always a thing of beauty. However, the option, list and tuple types are ubiquitous in F# and thus JSON serialization support is essential, especially for enterprise applications. Given these converters, F# types can be used anywhere JSON serialization is required, such as <a href="http://ravendb.net/">RavenDB</a> which was the motivating factor for these converters. The <a href="http://ravendb.net/docs/client-api/fsharp">RavenDB F# client</a> provides generalized support for the union type with a <a href="https://github.com/ravendb/ravendb/blob/master/Raven.Client.Lightweight.FSharp/Helpers.fs">UnionTypeConverter</a>, however the converters in this post result in more idiomatic JSON representations.</p>
+
+<h2>Source</h2>
+
+<p>The source code for this post can be found on <a href="https://github.com/eulerfx/JsonNet.FSharp">GitHub</a>.</p>
 ]]></content>
   </entry>
   
